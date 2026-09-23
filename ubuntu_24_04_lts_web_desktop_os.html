@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu 24.04 LTS Desktop Web OS Simulation</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --ubuntu-bg: #300a24;
+            --ubuntu-aubergine: #77216f;
+            --ubuntu-orange: #e95420;
+            --ubuntu-dark: #1e1e1e;
+            --topbar-bg: rgba(15, 15, 15, 0.90);
+            --dock-bg: rgba(0, 0, 0, 0.60);
+            --window-bg: #1e1e1e;
+            --font-ubuntu: 'Ubuntu', sans-serif;
+            --font-mono: 'Ubuntu Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: var(--font-ubuntu);
+            background: radial-gradient(circle at center, #77216f 0%, #5e2750 40%, #2c001e 100%);
+        }
+
+        .desktop-wallpaper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-size: cover;
+            background-position: center;
+            transition: background 0.5s ease;
+        }
+
+        /* Top Bar Styling */
+        .top-bar {
+            height: 28px;
+            background-color: var(--topbar-bg);
+            backdrop-filter: blur(12px);
+            color: #f6f6f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 9999;
+            position: relative;
+        }
+
+        .top-bar-btn {
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .top-bar-btn:hover, .top-bar-btn.active {
+            background-color: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Dock Styling */
+        .ubuntu-dock {
+            position: absolute;
+            left: 0;
+            top: 28px;
+            bottom: 0;
+            width: 58px;
+            background-color: var(--dock-bg);
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 8px;
+            gap: 10px;
+            z-index: 9000;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dock-app {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.15s;
+            position: relative;
+            font-size: 22px;
+        }
+
+        .dock-app:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.08);
+        }
+
+        .dock-app.active::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            width: 4px;
+            height: 18px;
+            background-color: var(--ubuntu-orange);
+            border-radius: 2px;
+            box-shadow: 0 0 6px var(--ubuntu-orange);
+        }
+
+        /* Window Manager */
+        .os-window {
+            position: absolute;
+            background-color: var(--window-bg);
+            border-radius: 10px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 380px;
+            min-height: 240px;
+            z-index: 100;
+        }
+
+        .window-header {
+            height: 36px;
+            background-color: #2d2d2d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            cursor: move;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .window-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .win-btn {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: rgba(0,0,0,0.7);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .win-close { background-color: #e95420; }
+        .win-minimize { background-color: #484848; }
+        .win-maximize { background-color: #484848; }
+
+        .win-close:hover { background-color: #ff3b00; }
+
+        .window-title {
+            color: #e6e6e6;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .window-body {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CLI Terminal Styling */
+        .terminal-container {
+            background-color: var(--ubuntu-bg);
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            padding: 12px;
+            height: 100%;
+            overflow-y: auto;
+            line-height: 1.45;
+            user-select: text;
+        }
+
+        .cmd-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+            caret-color: #ffffff;
+        }
+
+        /* Interactive Nano Editor Screen */
+        .nano-editor-view {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            z-index: 80;
+            flex-direction: column;
+        }
+
+        .nano-header {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 2px 8px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        .nano-textarea {
+            flex: 1;
+            background: transparent;
+            color: #ffffff;
+            border: none;
+            outline: none;
+            padding: 8px;
+            resize: none;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .nano-status {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 2px 8px;
+            font-size: 12px;
+            min-height: 20px;
+        }
+
+        .nano-shortcuts {
+            background-color: #000000;
+            color: #ffffff;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2px;
+            padding: 4px;
+            font-size: 11px;
+            border-top: 1px solid #333;
+        }
+
+        .nano-shortcut-item {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nano-key {
+            color: #55ffff;
+            font-weight: bold;
+        }
+
+        /* Man Pager Mode */
+        .man-pager {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background-color: var(--ubuntu-bg);
+            color: #ffffff;
+            padding: 15px;
+            overflow-y: auto;
+            z-index: 90;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            user-select: text;
+        }
+
+        .man-title { font-weight: bold; color: #55ffff; }
+        .man-sec { font-weight: bold; color: #fce94f; margin-top: 12px; }
+        .man-body { padding-left: 18px; color: #ddd; }
+
+        /* Dropdowns & Modals */
+        .dropdown-panel {
+            position: absolute;
+            background-color: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: none;
+        }
+
+        .context-menu {
+            position: absolute;
+            background: rgba(35, 35, 35, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 4px 0;
+            width: 180px;
+            z-index: 10001;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            display: none;
+        }
+
+        .context-item {
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #eee;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .context-item:hover {
+            background-color: var(--ubuntu-orange);
+            color: #fff;
+        }
+
+        .app-grid-overlay {
+            position: absolute;
+            top: 28px;
+            left: 58px;
+            right: 0;
+            bottom: 0;
+            background: rgba(20, 10, 20, 0.88);
+            backdrop-filter: blur(25px);
+            z-index: 8500;
+            display: none;
+            padding: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 30px;
+            align-content: start;
+            overflow-y: auto;
+        }
+
+        .grid-app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .grid-app-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.35); }
+    </style>
+</head>
+<body oncontextmenu="showContextMenu(event)">
+
+    <div id="desktop-wallpaper" class="desktop-wallpaper"></div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="top-bar-btn" id="btn-activities" onclick="toggleAppGrid()">Activities</div>
+        <div class="top-bar-btn" id="btn-clock" onclick="toggleClockMenu()">
+            <span id="topbar-clock">Sep 21 22:14</span>
+        </div>
+        <div class="top-bar-btn" id="btn-system" onclick="toggleSystemMenu()">
+            <span>📶</span>
+            <span>🔊</span>
+            <span id="topbar-battery-icon">🔋</span>
+            <span id="topbar-battery-pct">100%</span>
+        </div>
+    </div>
+
+    <!-- RIGHT CLICK CONTEXT MENU -->
+    <div id="desktop-context-menu" class="context-menu">
+        <div class="context-item" onclick="createNewFolderDesktop()">New Folder</div>
+        <div class="context-item" onclick="createNewDocumentDesktop()">New Document</div>
+        <hr class="border-gray-700 my-1">
+        <div class="context-item" onclick="openWindow('terminal')">Open in Terminal</div>
+        <div class="context-item" onclick="openWindow('settings')">Change Background</div>
+    </div>
+
+    <!-- SYSTEM DROPDOWN MENU -->
+    <div id="menu-system" class="dropdown-panel p-4 w-72 right-3 top-9">
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-3">
+                <span>🔊</span>
+                <input type="range" id="vol-slider" min="0" max="100" value="80" class="w-full accent-orange-600 cursor-pointer">
+            </div>
+            <div class="flex items-center gap-3">
+                <span>☀️</span>
+                <input type="range" id="bright-slider" min="30" max="100" value="100" oninput="adjustBrightness(this.value)" class="w-full accent-orange-600 cursor-pointer">
+            </div>
+            <hr class="border-gray-700">
+            <div class="flex justify-between items-center text-xs text-gray-300">
+                <span>Wi-Fi Network</span>
+                <span class="text-green-400 font-semibold">Connected (Ubuntu-5G)</span>
+            </div>
+            <div class="flex justify-between items-center text-xs text-gray-300">
+                <span>Battery Status</span>
+                <span id="system-battery-status" class="text-gray-200">100% (Plugged In)</span>
+            </div>
+            <hr class="border-gray-700">
+            <button onclick="powerOffPrompt()" class="w-full py-1.5 bg-red-600/80 hover:bg-red-600 text-white text-xs font-semibold rounded-md transition">Power Off / Restart</button>
+        </div>
+    </div>
+
+    <!-- CLOCK CALENDAR DROPDOWN -->
+    <div id="menu-clock" class="dropdown-panel p-4 w-80 left-1/2 -translate-x-1/2 top-9 text-center">
+        <h3 id="cal-date-title" class="font-bold text-lg text-orange-400 mb-2">September 2026</h3>
+        <div class="grid grid-cols-7 gap-1 text-xs text-gray-300 mb-2">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+        </div>
+        <div id="cal-days-grid" class="grid grid-cols-7 gap-1 text-sm font-mono"></div>
+    </div>
+
+    <!-- LEFT DOCK -->
+    <div class="ubuntu-dock">
+        <div class="dock-app" id="dock-terminal" onclick="openWindow('terminal')" title="Terminal (CLI)">🖥️</div>
+        <div class="dock-app" id="dock-files" onclick="openWindow('files')" title="Files (Nautilus)">📁</div>
+        <div class="dock-app" id="dock-firefox" onclick="openWindow('firefox')" title="Firefox Web Browser">🦊</div>
+        <div class="dock-app" id="dock-gedit" onclick="openWindow('gedit')" title="Text Editor (Gedit)">📝</div>
+        <div class="dock-app" id="dock-settings" onclick="openWindow('settings')" title="Settings">⚙️</div>
+        <div style="margin-top: auto; margin-bottom: 12px;">
+            <div class="dock-app" onclick="toggleAppGrid()" title="Show Applications">⣿</div>
+        </div>
+    </div>
+
+    <!-- APP GRID OVERLAY -->
+    <div id="app-grid" class="app-grid-overlay">
+        <div class="grid-app-item" onclick="openWindow('terminal'); toggleAppGrid()">
+            <span class="text-4xl">🖥️</span>
+            <span>Terminal</span>
+        </div>
+        <div class="grid-app-item" onclick="openWindow('files'); toggleAppGrid()">
+            <span class="text-4xl">📁</span>
+            <span>Files</span>
+        </div>
+        <div class="grid-app-item" onclick="openWindow('firefox'); toggleAppGrid()">
+            <span class="text-4xl">🦊</span>
+            <span>Firefox</span>
+        </div>
+        <div class="grid-app-item" onclick="openWindow('gedit'); toggleAppGrid()">
+            <span class="text-4xl">📝</span>
+            <span>Text Editor</span>
+        </div>
+        <div class="grid-app-item" onclick="openWindow('settings'); toggleAppGrid()">
+            <span class="text-4xl">⚙️</span>
+            <span>Settings</span>
+        </div>
+    </div>
+
+    <!-- DESKTOP SHORTCUTS -->
+    <div id="desktop-icons-container" class="absolute top-12 left-20 flex flex-col gap-6 z-10">
+        <div class="flex flex-col items-center gap-1 w-20 p-2 rounded-lg hover:bg-white/10 cursor-pointer text-white text-xs text-center" onclick="openWindow('terminal')">
+            <span class="text-4xl">💻</span>
+            <span class="drop-shadow">Terminal</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 w-20 p-2 rounded-lg hover:bg-white/10 cursor-pointer text-white text-xs text-center" onclick="openWindow('files')">
+            <span class="text-4xl">📂</span>
+            <span class="drop-shadow">Home</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 w-20 p-2 rounded-lg hover:bg-white/10 cursor-pointer text-white text-xs text-center" onclick="openWindow('gedit')">
+            <span class="text-4xl">📄</span>
+            <span class="drop-shadow">Dokumen</span>
+        </div>
+    </div>
+
+    <!-- 1. TERMINAL WINDOW -->
+    <div id="win-terminal" class="os-window w-[850px] h-[520px] top-16 left-28 hidden">
+        <div class="window-header" onmousedown="dragMouseDown(event, 'win-terminal')">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="closeWindow('terminal')">×</span>
+                <span class="win-btn win-minimize" onclick="minimizeWindow('terminal')">-</span>
+                <span class="win-btn win-maximize" onclick="maximizeWindow('terminal')">+</span>
+            </div>
+            <div class="window-title" id="terminal-win-title">siswa@ubuntu: ~</div>
+            <div class="w-12"></div>
+        </div>
+        <div class="window-body relative">
+            <!-- NANO EDITOR SCREEN -->
+            <div id="nano-editor" class="nano-editor-view">
+                <div class="nano-header">
+                    <span>GNU nano 7.2</span>
+                    <span id="nano-filename-display">catatan.txt</span>
+                    <span id="nano-modified-tag"></span>
+                </div>
+                <textarea id="nano-textarea" class="nano-textarea" autofocus spellcheck="false"></textarea>
+                <div id="nano-status-line" class="nano-status">Ketik teks. Gunakan Ctrl+O untuk menyimpan, Ctrl+X untuk keluar.</div>
+                <div class="nano-shortcuts">
+                    <div class="nano-shortcut-item"><span class="nano-key">^G</span> Get Help</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^O</span> WriteOut</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^W</span> Where Is</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^K</span> Cut</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^J</span> Justify</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^C</span> Location</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^X</span> Exit</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^R</span> Read File</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^\</span> Replace</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^U</span> Paste</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^T</span> Execute</div>
+                    <div class="nano-shortcut-item"><span class="nano-key">^_</span> Go To Line</div>
+                </div>
+            </div>
+
+            <!-- MAN PAGER SCREEN -->
+            <div id="man-pager" class="man-pager">
+                <div id="man-content"></div>
+                <div class="sticky bottom-0 bg-white text-black font-bold px-2 py-0.5 mt-4">Manual page (press q to quit)</div>
+            </div>
+
+            <!-- TERMINAL CLI SCREEN -->
+            <div class="terminal-container" id="terminal-body" onclick="focusTerminalInput()">
+                <div>Welcome to Ubuntu 24.04.1 LTS (GNU/Linux 6.8.0-generic x86_64)</div>
+                <div>* Documentation: https://help.ubuntu.com</div>
+                <div>* Management:    https://landscape.canonical.com</div>
+                <div>* Support:       https://ubuntu.com/pro</div>
+                <div class="text-yellow-300 my-1">Tips: Ketik <span class="font-bold">nano [file]</span> untuk mengedit file, <span class="font-bold">man [command]</span> untuk manual page otentik.</div>
+                <div id="term-output"></div>
+                <div class="cmd-line">
+                    <span class="font-bold text-green-500 mr-1" id="term-user-prompt">siswa@ubuntu</span>:<span class="font-bold text-blue-400 mr-2" id="term-path-prompt">~</span>$ 
+                    <input type="text" id="term-input" class="terminal-input" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. NAUTILUS FILE MANAGER -->
+    <div id="win-files" class="os-window w-[780px] h-[480px] top-24 left-36 hidden">
+        <div class="window-header" onmousedown="dragMouseDown(event, 'win-files')">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="closeWindow('files')">×</span>
+                <span class="win-btn win-minimize" onclick="minimizeWindow('files')">-</span>
+                <span class="win-btn win-maximize" onclick="maximizeWindow('files')">+</span>
+            </div>
+            <div class="window-title">Files - Home</div>
+            <div class="w-12"></div>
+        </div>
+        <div class="window-body bg-[#1e1e1e] text-white flex">
+            <div class="w-48 bg-[#252525] p-3 border-r border-gray-800 text-xs flex flex-col gap-2">
+                <div class="font-semibold text-gray-400 px-2">Places</div>
+                <div class="p-2 bg-orange-600/30 text-orange-300 rounded cursor-pointer font-medium" onclick="navFiles('/home/siswa')">🏠 Home</div>
+                <div class="p-2 hover:bg-white/10 rounded cursor-pointer" onclick="navFiles('/home/siswa/Documents')">📄 Documents</div>
+                <div class="p-2 hover:bg-white/10 rounded cursor-pointer" onclick="navFiles('/home/siswa/Downloads')">📥 Downloads</div>
+                <div class="p-2 hover:bg-white/10 rounded cursor-pointer" onclick="navFiles('/etc')">⚙️ System Configuration (/etc)</div>
+                <div class="p-2 hover:bg-white/10 rounded cursor-pointer" onclick="navFiles('/var/log')">📜 System Logs (/var/log)</div>
+            </div>
+            <div class="flex-1 flex flex-col">
+                <div class="p-3 bg-[#2a2a2a] border-b border-gray-800 flex justify-between items-center text-xs">
+                    <span id="files-current-path" class="font-mono text-gray-300">/home/siswa</span>
+                    <button onclick="createNewFilePrompt()" class="bg-orange-600 hover:bg-orange-500 text-white px-2.5 py-1 rounded"> + New File</button>
+                </div>
+                <div id="files-grid" class="p-4 grid grid-cols-4 gap-4 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. FIREFOX BROWSER SIMULATOR -->
+    <div id="win-firefox" class="os-window w-[840px] h-[520px] top-20 left-44 hidden">
+        <div class="window-header" onmousedown="dragMouseDown(event, 'win-firefox')">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="closeWindow('firefox')">×</span>
+                <span class="win-btn win-minimize" onclick="minimizeWindow('firefox')">-</span>
+                <span class="win-btn win-maximize" onclick="maximizeWindow('firefox')">+</span>
+            </div>
+            <div class="window-title">Firefox Web Browser</div>
+            <div class="w-12"></div>
+        </div>
+        <div class="window-body bg-[#2b2a33] text-white flex flex-col">
+            <div class="p-2 bg-[#1c1b22] flex items-center gap-2">
+                <button class="text-gray-400 hover:text-white px-2">←</button>
+                <button class="text-gray-400 hover:text-white px-2">→</button>
+                <button class="text-gray-400 hover:text-white px-2">↻</button>
+                <input type="text" value="https://ubuntu.com/doc/cli-guide" class="flex-1 bg-[#2b2a33] border border-gray-700 text-xs px-3 py-1.5 rounded-full text-gray-200 outline-none focus:border-orange-500">
+            </div>
+            <div class="flex-1 bg-white text-gray-800 p-8 overflow-y-auto">
+                <h1 class="text-3xl font-bold text-orange-600 mb-4">Ubuntu Documentation Portal</h1>
+                <p class="text-sm mb-4">Selamat datang di panduan resmi CLI Linux Ubuntu. Gunakan aplikasi <b>Terminal</b> di desktop ini untuk mempraktikkan seluruh perintah Linux dasar, teks editor Nano, dan fitur keamanan.</p>
+                <div class="grid grid-cols-2 gap-4 my-6">
+                    <div class="p-4 border rounded-lg bg-orange-50 border-orange-200">
+                        <h3 class="font-bold text-orange-800 mb-2">📁 File Management</h3>
+                        <p class="text-xs text-gray-600">Pelajari penggunaan <code>ls</code>, <code>cp</code>, <code>mv</code>, <code>rm</code>, <code>mkdir</code>, dan <code>nano</code>.</p>
+                    </div>
+                    <div class="p-4 border rounded-lg bg-purple-50 border-purple-200">
+                        <h3 class="font-bold text-purple-800 mb-2">🔒 Security & Permissions</h3>
+                        <p class="text-xs text-gray-600">Pelajari hak akses <code>chmod</code>, kepemilikan <code>chown</code>, superuser <code>sudo</code>, dan firewall <code>ufw</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. GEDIT TEXT EDITOR -->
+    <div id="win-gedit" class="os-window w-[680px] h-[460px] top-28 left-52 hidden">
+        <div class="window-header" onmousedown="dragMouseDown(event, 'win-gedit')">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="closeWindow('gedit')">×</span>
+                <span class="win-btn win-minimize" onclick="minimizeWindow('gedit')">-</span>
+                <span class="win-btn win-maximize" onclick="maximizeWindow('gedit')">+</span>
+            </div>
+            <div class="window-title" id="gedit-title">Text Editor - catatan.txt</div>
+            <button onclick="saveGeditFile()" class="bg-orange-600 hover:bg-orange-500 text-white text-xs px-3 py-1 rounded">Save</button>
+        </div>
+        <div class="window-body bg-[#1e1e1e] text-white">
+            <textarea id="gedit-textarea" class="w-full h-full p-4 bg-transparent text-white font-mono text-sm outline-none resize-none" spellcheck="false"></textarea>
+        </div>
+    </div>
+
+    <!-- 5. SETTINGS WINDOW -->
+    <div id="win-settings" class="os-window w-[620px] h-[420px] top-32 left-60 hidden">
+        <div class="window-header" onmousedown="dragMouseDown(event, 'win-settings')">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="closeWindow('settings')">×</span>
+                <span class="win-btn win-minimize" onclick="minimizeWindow('settings')">-</span>
+                <span class="win-btn win-maximize" onclick="maximizeWindow('settings')">+</span>
+            </div>
+            <div class="window-title">Settings - Appearance</div>
+            <div class="w-12"></div>
+        </div>
+        <div class="window-body bg-[#2d2d2d] text-white p-6">
+            <h2 class="text-lg font-bold mb-4">Background Wallpaper</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="h-24 rounded-lg cursor-pointer border-2 border-orange-500 bg-cover bg-center" style="background-image: radial-gradient(#77216f, #2c001e);" onclick="changeWallpaper('default')"></div>
+                <div class="h-24 rounded-lg cursor-pointer border-2 border-transparent hover:border-orange-500 bg-slate-900 flex items-center justify-center text-xs text-gray-400" onclick="changeWallpaper('dark')">Dark Solid</div>
+                <div class="h-24 rounded-lg cursor-pointer border-2 border-transparent hover:border-orange-500 bg-gradient-to-r from-blue-900 to-indigo-900 flex items-center justify-center text-xs text-gray-300" onclick="changeWallpaper('blue')">Ocean Blue</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- REALISTIC INDIVIDUAL MANUAL PAGES DATABASE ---
+        const manPagesDatabase = {
+            "ls": `
+<div class="man-title">LS(1)                            User Commands                            LS(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">ls - list directory contents</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>ls</b> [<i>OPTION</i>]... [<i>FILE</i>]...</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">List information about the FILEs (the current directory by default). Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.</div>
+<div class="man-sec">OPTIONS</div>
+<div class="man-body">
+<b>-a, --all</b>
+       do not ignore entries starting with .
+<b>-l</b>
+       use a long listing format showing permissions, ownership, size, and timestamp.
+<b>-h, --human-readable</b>
+       with -l and/or -s, print human readable sizes (e.g., 1K 234M 2G).
+<b>-t</b>
+       sort by modification time, newest first.
+</div>
+<div class="man-sec">EXAMPLES</div>
+<div class="man-body">
+ls -la       Tampilkan semua file tersembunyi beserta rincian atribut hak akses.
+ls -lh       Tampilkan ukuran file dalam format Megabyte/Gigabyte.
+</div>`,
+
+            "cd": `
+<div class="man-title">CD(1)                            Bash Builtins                            CD(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">cd - change the shell working directory</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>cd</b> [<i>DIRECTORY</i>]</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">Change the current working directory to DIRECTORY. Default DIRECTORY is the HOME environment variable.</div>
+<div class="man-sec">EXAMPLES</div>
+<div class="man-body">
+cd /var/log  Pindah ke direktori /var/log.
+cd ..        Naik satu tingkat direktori ke atas.
+cd ~         Kembali ke home direktori pengguna.
+</div>`,
+
+            "pwd": `
+<div class="man-title">PWD(1)                           User Commands                           PWD(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">pwd - print name of current/working directory</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>pwd</b> [<i>OPTION</i>]...</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">Print the full filename of the current working directory.</div>`,
+
+            "cp": `
+<div class="man-title">CP(1)                            User Commands                            CP(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">cp - copy files and directories</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>cp</b> [<i>OPTION</i>]... <i>SOURCE</i>... <i>DIRECTORY</i></div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.</div>
+<div class="man-sec">OPTIONS</div>
+<div class="man-body">
+<b>-r, -R, --recursive</b>
+       copy directories recursively.
+<b>-v, --verbose</b>
+       explain what is being done.
+<b>-i, --interactive</b>
+       prompt before overwrite.
+</div>`,
+
+            "mv": `
+<div class="man-title">MV(1)                            User Commands                            MV(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">mv - move (rename) files</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>mv</b> [<i>OPTION</i>]... <i>SOURCE</i>... <i>DIRECTORY</i></div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY.</div>`,
+
+            "rm": `
+<div class="man-title">RM(1)                            User Commands                            RM(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">rm - remove files or directories</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>rm</b> [<i>OPTION</i>]... [<i>FILE</i>]...</div>
+<div class="man-sec">OPTIONS</div>
+<div class="man-body">
+<b>-r, -R, --recursive</b>
+       remove directories and their contents recursively.
+<b>-f, --force</b>
+       ignore nonexistent files and arguments, never prompt.
+</div>`,
+
+            "mkdir": `
+<div class="man-title">MKDIR(1)                         User Commands                         MKDIR(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">mkdir - make directories</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>mkdir</b> [<i>OPTION</i>]... <i>DIRECTORY</i>...</div>
+<div class="man-sec">OPTIONS</div>
+<div class="man-body">
+<b>-p, --parents</b>
+       no error if existing, make parent directories as needed.
+</div>`,
+
+            "nano": `
+<div class="man-title">NANO(1)                          User Commands                          NANO(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">nano - Nano's ANOther editor, an enhanced free Pico clone</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>nano</b> [<i>OPTIONS</i>] [[+<i>LINE</i>[,<i>COLUMN</i>]] <i>FILE</i>]...</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">nano is a small and friendly editor. It emulates the Pico text editor while providing additional enhancements.</div>
+<div class="man-sec">KEYBINDINGS</div>
+<div class="man-body">
+<b>Ctrl+O</b> : WriteOut (Simpan file)
+<b>Ctrl+X</b> : Exit (Keluar dari editor)
+<b>Ctrl+K</b> : Cut current line
+<b>Ctrl+U</b> : Paste cut text
+</div>`,
+
+            "cat": `
+<div class="man-title">CAT(1)                           User Commands                           CAT(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">cat - concatenate files and print on the standard output</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>cat</b> [<i>OPTION</i>]... [<i>FILE</i>]...</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">Concatenate FILE(s) to standard output.</div>`,
+
+            "grep": `
+<div class="man-title">GREP(1)                          User Commands                          GREP(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">grep - print lines that match patterns</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>grep</b> [<i>OPTION...</i>] <i>PATTERNS</i> [<i>FILE...</i>]</div>
+<div class="man-sec">OPTIONS</div>
+<div class="man-body">
+<b>-i, --ignore-case</b>
+       ignore case distinctions in patterns and input data.
+<b>-r, -R, --recursive</b>
+       read all files under each directory, recursively.
+<b>-n, --line-number</b>
+       prefix each line of output with its line number.
+</div>`,
+
+            "chmod": `
+<div class="man-title">CHMOD(1)                         User Commands                         CHMOD(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">chmod - change file mode bits (permissions)</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>chmod</b> [<i>OPTION</i>]... <i>MODE</i>[,<i>MODE</i>]... <i>FILE</i>...</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">chmod changes the file mode bits of each given file according to mode.</div>
+<div class="man-sec">NUMERIC MODE VALUES</div>
+<div class="man-body">
+4 = Read (r), 2 = Write (w), 1 = Execute (x)
+755 : Owner(rwx), Group(r-x), Others(r-x)
+600 : Owner(rw-), Group(---), Others(---)
+</div>`,
+
+            "chown": `
+<div class="man-title">CHOWN(1)                         User Commands                         CHOWN(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">chown - change file owner and group</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>chown</b> [<i>OPTION</i>]... [<i>OWNER</i>][:[<i>GROUP</i>]] <i>FILE</i>...</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">chown changes the user and/or group ownership of each given file.</div>`,
+
+            "sudo": `
+<div class="man-title">SUDO(8)                          System Manager's Manual                 SUDO(8)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">sudo - execute a command as another user / superuser</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>sudo</b> [<b>-u</b> <i>user</i>] <i>command</i></div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">sudo allows a permitted user to execute a command as the superuser (root) or another user as specified by the security policy.</div>`,
+
+            "ufw": `
+<div class="man-title">UFW(8)                           System Manager's Manual                 UFW(8)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">ufw - program for managing a netfilter firewall</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>ufw</b> [<b>--dry-run</b>] <b>enable | disable | status | allow | deny</b></div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">ufw is a program for managing a netfilter firewall in Ubuntu Linux.</div>
+<div class="man-sec">EXAMPLES</div>
+<div class="man-body">
+ufw enable          Aktifkan firewall.
+ufw allow 22/tcp    Izinkan lalu lintas port SSH.
+ufw status          Tampilkan aturan firewall yang sedang aktif.
+</div>`,
+
+            "apt": `
+<div class="man-title">APT(8)                           System Manager's Manual                 APT(8)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">apt - command-line interface for package management</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>apt</b> [<b>update</b> | <b>upgrade</b> | <b>install</b> <i>pkg</i> | <b>remove</b> <i>pkg</i>]</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body">apt provides a high-level commandline interface for the package management system in Ubuntu Debian-based systems.</div>`
+        };
+
+        // Fallback Generator for Commands without hardcoded full pages
+        function getManPage(cmd) {
+            if (manPagesDatabase[cmd]) return manPagesDatabase[cmd];
+            return `
+<div class="man-title">${cmd.toUpperCase()}(1)                            User Commands                            ${cmd.toUpperCase()}(1)</div>
+<div class="man-sec">NAME</div>
+<div class="man-body">${cmd} - Linux Command Line Utility</div>
+<div class="man-sec">SYNOPSIS</div>
+<div class="man-body"><b>${cmd}</b> [<i>OPTION</i>]... [<i>ARGUMENT</i>]...</div>
+<div class="man-sec">DESCRIPTION</div>
+<div class="man-body"><b>${cmd}</b> adalah utilitas bawaan Linux Ubuntu 24.04 LTS. Digunakan dalam lingkungan baris perintah (CLI) untuk administrasi sistem, jaringan, atau pengelolaan file.</div>
+<div class="man-sec">OPTIONS</div>
+<div class="man-body">
+<b>-a, --all</b>       Tampilkan semua entri atau opsi lengkap.
+<b>-v, --verbose</b>   Tampilkan rincian eksekusi secara mendetail.
+<b>--help</b>          Tampilkan bantuan penggunaan dan keluar.
+</div>`.trim();
+        }
+
+        // Global OS State
+        let activeZIndex = 1000;
+        let currentEditingFile = "catatan.txt";
+
+        // Virtual Filesystem
+        let defaultFS = {
+            "/": {
+                type: "dir",
+                children: {
+                    "bin": { type: "dir", children: { "bash": { type: "file", content: "binary" }, "ls": { type: "file", content: "binary" } } },
+                    "etc": { type: "dir", children: { "passwd": { type: "file", content: "root:x:0:0:root:/root:/bin/bash\nsiswa:x:1000:1000:Siswa,,,:/home/siswa:/bin/bash" } } },
+                    "home": {
+                        type: "dir",
+                        children: {
+                            "siswa": {
+                                type: "dir",
+                                children: {
+                                    "catatan.txt": { type: "file", content: "1. Belajar Command Line Interface Linux\n2. Edit file menggunakan Nano (^O simpan, ^X keluar)\n3. Praktikkan chmod dan ufw firewall" },
+                                    "dokumen.txt": { type: "file", content: "File latihan Ubuntu 24.04 LTS Web OS Simulation." },
+                                    "Documents": { type: "dir", children: { "laporan.txt": { type: "file", content: "Laporan Praktikum Linux." } } },
+                                    "Downloads": { type: "dir", children: {} }
+                                }
+                            }
+                        }
+                    },
+                    "var": { type: "dir", children: { "log": { type: "dir", children: { "auth.log": { type: "file", content: "Sep 21 10:00:01 ubuntu sshd[1024]: Accepted password for siswa from 192.168.1.10" } } } } }
+                }
+            }
+        };
+
+        let fs = JSON.parse(localStorage.getItem("ubuntu_os_fs_v2")) || defaultFS;
+        let termPath = ["home", "siswa"];
+        let termUser = "siswa";
+        let commandHistory = JSON.parse(localStorage.getItem("ubuntu_os_history_v2")) || [];
+        let historyIndex = commandHistory.length;
+        let inPagerMode = false;
+        let inNanoMode = false;
+        let currentNanoFilename = "";
+        let currentFilesPath = "/home/siswa";
+        let cutBuffer = "";
+
+        function saveOSState() {
+            localStorage.setItem("ubuntu_os_fs_v2", JSON.stringify(fs));
+            localStorage.setItem("ubuntu_os_history_v2", JSON.stringify(commandHistory));
+        }
+
+        // --- WINDOW MANAGER ---
+        function openWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            const dockApp = document.getElementById(`dock-${appId}`);
+            if (!win) return;
+
+            win.classList.remove("hidden");
+            activeZIndex += 2;
+            win.style.zIndex = activeZIndex;
+
+            if (dockApp) dockApp.classList.add("active");
+
+            if (appId === "terminal") focusTerminalInput();
+            if (appId === "files") renderFilesGrid(currentFilesPath);
+            if (appId === "gedit") loadGeditFile(currentEditingFile);
+        }
+
+        function closeWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            const dockApp = document.getElementById(`dock-${appId}`);
+            if (win) win.classList.add("hidden");
+            if (dockApp) dockApp.classList.remove("active");
+        }
+
+        function minimizeWindow(appId) { closeWindow(appId); }
+
+        function maximizeWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (win.style.width === "100vw") {
+                win.style.width = "780px";
+                win.style.height = "480px";
+                win.style.top = "50px";
+                win.style.left = "100px";
+            } else {
+                win.style.width = "100vw";
+                win.style.height = "calc(100vh - 28px)";
+                win.style.top = "28px";
+                win.style.left = "0px";
+            }
+        }
+
+        function dragMouseDown(e, winId) {
+            const win = document.getElementById(winId);
+            activeZIndex += 2;
+            win.style.zIndex = activeZIndex;
+
+            let pos3 = e.clientX;
+            let pos4 = e.clientY;
+
+            document.onmousemove = (e) => {
+                let pos1 = pos3 - e.clientX;
+                let pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                win.style.top = (win.offsetTop - pos2) + "px";
+                win.style.left = (win.offsetLeft - pos1) + "px";
+            };
+
+            document.onmouseup = () => {
+                document.onmousemove = null;
+                document.onmouseup = null;
+            };
+        }
+
+        // --- TOP BAR & SYSTEM MENU ---
+        function updateTopBarClock() {
+            const now = new Date();
+            const opts = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+            document.getElementById("topbar-clock").textContent = now.toLocaleDateString('en-US', opts);
+        }
+
+        function initBatteryAPI() {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    function updateBatteryInfo() {
+                        const pct = Math.round(battery.level * 100);
+                        document.getElementById("topbar-battery-pct").textContent = pct + "%";
+                        document.getElementById("system-battery-status").textContent = `${pct}% (${battery.charging ? 'Plugged In' : 'Discharging'})`;
+                    }
+                    updateBatteryInfo();
+                    battery.addEventListener('levelchange', updateBatteryInfo);
+                    battery.addEventListener('chargingchange', updateBatteryInfo);
+                });
+            }
+        }
+
+        function toggleSystemMenu() {
+            const menu = document.getElementById("menu-system");
+            document.getElementById("menu-clock").style.display = "none";
+            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+        }
+
+        function toggleClockMenu() {
+            const menu = document.getElementById("menu-clock");
+            document.getElementById("menu-system").style.display = "none";
+            if (menu.style.display === "block") {
+                menu.style.display = "none";
+            } else {
+                menu.style.display = "block";
+                renderCalendar();
+            }
+        }
+
+        function toggleAppGrid() {
+            const grid = document.getElementById("app-grid");
+            grid.style.display = (grid.style.display === "grid") ? "none" : "grid";
+        }
+
+        function renderCalendar() {
+            const now = new Date();
+            const daysGrid = document.getElementById("cal-days-grid");
+            daysGrid.innerHTML = "";
+            for (let i = 1; i <= 30; i++) {
+                const isToday = i === now.getDate();
+                daysGrid.innerHTML += `<span class="p-1 text-center ${isToday ? 'bg-orange-600 font-bold rounded-full text-white' : 'hover:bg-white/10 rounded'}">${i}</span>`;
+            }
+        }
+
+        function adjustBrightness(val) { document.body.style.filter = `brightness(${val}%)`; }
+
+        function changeWallpaper(theme) {
+            const wp = document.getElementById("desktop-wallpaper");
+            if (theme === 'dark') wp.style.background = "#111111";
+            else if (theme === 'blue') wp.style.background = "linear-gradient(135deg, #0f2027, #203a43, #2c5364)";
+            else wp.style.background = "radial-gradient(circle at center, #77216f 0%, #5e2750 40%, #2c001e 100%)";
+        }
+
+        function showContextMenu(e) {
+            e.preventDefault();
+            const cm = document.getElementById("desktop-context-menu");
+            cm.style.left = e.clientX + "px";
+            cm.style.top = e.clientY + "px";
+            cm.style.display = "block";
+        }
+
+        document.addEventListener("click", () => {
+            document.getElementById("desktop-context-menu").style.display = "none";
+            document.getElementById("menu-system").style.display = "none";
+            document.getElementById("menu-clock").style.display = "none";
+        });
+
+        function createNewFolderDesktop() {
+            const name = prompt("Nama Folder Baru:");
+            if (name) {
+                const homeNode = getDirectoryFromPath("/home/siswa");
+                if (homeNode) {
+                    homeNode.children[name] = { type: "dir", children: {} };
+                    saveOSState();
+                    renderFilesGrid(currentFilesPath);
+                }
+            }
+        }
+
+        function createNewDocumentDesktop() { createNewFilePrompt(); }
+
+        function powerOffPrompt() {
+            if (confirm("Apakah Anda yakin ingin mereset/mematikan simulasi Ubuntu?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // --- NAUTILUS FILES ENGINE ---
+        function getDirectoryFromPath(pathStr) {
+            const parts = pathStr.split("/").filter(Boolean);
+            let curr = fs["/"];
+            for (let p of parts) {
+                if (curr.children && curr.children[p]) curr = curr.children[p];
+                else return null;
+            }
+            return curr;
+        }
+
+        function renderFilesGrid(pathStr) {
+            currentFilesPath = pathStr;
+            document.getElementById("files-current-path").textContent = pathStr;
+            const grid = document.getElementById("files-grid");
+            grid.innerHTML = "";
+
+            const dir = getDirectoryFromPath(pathStr);
+            if (!dir || !dir.children) return;
+
+            Object.keys(dir.children).forEach(name => {
+                const item = dir.children[name];
+                const isDir = item.type === "dir";
+                const icon = isDir ? "📁" : "📄";
+                
+                const card = document.createElement("div");
+                card.className = "flex flex-col items-center gap-1 p-3 hover:bg-white/10 rounded-lg cursor-pointer text-center text-xs";
+                card.innerHTML = `<span class="text-3xl">${icon}</span><span class="truncate w-full">${name}</span>`;
+                
+                card.onclick = () => {
+                    if (isDir) {
+                        renderFilesGrid(pathStr === "/" ? `/${name}` : `${pathStr}/${name}`);
+                    } else {
+                        currentEditingFile = name;
+                        openWindow('gedit');
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function navFiles(path) { renderFilesGrid(path); }
+
+        function createNewFilePrompt() {
+            const name = prompt("Masukkan nama file baru:");
+            if (name) {
+                const dir = getDirectoryFromPath(currentFilesPath);
+                if (dir) {
+                    dir.children[name] = { type: "file", content: "Isi file baru..." };
+                    saveOSState();
+                    renderFilesGrid(currentFilesPath);
+                }
+            }
+        }
+
+        // --- GEDIT ENGINE ---
+        function loadGeditFile(fileName) {
+            currentEditingFile = fileName;
+            document.getElementById("gedit-title").textContent = `Text Editor - ${fileName}`;
+            const homeDir = getDirectoryFromPath("/home/siswa");
+            if (homeDir && homeDir.children[fileName]) {
+                document.getElementById("gedit-textarea").value = homeDir.children[fileName].content || "";
+            } else {
+                document.getElementById("gedit-textarea").value = "";
+            }
+        }
+
+        function saveGeditFile() {
+            const val = document.getElementById("gedit-textarea").value;
+            const homeDir = getDirectoryFromPath("/home/siswa");
+            if (homeDir) {
+                homeDir.children[currentEditingFile] = { type: "file", content: val };
+                saveOSState();
+                alert(`File ${currentEditingFile} berhasil disimpan!`);
+                renderFilesGrid(currentFilesPath);
+            }
+        }
+
+        // --- STREAMING_CHUNK:Executing Terminal Command Interpreter, Nano Editor Keybindings, and Filesystem Sync... ---
+        // --- TERMINAL & NANO EDITOR ENGINE ---
+        const termInput = document.getElementById("term-input");
+        const termOutput = document.getElementById("term-output");
+        const termUserPrompt = document.getElementById("term-user-prompt");
+        const termPathPrompt = document.getElementById("term-path-prompt");
+        const manPager = document.getElementById("man-pager");
+        const manContent = document.getElementById("man-content");
+        const nanoEditor = document.getElementById("nano-editor");
+        const nanoTextarea = document.getElementById("nano-textarea");
+        const nanoStatusLine = document.getElementById("nano-status-line");
+
+        function focusTerminalInput() {
+            if (!inPagerMode && !inNanoMode) termInput.focus();
+        }
+
+        function getTermFormattedPath() {
+            if (termUser === "siswa" && termPath.length === 2 && termPath[0] === "home" && termPath[1] === "siswa") return "~";
+            if (termUser === "root" && termPath.length === 1 && termPath[0] === "root") return "~";
+            return "/" + termPath.join("/");
+        }
+
+        function getTermCurrentNode() {
+            let curr = fs["/"];
+            for (let seg of termPath) {
+                if (curr.children && curr.children[seg]) curr = curr.children[seg];
+                else return null;
+            }
+            return curr;
+        }
+
+        // Launch Nano Editor
+        function openNanoEditor(filename) {
+            currentNanoFilename = filename;
+            document.getElementById("nano-filename-display").textContent = filename;
+            const node = getTermCurrentNode();
+            if (node && node.children[filename] && node.children[filename].type === "file") {
+                nanoTextarea.value = node.children[filename].content || "";
+            } else {
+                nanoTextarea.value = "";
+            }
+            nanoStatusLine.textContent = `File: ${filename}`;
+            nanoEditor.style.display = "flex";
+            nanoTextarea.focus();
+            inNanoMode = true;
+        }
+
+        function closeNanoEditor() {
+            nanoEditor.style.display = "none";
+            inNanoMode = false;
+            focusTerminalInput();
+        }
+
+        // Nano Keybindings Handler (Ctrl+O, Ctrl+X, Ctrl+K, Ctrl+U)
+        nanoTextarea.addEventListener("keydown", function(e) {
+            if (e.ctrlKey && e.key.toLowerCase() === "o") {
+                e.preventDefault();
+                const node = getTermCurrentNode();
+                if (node) {
+                    node.children[currentNanoFilename] = { type: "file", content: nanoTextarea.value };
+                    saveOSState();
+                    renderFilesGrid(currentFilesPath);
+                    nanoStatusLine.textContent = `[ Wrote ${nanoTextarea.value.split('\n').length} lines to ${currentNanoFilename} ]`;
+                }
+            } else if (e.ctrlKey && e.key.toLowerCase() === "x") {
+                e.preventDefault();
+                closeNanoEditor();
+            } else if (e.ctrlKey && e.key.toLowerCase() === "k") {
+                e.preventDefault();
+                cutBuffer = nanoTextarea.value;
+                nanoTextarea.value = "";
+                nanoStatusLine.textContent = "[ Cut text ]";
+            } else if (e.ctrlKey && e.key.toLowerCase() === "u") {
+                e.preventDefault();
+                nanoTextarea.value += cutBuffer;
+                nanoStatusLine.textContent = "[ Pasted text ]";
+            }
+        });
+
+        termInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                const raw = termInput.value;
+                if (raw.trim()) {
+                    commandHistory.push(raw);
+                    historyIndex = commandHistory.length;
+                    saveOSState();
+                }
+                execTerminalCmd(raw);
+                termInput.value = "";
+                document.getElementById("terminal-body").scrollTop = document.getElementById("terminal-body").scrollHeight;
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    termInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    termInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    termInput.value = "";
+                }
+            } else if (e.key === "Tab") {
+                e.preventDefault();
+                handleTermTab();
+            }
+        });
+
+        window.addEventListener("keydown", function(e) {
+            if (inPagerMode && e.key.toLowerCase() === "q") {
+                manPager.style.display = "none";
+                inPagerMode = false;
+                focusTerminalInput();
+            }
+        });
+
+        function handleTermTab() {
+            const val = termInput.value;
+            const parts = val.split(/\s+/);
+            const last = parts[parts.length - 1];
+
+            const cmds = Object.keys(manPagesDatabase).concat(["nano", "clear", "history", "sudo", "su", "ufw"]);
+            const node = getTermCurrentNode();
+            const files = node ? Object.keys(node.children) : [];
+
+            let matches = parts.length === 1 ? cmds.filter(c => c.startsWith(last)) : files.filter(f => f.startsWith(last));
+
+            if (matches.length === 1) {
+                parts[parts.length - 1] = matches[0];
+                termInput.value = parts.join(" ") + (parts.length === 1 ? " " : "");
+            }
+        }
+
+        function printTermLine(text, isError = false) {
+            const div = document.createElement("div");
+            div.className = "my-0.5 whitespace-pre-wrap " + (isError ? "text-red-400" : "text-gray-100");
+            div.innerHTML = text;
+            termOutput.appendChild(div);
+        }
+
+        function execTerminalCmd(cmdLine) {
+            const symbol = termUser === "root" ? "#" : "$";
+            printTermLine(`<span class="text-green-500 font-bold">${termUser}@ubuntu</span>:<span class="text-blue-400 font-bold">${getTermFormattedPath()}</span>${symbol} ${cmdLine}`);
+            
+            let trimmed = cmdLine.trim();
+            if (!trimmed) return;
+
+            // Handle Redirection (>)
+            if (trimmed.includes(">")) {
+                const parts = trimmed.split(">").map(s => s.trim());
+                const subCmd = parts[0];
+                const fileTarget = parts[1];
+                const node = getTermCurrentNode();
+                if (node) {
+                    node.children[fileTarget] = { type: "file", content: subCmd };
+                    saveOSState();
+                    renderFilesGrid(currentFilesPath);
+                    printTermLine(`Output written to ${fileTarget}`);
+                    return;
+                }
+            }
+
+            const args = trimmed.split(/\s+/);
+            const cmd = args[0];
+            const flags = args.filter(a => a.startsWith("-"));
+            const params = args.slice(1).filter(a => !a.startsWith("-"));
+            const currNode = getTermCurrentNode();
+
+            switch (cmd) {
+                case "nano":
+                    if (!params[0]) {
+                        printTermLine("nano: filename required", true);
+                    } else {
+                        openNanoEditor(params[0]);
+                    }
+                    break;
+
+                case "man":
+                    if (!params[0]) {
+                        printTermLine("What manual page do you want?\nFor example, try 'man ls' or 'man ufw'.");
+                    } else {
+                        manContent.innerHTML = getManPage(params[0].toLowerCase());
+                        manPager.style.display = "block";
+                        manPager.focus();
+                        inPagerMode = true;
+                    }
+                    break;
+
+                case "pwd": printTermLine("/" + termPath.join("/")); break;
+                case "whoami": printTermLine(termUser); break;
+
+                case "sudo":
+                case "su":
+                    termUser = "root";
+                    termUserPrompt.textContent = "root@ubuntu";
+                    printTermLine("Berhasil masuk ke mode superuser (root).");
+                    break;
+
+                case "exit":
+                    if (termUser === "root") {
+                        termUser = "siswa";
+                        termUserPrompt.textContent = "siswa@ubuntu";
+                        printTermLine("exit (kembali ke akun biasa)");
+                    } else {
+                        closeWindow('terminal');
+                    }
+                    break;
+
+                case "ls":
+                    let showAll = flags.some(f => f.includes("a"));
+                    let longFmt = flags.some(f => f.includes("l"));
+                    let items = Object.keys(currNode.children);
+                    if (showAll) items = [".", "..", ...items];
+
+                    if (longFmt) {
+                        let lines = items.map(item => {
+                            let isDir = item === "." || item === ".." || (currNode.children[item] && currNode.children[item].type === "dir");
+                            let perm = isDir ? "drwxr-xr-x" : "-rw-r--r--";
+                            let name = isDir ? `<span class="text-blue-400 font-bold">${item}</span>` : item;
+                            return `${perm} 1 ${termUser} ${termUser} 4096 Sep 21 10:00 ${name}`;
+                        });
+                        printTermLine(lines.join("\n"));
+                    } else {
+                        let formatted = items.map(item => {
+                            let isDir = item === "." || item === ".." || (currNode.children[item] && currNode.children[item].type === "dir");
+                            return isDir ? `<span class="text-blue-400 font-bold">${item}</span>` : item;
+                        });
+                        printTermLine(formatted.join("  "));
+                    }
+                    break;
+
+                case "cd":
+                    let dest = params[0];
+                    if (!dest || dest === "~") {
+                        termPath = termUser === "root" ? ["root"] : ["home", "siswa"];
+                    } else if (dest === "..") {
+                        if (termPath.length > 0) termPath.pop();
+                    } else {
+                        if (currNode.children[dest] && currNode.children[dest].type === "dir") {
+                            termPath.push(dest);
+                        } else {
+                            printTermLine(`bash: cd: ${dest}: No such file or directory`, true);
+                        }
+                    }
+                    termPathPrompt.textContent = getTermFormattedPath();
+                    document.getElementById("terminal-win-title").textContent = `${termUser}@ubuntu: ${getTermFormattedPath()}`;
+                    break;
+
+                case "mkdir":
+                    if (params[0]) {
+                        currNode.children[params[0]] = { type: "dir", children: {} };
+                        saveOSState();
+                        renderFilesGrid(currentFilesPath);
+                    }
+                    break;
+
+                case "touch":
+                    if (params[0]) {
+                        currNode.children[params[0]] = { type: "file", content: "" };
+                        saveOSState();
+                        renderFilesGrid(currentFilesPath);
+                    }
+                    break;
+
+                case "cat":
+                    if (params[0] && currNode.children[params[0]]) {
+                        printTermLine(currNode.children[params[0]].content);
+                    } else {
+                        printTermLine(`cat: ${params[0] || ''}: No such file`, true);
+                    }
+                    break;
+
+                case "rm":
+                    if (params[0] && currNode.children[params[0]]) {
+                        delete currNode.children[params[0]];
+                        saveOSState();
+                        renderFilesGrid(currentFilesPath);
+                    }
+                    break;
+
+                case "clear": termOutput.innerHTML = ""; break;
+
+                case "history":
+                    printTermLine(commandHistory.map((c, i) => ` ${(i + 1).toString().padStart(3, ' ')}  ${c}`).join("\n"));
+                    break;
+
+                default:
+                    printTermLine(`Command '${cmd}' executed. Ketik 'man ${cmd}' untuk manual page.`, false);
+                    break;
+            }
+        }
+
+        // Initialize OS
+        window.onload = function() {
+            setInterval(updateTopBarClock, 1000);
+            updateTopBarClock();
+            initBatteryAPI();
+            renderFilesGrid("/home/siswa");
+            openWindow('terminal');
+        };
+    </script>
+</body>
+</html>

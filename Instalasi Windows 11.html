@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Interactive Installation Simulator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+        :root {
+            --win11-purple-bg: linear-gradient(135deg, #1b1732 0%, #0e1d35 50%, #080d19 100%);
+            --win11-blue: #0078d4;
+            --win11-blue-hover: #106ebe;
+            --win11-window-bg: rgba(25, 25, 35, 0.94);
+            --win11-border: rgba(255, 255, 255, 0.12);
+            --font-segoe: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: var(--font-segoe);
+            background: #000;
+            color: #ffffff;
+        }
+
+        /* Screen Views */
+        .sim-screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            inset: 0;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sim-screen.active {
+            display: flex;
+        }
+
+        /* Setup Window Container */
+        .setup-window {
+            width: 840px;
+            height: 580px;
+            background: var(--win11-window-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--win11-border);
+            border-radius: 12px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .setup-titlebar {
+            height: 38px;
+            background: rgba(15, 15, 20, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 13px;
+            color: #d1d5db;
+        }
+
+        .setup-content {
+            flex: 1;
+            padding: 32px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        /* Custom Form Controls */
+        .win-select {
+            background: rgba(35, 35, 48, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .win-select:focus {
+            border-color: var(--win11-blue);
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.4);
+        }
+
+        .win-btn-primary {
+            background-color: var(--win11-blue);
+            color: #ffffff;
+            padding: 8px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .win-btn-primary:hover {
+            background-color: var(--win11-blue-hover);
+        }
+
+        .win-btn-primary:disabled {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: not-allowed;
+        }
+
+        .win-btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .win-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        /* OOBE Styling */
+        .oobe-card {
+            width: 920px;
+            height: 600px;
+            background: rgba(24, 24, 34, 0.96);
+            backdrop-filter: blur(30px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .oobe-left {
+            width: 38%;
+            background: linear-gradient(180deg, rgba(0, 120, 212, 0.18) 0%, rgba(100, 50, 200, 0.08) 100%);
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .oobe-right {
+            width: 62%;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        /* Disk Partition Table */
+        .partition-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: rgba(20, 20, 28, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .partition-table th {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #9ca3af;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .partition-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .partition-table tr.selected {
+            background: rgba(0, 120, 212, 0.3) !important;
+            border-left: 3px solid var(--win11-blue);
+        }
+
+        .partition-table tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+        }
+
+        /* Modal Dialog */
+        .sim-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .sim-modal-box {
+            width: 480px;
+            background: #1f1f2e;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+        }
+
+        /* Spinner Animation */
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .win-spinner {
+            width: 38px;
+            height: 38px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--win11-blue);
+            border-radius: 50%;
+            animation: spinner 1s linear infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+    </style>
+</head>
+<body>
+
+    <!-- 0. MODE SELECTION LAUNCHER SCREEN -->
+    <div id="screen-mode-select" class="sim-screen active" style="background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);">
+        <div class="max-w-2xl w-full p-8 bg-slate-900/80 border border-slate-700/60 rounded-2xl shadow-2xl backdrop-blur-xl text-center">
+            <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 bg-blue-600/20 border border-blue-500/40 rounded-2xl flex items-center justify-center text-blue-400 text-3xl font-bold">
+                    🪟
+                </div>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Simulator Instalasi Windows 11</h1>
+            <p class="text-slate-400 text-sm mb-8">Pilih skenario simulasi praktikum yang ingin Anda pelajari. Latihan ini mensimulasikan seluruh tahapan asli tanpa risiko merusak laptop atau VM.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                <div onclick="startSimulation('clean')" class="p-6 bg-slate-800/60 hover:bg-blue-600/20 border border-slate-700 hover:border-blue-500 rounded-xl cursor-pointer transition-all duration-200 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-2xl">✨</span>
+                        <h3 class="font-bold text-white group-hover:text-blue-400 transition">Clean Install</h3>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">Disk kosong baru (Unallocated Space). Anda akan belajar membuat skema partisi GPT (System, MSR, Primary C: dan D:) dari nol.</p>
+                </div>
+
+                <div onclick="startSimulation('reinstall')" class="p-6 bg-slate-800/60 hover:bg-purple-600/20 border border-slate-700 hover:border-purple-500 rounded-xl cursor-pointer transition-all duration-200 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-2xl">🔄</span>
+                        <h3 class="font-bold text-white group-hover:text-purple-400 transition">Reinstall / Custom</h3>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">Disk sudah berisi Windows lama dan partisi data. Anda belajar memformat partisi sistem C: tanpa menghapus Data D:.</p>
+                </div>
+            </div>
+
+            <div class="mt-8 text-xs text-slate-500 flex justify-between items-center border-t border-slate-800 pt-4">
+                <span>Modul Praktikum Laboratorium Komputer OS</span>
+                <span class="text-emerald-400 font-mono">Status: Ready Simulator v2.8</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. BIOS / UEFI BOOT SCREEN -->
+    <div id="screen-bios" class="sim-screen bg-black">
+        <div class="flex flex-col items-center justify-center h-full">
+            <div class="mb-8 flex flex-col items-center">
+                <div class="w-24 h-24 border-2 border-red-600 rotate-45 flex items-center justify-center mb-6 shadow-lg shadow-red-900/50 cursor-pointer" onclick="triggerBiosMenu()">
+                    <span class="-rotate-45 text-red-500 font-black text-2xl tracking-wider">ROG</span>
+                </div>
+                <h2 class="text-xl font-bold tracking-widest text-slate-300">REPUBLIC OF GAMERS UEFI BIOS</h2>
+            </div>
+            
+            <div id="bios-boot-prompt" onclick="triggerBiosMenu()" class="text-slate-400 font-mono text-sm mb-6 animate-pulse cursor-pointer">
+                Press <span class="text-yellow-400 font-bold">F12</span> or <span class="text-yellow-400 font-bold">DEL</span> to enter Boot Menu...
+            </div>
+
+            <div id="bios-menu" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-lg w-96 text-left shadow-2xl">
+                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-3 border-b border-slate-800 pb-2">Select Boot Device</h4>
+                <div onclick="bootFromUSB()" class="p-3 bg-blue-600/30 border border-blue-500 rounded text-sm text-white font-mono cursor-pointer hover:bg-blue-600/50 flex items-center gap-3">
+                    <span>🔌</span> UEFI: USB Flash Drive 32GB (Installer)
+                </div>
+                <div class="p-3 bg-slate-800/40 border border-slate-700/50 rounded text-sm text-slate-500 font-mono mt-2 flex items-center gap-3">
+                    <span>💽</span> NVMe SSD 512GB (Internal)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. SETUP LOADING SCREEN -->
+    <div id="screen-setup-loading" class="sim-screen" style="background: var(--win11-purple-bg);">
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center mb-10 text-white text-3xl font-bold shadow-xl shadow-blue-500/20">
+                🪟
+            </div>
+            <div class="win-spinner mb-6"></div>
+            <p class="text-slate-300 text-sm font-medium">Windows Setup is starting...</p>
+        </div>
+    </div>
+
+    <!-- 3. MAIN WINDOWS SETUP WIZARD CONTAINER -->
+    <div id="screen-setup-wizard" class="sim-screen" style="background: var(--win11-purple-bg);">
+        <div class="setup-window">
+            <div class="setup-titlebar">
+                <div class="flex items-center gap-2">
+                    <span>🪟</span>
+                    <span>Windows Setup</span>
+                </div>
+                <div class="text-xs text-slate-400">Windows 11 64-bit Architecture</div>
+            </div>
+
+            <!-- STEP 3.1: LANGUAGE & TIME SELECTION -->
+            <div id="wizard-step-1" class="setup-content">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-1">Windows 11 Setup</h2>
+                    <p class="text-xs text-slate-400 mb-6">Pilih bahasa, format waktu, dan tata letak papan ketik untuk penginstalan.</p>
+
+                    <div class="space-y-4 max-w-md">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1.5">Language to install:</label>
+                            <select class="win-select" id="setup-lang">
+                                <option value="en-US">English (United States)</option>
+                                <option value="id-ID">Indonesian (Indonesia)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1.5">Time and currency format:</label>
+                            <select class="win-select" id="setup-time">
+                                <option value="id-ID">Indonesian (Indonesia)</option>
+                                <option value="en-US">English (United States)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1.5">Keyboard or input method:</label>
+                            <select class="win-select" id="setup-keyboard">
+                                <option value="US">US Keyboard</option>
+                                <option value="UK">UK English Keyboard</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end border-t border-slate-800 pt-4">
+                    <button onclick="goToWizardStep(2)" class="win-btn-primary">Next</button>
+                </div>
+            </div>
+
+            <!-- STEP 3.2: INSTALL NOW BUTTON -->
+            <div id="wizard-step-2" class="setup-content hidden flex flex-col justify-center items-center text-center">
+                <div class="my-auto">
+                    <div class="w-20 h-20 bg-blue-600/20 border border-blue-500/30 rounded-2xl flex items-center justify-center text-blue-400 text-4xl mb-6 mx-auto">
+                        🪟
+                    </div>
+                    <h1 class="text-2xl font-bold text-white mb-6">Windows 11</h1>
+                    <button onclick="goToWizardStep(3)" class="win-btn-primary py-3 px-10 text-base shadow-xl shadow-blue-600/30">Install now</button>
+                </div>
+                <div class="w-full flex justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
+                    <button onclick="alert('Simulasi: Repair Your Computer membawa Anda ke System Recovery Menu.')" class="hover:underline text-blue-400">Repair your computer</button>
+                    <span>Copyright © Microsoft Corporation</span>
+                </div>
+            </div>
+
+            <!-- STEP 3.3: PRODUCT KEY ENTRY -->
+            <div id="wizard-step-3" class="setup-content hidden">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-2">Activate Windows</h2>
+                    <p class="text-xs text-slate-400 mb-6">Masukkan Product Key 25 karakter jika Anda memilikinya. Jika memasang ulang, pilih "I don't have a product key".</p>
+
+                    <div class="max-w-md">
+                        <label class="block text-xs text-slate-300 mb-2">Product Key:</label>
+                        <input type="text" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" class="win-select font-mono uppercase tracking-widest text-center" maxlength="29">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-t border-slate-800 pt-4">
+                    <button onclick="goToWizardStep(4)" class="text-xs text-blue-400 hover:underline bg-transparent border-none cursor-pointer">I don't have a product key</button>
+                    <div class="space-x-3">
+                        <button onclick="goToWizardStep(1)" class="win-btn-secondary">Back</button>
+                        <button onclick="goToWizardStep(4)" class="win-btn-primary">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3.4: EDITION SELECTION -->
+            <div id="wizard-step-4" class="setup-content hidden">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-2">Select the operating system you want to install</h2>
+                    <p class="text-xs text-slate-400 mb-4">Pilih edisi Windows 11 yang sesuai dengan lisensi Anda.</p>
+
+                    <div class="border border-slate-700/80 rounded-lg overflow-hidden bg-slate-900/60 max-h-56 overflow-y-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-800 text-slate-400 border-b border-slate-700">
+                                <tr>
+                                    <th class="p-2.5">Name</th>
+                                    <th class="p-2.5">Architecture</th>
+                                    <th class="p-2.5">Date Modified</th>
+                                </tr>
+                            </thead>
+                            <tbody id="edition-list">
+                                <tr onclick="selectEdition(this, 'Home')" class="border-b border-slate-800 hover:bg-slate-800/50 cursor-pointer selected bg-blue-600/20">
+                                    <td class="p-2.5 font-medium text-white">Windows 11 Home</td>
+                                    <td class="p-2.5 text-slate-400">x64</td>
+                                    <td class="p-2.5 text-slate-400">09/2026</td>
+                                </tr>
+                                <tr onclick="selectEdition(this, 'Pro')" class="border-b border-slate-800 hover:bg-slate-800/50 cursor-pointer">
+                                    <td class="p-2.5 font-medium text-white">Windows 11 Pro</td>
+                                    <td class="p-2.5 text-slate-400">x64</td>
+                                    <td class="p-2.5 text-slate-400">09/2026</td>
+                                </tr>
+                                <tr onclick="selectEdition(this, 'Education')" class="border-b border-slate-800 hover:bg-slate-800/50 cursor-pointer">
+                                    <td class="p-2.5 font-medium text-white">Windows 11 Education</td>
+                                    <td class="p-2.5 text-slate-400">x64</td>
+                                    <td class="p-2.5 text-slate-400">09/2026</td>
+                                </tr>
+                                <tr onclick="selectEdition(this, 'Enterprise')" class="hover:bg-slate-800/50 cursor-pointer">
+                                    <td class="p-2.5 font-medium text-white">Windows 11 Enterprise</td>
+                                    <td class="p-2.5 text-slate-400">x64</td>
+                                    <td class="p-2.5 text-slate-400">09/2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-t border-slate-800 pt-4">
+                    <span class="text-xs text-slate-400">Edisi Terpilih: <strong id="selected-edition-name" class="text-blue-400">Windows 11 Home</strong></span>
+                    <div class="space-x-3">
+                        <button onclick="goToWizardStep(3)" class="win-btn-secondary">Back</button>
+                        <button onclick="goToWizardStep(5)" class="win-btn-primary">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3.5: LICENSE AGREEMENT (EULA) -->
+            <div id="wizard-step-5" class="setup-content hidden">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-2">Applicable notices and license terms</h2>
+                    <div class="p-4 bg-slate-900/80 border border-slate-700/80 rounded-lg h-52 overflow-y-auto text-xs text-slate-300 leading-relaxed font-mono mb-4">
+                        MICROSOFT SOFTWARE LICENSE TERMS<br>
+                        WINDOWS OPERATING SYSTEM<br><br>
+                        IF YOU LIVE IN (OR IF YOUR PRINCIPAL PLACE OF BUSINESS IS IN) THE UNITED STATES, PLEASE READ THE BINDING ARBITRATION CLAUSE AND CLASS ACTION WAIVER IN SECTION 10. IT AFFECTS HOW DISPUTES ARE RESOLVED.<br><br>
+                        1. Overview & Rights. You are licensed to install and run one instance of the software on one device for use by one person at a time.<br>
+                        2. Privacy & Data Consent. Microsoft collects diagnostic data to keep Windows secure and up to date.
+                    </div>
+
+                    <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
+                        <input type="checkbox" id="eula-check" onchange="toggleEulaNext(this.checked)" class="accent-blue-600 rounded">
+                        <span>I accept the Microsoft Software License Terms.</span>
+                    </label>
+                </div>
+
+                <div class="flex justify-end space-x-3 border-t border-slate-800 pt-4">
+                    <button onclick="goToWizardStep(4)" class="win-btn-secondary">Back</button>
+                    <button id="eula-next-btn" onclick="goToWizardStep(6)" class="win-btn-primary" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- STEP 3.6: INSTALLATION TYPE (UPGRADE VS CUSTOM) -->
+            <div id="wizard-step-6" class="setup-content hidden">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-4">Which type of installation do you want?</h2>
+
+                    <div class="space-y-4">
+                        <div onclick="selectInstallType('upgrade')" class="p-4 bg-slate-900/60 hover:bg-blue-600/20 border border-slate-700 hover:border-blue-500 rounded-lg cursor-pointer transition">
+                            <h4 class="font-bold text-blue-400 text-sm mb-1">Upgrade: Install Windows and keep files, settings, and applications</h4>
+                            <p class="text-xs text-slate-400">Files, settings, and applications are moved to Windows. Only available when a supported version of Windows is already running.</p>
+                        </div>
+
+                        <div onclick="selectInstallType('custom')" class="p-4 bg-slate-900/60 hover:bg-blue-600/20 border border-slate-700 hover:border-blue-500 rounded-lg cursor-pointer transition">
+                            <h4 class="font-bold text-blue-400 text-sm mb-1">Custom: Install Windows only (advanced)</h4>
+                            <p class="text-xs text-slate-400">Files, settings, and applications aren't moved to Windows. You can make changes to partitions and drives (Rekomendasi Praktikum).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-start border-t border-slate-800 pt-4">
+                    <button onclick="goToWizardStep(5)" class="win-btn-secondary">Back</button>
+                </div>
+            </div>
+
+            <!-- STEP 3.7: INTERACTIVE DRIVE PARTITION MANAGER -->
+            <div id="wizard-step-7" class="setup-content hidden">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-xl font-bold text-white">Where do you want to install Windows?</h2>
+                        <span id="partition-scenario-badge" class="px-2.5 py-1 bg-purple-900/50 border border-purple-500/40 text-purple-300 text-xs rounded-full font-mono">Scenario: Clean Disk</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-3">Pilih partisi tujuan atau kelola ruang penyimpanan (Drive 0) untuk pemasangan Windows.</p>
+
+                    <!-- PARTITION TABLE -->
+                    <div class="partition-table mb-3">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 45%;">Name</th>
+                                    <th style="width: 20%;">Total size</th>
+                                    <th style="width: 20%;">Free space</th>
+                                    <th style="width: 15%;">Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="partition-rows-body">
+                                <!-- Dynamically populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <button onclick="actionRefreshPartitions()" class="win-btn-secondary flex items-center gap-1">🔄 Refresh</button>
+                        <button id="btn-part-delete" onclick="actionDeletePartition()" class="win-btn-secondary flex items-center gap-1">❌ Delete</button>
+                        <button id="btn-part-format" onclick="actionFormatPartition()" class="win-btn-secondary flex items-center gap-1">🧹 Format</button>
+                        <button id="btn-part-new" onclick="actionNewPartitionPrompt()" class="win-btn-secondary flex items-center gap-1">➕ New</button>
+                        <button id="btn-part-extend" onclick="actionExtendPartition()" class="win-btn-secondary flex items-center gap-1">📐 Extend</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-t border-slate-800 pt-3">
+                    <span id="partition-status-msg" class="text-xs text-emerald-400 font-mono">Partisi valid. Siap untuk proses penginstalan.</span>
+                    <div class="space-x-3">
+                        <button onclick="goToWizardStep(6)" class="win-btn-secondary">Back</button>
+                        <button id="btn-partition-next" onclick="startCopyingProcess()" class="win-btn-primary">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3.8: COPYING & INSTALLING WINDOWS FILES -->
+            <div id="wizard-step-8" class="setup-content hidden flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-2">Installing Windows</h2>
+                    <p class="text-xs text-slate-400 mb-8">Komputer Anda akan merestart beberapa kali. Harap tidak mematikan komputer.</p>
+
+                    <div class="space-y-4 max-w-lg font-mono text-xs">
+                        <div id="install-step-1" class="flex items-center gap-3 text-slate-400">
+                            <span class="step-icon">⏳</span>
+                            <span>Copying Windows files</span>
+                        </div>
+                        <div id="install-step-2" class="flex items-center gap-3 text-slate-400">
+                            <span class="step-icon">⏳</span>
+                            <span>Getting files ready for installation (<span id="install-progress-pct">0</span>%)</span>
+                        </div>
+                        <div id="install-step-3" class="flex items-center gap-3 text-slate-400">
+                            <span class="step-icon">⏳</span>
+                            <span>Installing features</span>
+                        </div>
+                        <div id="install-step-4" class="flex items-center gap-3 text-slate-400">
+                            <span class="step-icon">⏳</span>
+                            <span>Installing updates</span>
+                        </div>
+                        <div id="install-step-5" class="flex items-center gap-3 text-slate-400">
+                            <span class="step-icon">⏳</span>
+                            <span>Finishing up</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROGRESS BAR & RESTART COUNTDOWN -->
+                <div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-4 border border-slate-700">
+                        <div id="main-install-progressbar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                    
+                    <div id="restart-countdown-box" class="hidden flex justify-between items-center bg-blue-900/30 border border-blue-500/40 p-3 rounded-lg">
+                        <span class="text-xs text-blue-200">Windows needs to restart to continue. Restarting in <strong id="restart-timer-num" class="text-yellow-400 font-bold text-sm">10</strong> seconds.</span>
+                        <button onclick="triggerImmediateRestart()" class="win-btn-primary text-xs py-1 px-3">Restart now</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 4. WINDOWS 11 OOBE INITIAL SETUP (OUT-OF-BOX EXPERIENCE) -->
+    <div id="screen-oobe" class="sim-screen" style="background: var(--win11-purple-bg);">
+        <div class="oobe-card">
+            <div class="oobe-left">
+                <div>
+                    <div class="w-10 h-10 bg-blue-600/30 border border-blue-400/40 rounded-lg flex items-center justify-center text-blue-400 text-xl font-bold mb-6">
+                        🪟
+                    </div>
+                    <h2 id="oobe-left-title" class="text-2xl font-bold text-white mb-2">Is this the right country or region?</h2>
+                    <p id="oobe-left-desc" class="text-xs text-slate-400 leading-relaxed">Pengaturan kawasan ini memastikan zona waktu dan bahasa lokal sesuai.</p>
+                </div>
+
+                <div class="text-xs text-slate-500 font-mono">
+                    Windows 11 Setup Assistant
+                </div>
+            </div>
+
+            <div class="oobe-right">
+                <!-- OOBE STEP 1: REGION -->
+                <div id="oobe-step-1" class="space-y-3 flex-1">
+                    <div class="border border-slate-700/80 rounded-lg bg-slate-900/60 max-h-72 overflow-y-auto">
+                        <div onclick="selectOobeRegion(this, 'Indonesia')" class="p-3 border-b border-slate-800 text-sm hover:bg-slate-800 cursor-pointer text-white font-medium bg-blue-600/20 flex items-center justify-between">
+                            <span>🇮🇩 Indonesia</span>
+                            <span class="text-blue-400">✓</span>
+                        </div>
+                        <div onclick="selectOobeRegion(this, 'United States')" class="p-3 border-b border-slate-800 text-sm hover:bg-slate-800 cursor-pointer text-slate-300">
+                            <span>🇺🇸 United States</span>
+                        </div>
+                        <div onclick="selectOobeRegion(this, 'United Kingdom')" class="p-3 border-b border-slate-800 text-sm hover:bg-slate-800 cursor-pointer text-slate-300">
+                            <span>🇬🇧 United Kingdom</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OOBE STEP 2: KEYBOARD -->
+                <div id="oobe-step-2" class="space-y-3 flex-1 hidden">
+                    <h3 class="text-sm font-semibold text-slate-200 mb-2">Is this the right keyboard layout or input method?</h3>
+                    <div class="border border-slate-700/80 rounded-lg bg-slate-900/60">
+                        <div class="p-3 border-b border-slate-800 text-sm text-white bg-blue-600/20 font-medium">US (Standard Keyboard)</div>
+                        <div class="p-3 text-sm text-slate-400">UK Extended</div>
+                    </div>
+                </div>
+
+                <!-- OOBE STEP 3: DEVICE NAMING -->
+                <div id="oobe-step-3" class="space-y-4 flex-1 hidden">
+                    <h3 class="text-sm font-semibold text-slate-200">Let's name your device</h3>
+                    <p class="text-xs text-slate-400">Beri nama unik untuk laptop/PC ini di jaringan lokal (contoh: LAPTOP-SISWA).</p>
+                    <input type="text" id="oobe-input-devicename" value="LAPTOP-SISWA" class="win-select font-mono uppercase tracking-wider">
+                </div>
+
+                <!-- OOBE STEP 4: NETWORK & LOCAL ACCOUNT -->
+                <div id="oobe-step-4" class="space-y-4 flex-1 hidden">
+                    <h3 class="text-sm font-semibold text-slate-200">Who's going to use this device?</h3>
+                    <p class="text-xs text-slate-400">Masukkan nama pengguna untuk akun lokal Windows 11 Anda.</p>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">User Name:</label>
+                        <input type="text" id="oobe-input-username" value="SiswaPraktikum" class="win-select">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Password (opsional):</label>
+                        <input type="password" id="oobe-input-password" placeholder="Kosongkan jika tanpa password" class="win-select">
+                    </div>
+                </div>
+
+                <!-- OOBE STEP 5: PIN SETUP -->
+                <div id="oobe-step-5" class="space-y-4 flex-1 hidden">
+                    <h3 class="text-sm font-semibold text-slate-200">Create a PIN</h3>
+                    <p class="text-xs text-slate-400">PIN 4-digit mempermudah masuk ke Windows secara cepat dan aman.</p>
+                    <div class="max-w-xs">
+                        <input type="password" id="oobe-input-pin" value="1234" maxlength="4" class="win-select font-mono text-center tracking-widest text-lg">
+                    </div>
+                </div>
+
+                <!-- OOBE STEP 6: PRIVACY SETTINGS -->
+                <div id="oobe-step-6" class="space-y-3 flex-1 hidden text-xs">
+                    <h3 class="text-sm font-semibold text-slate-200 mb-2">Choose privacy settings for your device</h3>
+                    <div class="flex items-center justify-between p-2.5 bg-slate-900/60 rounded border border-slate-800">
+                        <span>Location (Lokasi)</span>
+                        <input type="checkbox" checked class="accent-blue-600">
+                    </div>
+                    <div class="flex items-center justify-between p-2.5 bg-slate-900/60 rounded border border-slate-800">
+                        <span>Find My Device</span>
+                        <input type="checkbox" checked class="accent-blue-600">
+                    </div>
+                    <div class="flex items-center justify-between p-2.5 bg-slate-900/60 rounded border border-slate-800">
+                        <span>Diagnostic Data (Required)</span>
+                        <input type="checkbox" checked disabled class="accent-blue-600">
+                    </div>
+                </div>
+
+                <!-- NAVIGATION BUTTONS -->
+                <div class="flex justify-end space-x-3 border-t border-slate-800 pt-4 mt-auto">
+                    <button id="oobe-next-btn" onclick="nextOobeStep()" class="win-btn-primary">Yes / Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. ANIMATED WELCOME SCREEN ("Getting things ready for you") -->
+    <div id="screen-welcome-animation" class="sim-screen" style="background: radial-gradient(circle at center, #1e1b4b 0%, #030712 100%);">
+        <div class="text-center space-y-6">
+            <h1 id="welcome-text-1" class="text-3xl font-light text-white animate-pulse">Hi.</h1>
+            <p id="welcome-text-2" class="text-xl text-slate-300 font-light">Getting things ready for you...</p>
+            <p id="welcome-text-3" class="text-sm text-slate-400 font-light">This might take a few minutes. Don't turn off your PC.</p>
+        </div>
+    </div>
+
+    <!-- 6. WINDOWS 11 FINAL DESKTOP & SUMMARY REPORT -->
+    <div id="screen-desktop" class="sim-screen" style="background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop') no-repeat center center; background-size: cover;">
+        <!-- TASKBAR -->
+        <div class="absolute bottom-0 left-0 right-0 h-12 bg-slate-900/80 backdrop-blur-xl border-t border-white/10 flex justify-between items-center px-4 z-50">
+            <div></div>
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 hover:bg-white/10 rounded-lg flex items-center justify-center text-xl cursor-pointer">🪟</div>
+                <div class="w-9 h-9 hover:bg-white/10 rounded-lg flex items-center justify-center text-xl cursor-pointer">📁</div>
+                <div class="w-9 h-9 hover:bg-white/10 rounded-lg flex items-center justify-center text-xl cursor-pointer">🌐</div>
+            </div>
+            <div class="text-right text-xs text-white">
+                <div id="desktop-clock-time" class="font-bold">10:00 AM</div>
+                <div id="desktop-clock-date" class="text-slate-300">9/21/2026</div>
+            </div>
+        </div>
+
+        <!-- CONGRATULATIONS & EVALUATION SUMMARY MODAL -->
+        <div class="bg-slate-900/90 border border-slate-700 p-8 rounded-2xl max-w-xl w-full text-center shadow-2xl backdrop-blur-2xl border-emerald-500/30">
+            <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-500/40 rounded-full flex items-center justify-center text-emerald-400 text-3xl mx-auto mb-4">
+                ✓
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Instalasi Windows 11 Berhasil!</h2>
+            <p class="text-slate-400 text-xs mb-6">Selamat! Anda telah menyelesaikan seluruh prosedur penginstalan sistem operasi Windows 11.</p>
+
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 text-left text-xs font-mono space-y-2 mb-6">
+                <div class="flex justify-between border-b border-slate-700 pb-1.5">
+                    <span class="text-slate-400">Edisi Windows:</span>
+                    <span id="summary-edition" class="text-blue-400 font-bold">Windows 11 Pro</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-700 pb-1.5">
+                    <span class="text-slate-400">Mode Instalasi:</span>
+                    <span id="summary-mode" class="text-purple-400 font-bold">Clean Install</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-700 pb-1.5">
+                    <span class="text-slate-400">Nama Perangkat:</span>
+                    <span id="summary-devicename" class="text-yellow-400 font-bold">LAPTOP-SISWA</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-700 pb-1.5">
+                    <span class="text-slate-400">Pengguna Lokal:</span>
+                    <span id="summary-username" class="text-emerald-400 font-bold">SiswaPraktikum</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Skema Partisi Disk:</span>
+                    <span id="summary-partition-type" class="text-cyan-400 font-bold">GPT / UEFI Standard</span>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="win-btn-primary w-full py-3">Coba Simulasi Lagi / Restart Test</button>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE MODALS -->
+    <div id="modal-confirm" class="sim-modal-overlay">
+        <div class="sim-modal-box">
+            <h3 id="modal-title" class="text-base font-bold text-white mb-2">Windows Setup</h3>
+            <p id="modal-body" class="text-xs text-slate-300 leading-relaxed mb-6">Pesan konfirmasi...</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeSimModal(false)" class="win-btn-secondary">Cancel</button>
+                <button onclick="closeSimModal(true)" class="win-btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROMPT NEW PARTITION SIZE MODAL -->
+    <div id="modal-prompt-size" class="sim-modal-overlay">
+        <div class="sim-modal-box">
+            <h3 class="text-base font-bold text-white mb-2">Create New Partition</h3>
+            <p class="text-xs text-slate-300 mb-4">Masukkan ukuran partisi baru dalam Megabyte (MB):</p>
+            <input type="number" id="input-part-size" value="102400" class="win-select font-mono mb-6">
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeSizeModal(false)" class="win-btn-secondary">Cancel</button>
+                <button onclick="closeSizeModal(true)" class="win-btn-primary">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GLOBAL SIMULATOR STATE
+        let simMode = 'clean'; // 'clean' or 'reinstall'
+        let selectedEdition = 'Windows 11 Home';
+        let oobeRegion = 'Indonesia';
+        let currentOobeStep = 1;
+        let activePartitionIndex = -1;
+        let modalCallback = null;
+
+        // Keydown Event Listener untuk Keyboard BIOS
+        window.addEventListener('keydown', function(e) {
+            const biosScreen = document.getElementById('screen-bios');
+            if (biosScreen.classList.contains('active')) {
+                if (e.key === 'F12' || e.key === 'Delete' || e.key === 'f12' || e.key === 'Del') {
+                    e.preventDefault();
+                    triggerBiosMenu();
+                }
+            }
+        });
+
+        function setScreen(screenId) {
+            document.querySelectorAll('.sim-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startSimulation(mode) {
+            simMode = mode;
+            setScreen('screen-bios');
+            
+            // Show BIOS prompt
+            document.getElementById('bios-boot-prompt').classList.remove('hidden');
+            document.getElementById('bios-menu').classList.add('hidden');
+        }
+
+        function triggerBiosMenu() {
+            document.getElementById('bios-boot-prompt').classList.add('hidden');
+            document.getElementById('bios-menu').classList.remove('hidden');
+        }
+
+        function bootFromUSB() {
+            setScreen('screen-setup-loading');
+            setTimeout(() => {
+                setScreen('screen-setup-wizard');
+                goToWizardStep(1);
+            }, 1800);
+        }
+
+        function goToWizardStep(stepNum) {
+            for (let i = 1; i <= 8; i++) {
+                const el = document.getElementById(`wizard-step-${i}`);
+                if (el) el.classList.add('hidden');
+            }
+            document.getElementById(`wizard-step-${stepNum}`).classList.remove('hidden');
+
+            if (stepNum === 7) {
+                initPartitionManager();
+            }
+        }
+
+        function selectEdition(row, editionName) {
+            document.querySelectorAll('#edition-list tr').forEach(r => r.classList.remove('selected', 'bg-blue-600/20'));
+            row.classList.add('selected', 'bg-blue-600/20');
+            selectedEdition = `Windows 11 ${editionName}`;
+            document.getElementById('selected-edition-name').textContent = selectedEdition;
+        }
+
+        function toggleEulaNext(checked) {
+            document.getElementById('eula-next-btn').disabled = !checked;
+        }
+
+        function selectInstallType(type) {
+            if (type === 'upgrade') {
+                alert("Simulasi: Pilihan Upgrade membutuhkan Windows versi sebelumnya yang sudah berjalan aktif. Beralih ke Custom Partitioning.");
+            }
+            goToWizardStep(7);
+        }
+
+        // ==========================================
+        // DISK PARTITION MANAGER ENGINE (GPT STANDARD)
+        // ==========================================
+        function initPartitionManager() {
+            const badge = document.getElementById('partition-scenario-badge');
+            
+            if (simMode === 'clean') {
+                badge.textContent = 'Scenario: Clean Unallocated Disk';
+                diskPartitions = [
+                    { name: 'Drive 0 Unallocated Space', totalMB: 512000, freeMB: 512000, type: 'Unallocated', isSystem: false }
+                ];
+            } else {
+                badge.textContent = 'Scenario: Existing Windows Drive';
+                diskPartitions = [
+                    { name: 'Drive 0 Partition 1: SYSTEM (EFI)', totalMB: 100, freeMB: 70, type: 'System', isSystem: true },
+                    { name: 'Drive 0 Partition 2: MSR (Reserved)', totalMB: 16, freeMB: 0, type: 'MSR', isSystem: true },
+                    { name: 'Drive 0 Partition 3: Primary (C:)', totalMB: 150000, freeMB: 42000, type: 'Primary', isSystem: false },
+                    { name: 'Drive 0 Partition 4: Data (D:)', totalMB: 361884, freeMB: 180000, type: 'Primary', isSystem: false }
+                ];
+            }
+            activePartitionIndex = 0;
+            renderPartitions();
+        }
+
+        function renderPartitions() {
+            const tbody = document.getElementById('partition-rows-body');
+            tbody.innerHTML = '';
+
+            diskPartitions.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                if (idx === activePartitionIndex) tr.className = 'selected bg-blue-600/20';
+
+                const totalGB = (p.totalMB / 1024).toFixed(1) + ' GB';
+                const freeGB = (p.freeMB / 1024).toFixed(1) + ' GB';
+
+                tr.innerHTML = `
+                    <td class="font-medium text-white">${p.name}</td>
+                    <td class="text-slate-300 font-mono">${totalGB}</td>
+                    <td class="text-slate-300 font-mono">${freeGB}</td>
+                    <td class="text-slate-400">${p.type}</td>
+                `;
+
+                tr.onclick = () => {
+                    activePartitionIndex = idx;
+                    renderPartitions();
+                };
+
+                tbody.appendChild(tr);
+            });
+
+            validatePartitionSelection();
+        }
+
+        function validatePartitionSelection() {
+            const status = document.getElementById('partition-status-msg');
+            const btnNext = document.getElementById('btn-partition-next');
+
+            if (activePartitionIndex < 0 || activePartitionIndex >= diskPartitions.length) {
+                status.textContent = 'Pilih partisi tujuan.';
+                status.className = 'text-xs text-yellow-400 font-mono';
+                btnNext.disabled = true;
+                return;
+            }
+
+            const activePart = diskPartitions[activePartitionIndex];
+
+            if (activePart.type === 'Unallocated') {
+                status.textContent = 'Windows akan membuat partisi otomatis pada Unallocated Space.';
+                status.className = 'text-xs text-emerald-400 font-mono';
+                btnNext.disabled = false;
+            } else if (activePart.type === 'Primary') {
+                status.textContent = 'Partisi siap. Windows akan terpasang di partisi ini.';
+                status.className = 'text-xs text-emerald-400 font-mono';
+                btnNext.disabled = false;
+            } else {
+                status.textContent = 'Peringatan: Windows tidak dapat dipasang di partisi sistem/MSR.';
+                status.className = 'text-xs text-red-400 font-mono';
+                btnNext.disabled = true;
+            }
+        }
+
+        function actionRefreshPartitions() { renderPartitions(); }
+
+        function actionDeletePartition() {
+            if (activePartitionIndex < 0) return;
+            const target = diskPartitions[activePartitionIndex];
+
+            if (target.type === 'Unallocated') return;
+
+            openSimModal('Delete Partition', `Apakah Anda yakin ingin menghapus ${target.name}? Seluruh data di partisi ini akan hilang!`, (confirmed) => {
+                if (confirmed) {
+                    diskPartitions.splice(activePartitionIndex, 1);
+                    diskPartitions.push({ name: 'Drive 0 Unallocated Space', totalMB: target.totalMB, freeMB: target.totalMB, type: 'Unallocated', isSystem: false });
+                    activePartitionIndex = 0;
+                    renderPartitions();
+                }
+            });
+        }
+
+        function actionFormatPartition() {
+            if (activePartitionIndex < 0) return;
+            const target = diskPartitions[activePartitionIndex];
+
+            if (target.type === 'Unallocated') return;
+
+            openSimModal('Format Partition', `Format ${target.name}? Seluruh data yang tersimpan akan dihapus permanen!`, (confirmed) => {
+                if (confirmed) {
+                    target.freeMB = target.totalMB;
+                    renderPartitions();
+                }
+            });
+        }
+
+        function actionNewPartitionPrompt() {
+            if (activePartitionIndex < 0) return;
+            const target = diskPartitions[activePartitionIndex];
+
+            if (target.type !== 'Unallocated') {
+                alert("Tombol 'New' hanya dapat digunakan pada Unallocated Space.");
+                return;
+            }
+
+            document.getElementById('modal-prompt-size').style.display = 'flex';
+        }
+
+        function closeSizeModal(apply) {
+            document.getElementById('modal-prompt-size').style.display = 'none';
+            if (apply) {
+                const sizeInput = parseInt(document.getElementById('input-part-size').value) || 102400;
+                
+                openSimModal('Windows System Partitions', 'Untuk memastikan semua fitur Windows berfungsi dengan baik, Windows akan membuat partisi tambahan untuk file sistem (EFI & MSR).', (confirmed) => {
+                    if (confirmed) {
+                        diskPartitions = [
+                            { name: 'Drive 0 Partition 1: SYSTEM (EFI)', totalMB: 100, freeMB: 70, type: 'System', isSystem: true },
+                            { name: 'Drive 0 Partition 2: MSR (Reserved)', totalMB: 16, freeMB: 0, type: 'MSR', isSystem: true },
+                            { name: 'Drive 0 Partition 3: Primary', totalMB: sizeInput, freeMB: sizeInput, type: 'Primary', isSystem: false },
+                            { name: 'Drive 0 Unallocated Space', totalMB: Math.max(0, 512000 - sizeInput - 116), freeMB: Math.max(0, 512000 - sizeInput - 116), type: 'Unallocated', isSystem: false }
+                        ];
+                        activePartitionIndex = 2; // Select Primary C:
+                        renderPartitions();
+                    }
+                });
+            }
+        }
+
+        function actionExtendPartition() {
+            alert("Fitur Extend digunakan untuk memperluas partisi dari Unallocated Space yang bersebelahan.");
+        }
+
+        function openSimModal(title, body, callback) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').textContent = body;
+            document.getElementById('modal-confirm').style.display = 'flex';
+            modalCallback = callback;
+        }
+
+        function closeSimModal(result) {
+            document.getElementById('modal-confirm').style.display = 'none';
+            if (modalCallback) modalCallback(result);
+        }
+
+        // ==========================================
+        // COPYING & INSTALLATION PROGRESS ENGINE
+        // ==========================================
+        function startCopyingProcess() {
+            goToWizardStep(8);
+
+            let percent = 0;
+            const progressBar = document.getElementById('main-install-progressbar');
+            const pctText = document.getElementById('install-progress-pct');
+
+            function updateStepUI(stepNum, status) {
+                const el = document.getElementById(`install-step-${stepNum}`);
+                if (!el) return;
+                const icon = el.querySelector('.step-icon');
+                if (status === 'active') {
+                    el.className = 'flex items-center gap-3 text-blue-400 font-bold';
+                    icon.textContent = '⚙️';
+                } else if (status === 'done') {
+                    el.className = 'flex items-center gap-3 text-emerald-400';
+                    icon.textContent = '✓';
+                }
+            }
+
+            updateStepUI(1, 'active');
+
+            const interval = setInterval(() => {
+                percent += 2;
+                progressBar.style.width = `${percent}%`;
+
+                if (percent < 15) {
+                    updateStepUI(1, 'active');
+                } else if (percent >= 15 && percent < 75) {
+                    updateStepUI(1, 'done');
+                    updateStepUI(2, 'active');
+                    const filePct = Math.round(((percent - 15) / 60) * 100);
+                    pctText.textContent = filePct;
+                } else if (percent >= 75 && percent < 90) {
+                    updateStepUI(2, 'done');
+                    updateStepUI(3, 'done');
+                    updateStepUI(4, 'active');
+                } else if (percent >= 90 && percent < 100) {
+                    updateStepUI(4, 'done');
+                    updateStepUI(5, 'active');
+                } else if (percent >= 100) {
+                    clearInterval(interval);
+                    updateStepUI(5, 'done');
+                    showRestartCountdown();
+                }
+            }, 90);
+        }
+
+        function showRestartCountdown() {
+            document.getElementById('restart-countdown-box').classList.remove('hidden');
+            let seconds = 10;
+            const timerEl = document.getElementById('restart-timer-num');
+
+            const countdown = setInterval(() => {
+                seconds--;
+                timerEl.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(countdown);
+                    triggerImmediateRestart();
+                }
+            }, 1000);
+        }
+
+        function triggerImmediateRestart() {
+            setScreen('screen-setup-loading');
+            setTimeout(() => {
+                startOobeProcess();
+            }, 2200);
+        }
+
+        // ==========================================
+        // OOBE (OUT-OF-BOX EXPERIENCE) INITIAL SETUP
+        // ==========================================
+        function startOobeProcess() {
+            currentOobeStep = 1;
+            setScreen('screen-oobe');
+            showOobeStep(1);
+        }
+
+        function showOobeStep(step) {
+            currentOobeStep = step;
+            for (let i = 1; i <= 6; i++) {
+                const el = document.getElementById(`oobe-step-${i}`);
+                if (el) el.classList.add('hidden');
+            }
+            document.getElementById(`oobe-step-${step}`).classList.remove('hidden');
+
+            const leftTitle = document.getElementById('oobe-left-title');
+            const leftDesc = document.getElementById('oobe-left-desc');
+
+            switch(step) {
+                case 1:
+                    leftTitle.textContent = "Is this the right country or region?";
+                    leftDesc.textContent = "Pengaturan kawasan menentukan format tanggal, mata uang, dan zona waktu lokal.";
+                    break;
+                case 2:
+                    leftTitle.textContent = "Is this the right keyboard layout?";
+                    leftDesc.textContent = "Pilih tata letak papan ketik utama Anda.";
+                    break;
+                case 3:
+                    leftTitle.textContent = "Let's name your device";
+                    leftDesc.textContent = "Beri nama perangkat ini untuk mempermudah identifikasi di jaringan lokal.";
+                    break;
+                case 4:
+                    leftTitle.textContent = "Who's going to use this device?";
+                    leftDesc.textContent = "Buat nama pengguna lokal untuk login ke Windows 11.";
+                    break;
+                case 5:
+                    leftTitle.textContent = "Create a PIN";
+                    leftDesc.textContent = "PIN 4-digit mempermudah masuk secara cepat dan aman.";
+                    break;
+                case 6:
+                    leftTitle.textContent = "Choose privacy settings";
+                    leftDesc.textContent = "Atur opsi privasi dan data diagnostik perangkat Anda.";
+                    break;
+            }
+        }
+
+        function selectOobeRegion(el, name) {
+            oobeRegion = name;
+        }
+
+        function nextOobeStep() {
+            if (currentOobeStep < 6) {
+                showOobeStep(currentOobeStep + 1);
+            } else {
+                startWelcomeAnimation();
+            }
+        }
+
+        function startWelcomeAnimation() {
+            setScreen('screen-welcome-animation');
+            
+            setTimeout(() => {
+                document.getElementById('welcome-text-1').textContent = "Getting things ready for you...";
+            }, 1800);
+
+            setTimeout(() => {
+                document.getElementById('welcome-text-1').textContent = "Almost there.";
+            }, 3800);
+
+            setTimeout(() => {
+                arriveAtDesktop();
+            }, 5500);
+        }
+
+        // ==========================================
+        // FINAL DESKTOP ARRIVAL & ASSESSMENT REPORT
+        // ==========================================
+        function arriveAtDesktop() {
+            setScreen('screen-desktop');
+
+            const userName = document.getElementById('oobe-input-username').value || 'SiswaPraktikum';
+            const deviceName = document.getElementById('oobe-input-devicename').value || 'LAPTOP-SISWA';
+
+            document.getElementById('summary-edition').textContent = selectedEdition;
+            document.getElementById('summary-mode').textContent = simMode === 'clean' ? 'Clean Install (New Disk)' : 'Reinstall / Custom';
+            document.getElementById('summary-devicename').textContent = deviceName;
+            document.getElementById('summary-username').textContent = userName;
+            document.getElementById('summary-partition-type').textContent = 'GPT Standard (EFI System, MSR, Primary C:)';
+
+            // Realtime desktop clock
+            const now = new Date();
+            document.getElementById('desktop-clock-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('desktop-clock-date').textContent = now.toLocaleDateString();
+        }
+    </script>
+</body>
+</html>

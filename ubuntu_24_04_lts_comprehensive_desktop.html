@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu 24.04 LTS Desktop Simulation</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Pro / Free icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Ubuntu & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Ubuntu', 'Inter', 'sans-serif'],
+                        mono: ['Ubuntu Mono', 'Courier New', 'monospace']
+                    },
+                    colors: {
+                        ubuntu: {
+                            orange: '#E95420',
+                            aubergine: '#77216F',
+                            dark: '#2C001E',
+                            light: '#F7F7F7',
+                            gray: '#1E1E1E',
+                            panel: '#111111',
+                            windowBg: '#2D2D2D'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            user-select: none;
+            overflow: hidden;
+            font-family: 'Ubuntu', sans-serif;
+        }
+        .desktop-bg {
+            background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2560&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.5s ease-in-out;
+        }
+        .ubuntu-aubergine-bg {
+            background: linear-gradient(135deg, #2C001E 0%, #77216F 100%);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+        .glass-panel {
+            background: rgba(30, 30, 30, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .glass-topbar {
+            background: rgba(17, 17, 17, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dock-container {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .window-anim {
+            animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        /* Window Resizing handles */
+        .resizer {
+            position: absolute;
+            z-index: 50;
+        }
+        .resizer-r { right: 0; top: 0; bottom: 0; width: 6px; cursor: ew-resize; }
+        .resizer-b { bottom: 0; left: 0; right: 0; height: 6px; cursor: ns-resize; }
+        .resizer-rb { right: 0; bottom: 0; width: 12px; height: 12px; cursor: nwse-resize; }
+    </style>
+</head>
+<body class="h-full w-full relative desktop-bg text-white">
+
+    <!-- LOCK & LOGIN SCREEN -->
+    <div id="lock-screen" class="absolute inset-0 z-50 ubuntu-aubergine-bg flex flex-col items-center justify-between p-8 transition-all duration-500">
+        <div class="mt-16 text-center cursor-pointer" onclick="unlockDesktop()">
+            <div id="lock-clock" class="text-6xl md:text-8xl font-light tracking-wide mb-2">00:00</div>
+            <div id="lock-date" class="text-xl md:text-2xl font-light text-gray-300">Monday, September 21</div>
+        </div>
+
+        <div id="login-box" class="flex flex-col items-center mb-20 transition-all duration-300">
+            <div class="w-28 h-28 rounded-full border-4 border-ubuntu-orange overflow-hidden mb-4 shadow-2xl bg-gray-700 flex items-center justify-center">
+                <i class="fa-solid fa-user text-5xl text-gray-300"></i>
+            </div>
+            <h2 class="text-2xl font-medium mb-6">Ubuntu User</h2>
+            <div class="relative flex items-center w-72">
+                <input type="password" id="password-input" placeholder="Password (press Enter)" class="w-full bg-black/40 border border-white/20 rounded-full px-5 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-ubuntu-orange focus:ring-1 focus:ring-ubuntu-orange text-center pr-12" onkeydown="handleLoginKey(event)">
+                <button onclick="unlockDesktop()" class="absolute right-3 w-8 h-8 rounded-full bg-ubuntu-orange flex items-center justify-center hover:bg-orange-600 transition-colors">
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-3">Press Enter or click arrow to login (any password works)</p>
+        </div>
+
+        <div class="flex items-center space-x-6 text-gray-300 text-sm">
+            <div class="flex items-center space-x-2"><i class="fa-solid fa-wifi"></i><span>Connected</span></div>
+            <div class="flex items-center space-x-2"><i class="fa-solid fa-battery-three-quarters"></i><span>100%</span></div>
+            <div class="flex items-center space-x-2"><i class="fa-solid fa-volume-high"></i><span>100%</span></div>
+        </div>
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="absolute top-0 left-0 right-0 h-8 glass-topbar z-40 flex items-center justify-between px-4 text-xs font-medium border-b border-white/10">
+        <div class="flex items-center space-x-4">
+            <button onclick="toggleAppLauncher()" class="hover:bg-white/10 px-3 py-1 rounded transition-colors font-semibold tracking-wide">Activities</button>
+            <span id="topbar-title" class="hidden sm:inline text-gray-300">Desktop</span>
+        </div>
+
+        <div class="cursor-pointer hover:bg-white/10 px-3 py-1 rounded transition-colors" onclick="toggleQuickSettings()">
+            <span id="topbar-clock">00:00</span>
+        </div>
+
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="toggleQuickSettings()">
+            <i class="fa-solid fa-ethernet hover:text-ubuntu-orange transition-colors" title="Wired Connected"></i>
+            <i class="fa-solid fa-volume-high hover:text-ubuntu-orange transition-colors" id="topbar-sound-icon"></i>
+            <i class="fa-solid fa-battery-full hover:text-ubuntu-orange transition-colors"></i>
+            <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+        </div>
+    </div>
+
+    <!-- QUICK SETTINGS PANEL (DROPDOWN) -->
+    <div id="quick-settings-panel" class="absolute top-10 right-4 w-80 glass-panel border border-white/10 rounded-2xl p-4 z-40 shadow-2xl hidden flex-col space-y-4">
+        <div class="bg-black/30 p-3 rounded-xl space-y-3">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-volume-high text-gray-300 w-5"></i>
+                <input type="range" min="0" max="100" value="80" oninput="updateVolume(this.value)" class="w-full accent-ubuntu-orange cursor-pointer">
+            </div>
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-sun text-gray-300 w-5"></i>
+                <input type="range" min="20" max="100" value="100" oninput="updateBrightness(this.value)" class="w-full accent-ubuntu-orange cursor-pointer">
+            </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+            <button id="toggle-wifi-btn" onclick="toggleQuickToggle('wifi')" class="bg-ubuntu-orange p-3 rounded-xl flex flex-col items-center justify-center space-y-1 text-xs hover:opacity-95 transition-all">
+                <i class="fa-solid fa-wifi text-base"></i>
+                <span>Wi-Fi</span>
+            </button>
+            <button id="toggle-bt-btn" onclick="toggleQuickToggle('bt')" class="bg-white/10 p-3 rounded-xl flex flex-col items-center justify-center space-y-1 text-xs hover:bg-white/20 transition-all">
+                <i class="fa-solid fa-bluetooth text-base"></i>
+                <span>Bluetooth</span>
+            </button>
+            <button id="toggle-dark-btn" onclick="toggleDarkMode()" class="bg-ubuntu-orange p-3 rounded-xl flex flex-col items-center justify-center space-y-1 text-xs hover:opacity-95 transition-all">
+                <i class="fa-solid fa-moon text-base"></i>
+                <span>Dark Mode</span>
+            </button>
+        </div>
+        <div class="pt-2 border-t border-white/10 flex justify-between items-center text-sm">
+            <button onclick="lockSystem()" class="p-2 hover:bg-white/10 rounded-lg flex items-center space-x-2 text-gray-300"><i class="fa-solid fa-lock"></i><span>Lock</span></button>
+            <button onclick="restartSystem()" class="p-2 hover:bg-white/10 rounded-lg flex items-center space-x-2 text-gray-300"><i class="fa-solid fa-rotate-right"></i><span>Restart</span></button>
+            <button onclick="powerOff()" class="p-2 hover:bg-red-600/30 text-red-400 rounded-lg flex items-center space-x-2"><i class="fa-solid fa-power-off"></i><span>Power</span></button>
+        </div>
+    </div>
+
+    <!-- DOCK (LEFT SIDEBAR) -->
+    <div class="absolute left-0 top-8 bottom-0 w-16 dock-container z-30 flex flex-col items-center py-3 justify-between border-r border-white/10">
+        <div class="flex flex-col items-center space-y-3">
+            <button onclick="openWindow('appcenter')" class="relative group w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="App Center">
+                <i class="fa-solid fa-bag-shopping text-xl text-white"></i>
+                <div id="indicator-appcenter" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+            <button onclick="openWindow('files')" class="relative group w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="Files">
+                <i class="fa-solid fa-folder text-xl text-white"></i>
+                <div id="indicator-files" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+            <button onclick="openWindow('terminal')" class="relative group w-12 h-12 rounded-2xl bg-gray-900 border border-white/10 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="Terminal">
+                <i class="fa-solid fa-terminal text-xl text-ubuntu-orange"></i>
+                <div id="indicator-terminal" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+            <button onclick="openWindow('texteditor')" class="relative group w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="Text Editor">
+                <i class="fa-solid fa-file-lines text-xl text-white"></i>
+                <div id="indicator-texteditor" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+            <button onclick="openWindow('browser')" class="relative group w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="Web Browser">
+                <i class="fa-solid fa-globe text-xl text-white"></i>
+                <div id="indicator-browser" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+            <button onclick="openWindow('monitor')" class="relative group w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="System Monitor">
+                <i class="fa-solid fa-chart-line text-xl text-white"></i>
+                <div id="indicator-monitor" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+            <button onclick="openWindow('calculator')" class="relative group w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="Calculator">
+                <i class="fa-solid fa-calculator text-xl text-white"></i>
+                <div id="indicator-calculator" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+            <button onclick="openWindow('settings')" class="relative group w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-lg hover:scale-105 transition-all active:scale-95" title="Settings">
+                <i class="fa-solid fa-gear text-xl text-white"></i>
+                <div id="indicator-settings" class="absolute -left-3 w-1.5 h-4 bg-white rounded-r-full hidden"></div>
+            </button>
+        </div>
+
+        <button onclick="toggleAppLauncher()" class="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center shadow-lg transition-all" title="Show Applications">
+            <i class="fa-solid fa-grip text-lg text-white"></i>
+        </button>
+    </div>
+
+    <!-- DESKTOP WORKSPACE & SHORTCUTS -->
+    <div id="desktop-area" class="absolute top-8 left-16 right-0 bottom-0 p-6 z-10 flex flex-col flex-wrap content-start gap-6 select-none" onclick="closeDropdowns(event)">
+        <div ondblclick="openWindow('files')" class="w-24 flex flex-col items-center p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors">
+            <div class="w-14 h-14 rounded-xl bg-amber-500/80 flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-house"></i>
+            </div>
+            <span class="text-xs mt-2 text-center text-white font-medium drop-shadow-md">Home</span>
+        </div>
+        <div ondblclick="openWindow('files')" class="w-24 flex flex-col items-center p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors">
+            <div class="w-14 h-14 rounded-xl bg-gray-600/80 flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+            <span class="text-xs mt-2 text-center text-white font-medium drop-shadow-md">Trash</span>
+        </div>
+        <div ondblclick="openWindow('terminal')" class="w-24 flex flex-col items-center p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors">
+            <div class="w-14 h-14 rounded-xl bg-gray-900/90 border border-white/20 flex items-center justify-center text-ubuntu-orange text-2xl shadow-md group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-terminal"></i>
+            </div>
+            <span class="text-xs mt-2 text-center text-white font-medium drop-shadow-md">Terminal</span>
+        </div>
+        <div ondblclick="openWindow('appcenter')" class="w-24 flex flex-col items-center p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors">
+            <div class="w-14 h-14 rounded-xl bg-orange-600/90 flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <span class="text-xs mt-2 text-center text-white font-medium drop-shadow-md">App Center</span>
+        </div>
+    </div>
+
+    <!-- APP LAUNCHER OVERLAY (Activities Screen) -->
+    <div id="app-launcher" class="absolute inset-0 z-40 bg-black/70 backdrop-blur-xl hidden flex-col items-center pt-16 px-10 transition-all duration-300 opacity-0">
+        <div class="w-full max-w-md relative mb-12">
+            <input type="text" id="launcher-search" placeholder="Type to search apps..." class="w-full bg-white/10 border border-white/20 rounded-full px-5 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-ubuntu-orange text-center text-sm shadow-xl" oninput="filterApps(this.value)">
+            <i class="fa-solid fa-magnifying-glass absolute right-5 top-3.5 text-gray-400"></i>
+        </div>
+
+        <div id="launcher-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-8 max-w-4xl w-full">
+            <div onclick="launchAppFromGrid('appcenter')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-bag-shopping text-3xl text-white"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">App Center</span>
+            </div>
+            <div onclick="launchAppFromGrid('files')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-folder text-3xl text-white"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">Files</span>
+            </div>
+            <div onclick="launchAppFromGrid('terminal')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gray-900 border border-white/20 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-terminal text-3xl text-ubuntu-orange"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">Terminal</span>
+            </div>
+            <div onclick="launchAppFromGrid('texteditor')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-file-lines text-3xl text-white"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">Text Editor</span>
+            </div>
+            <div onclick="launchAppFromGrid('browser')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-globe text-3xl text-white"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">Web Browser</span>
+            </div>
+            <div onclick="launchAppFromGrid('monitor')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-chart-line text-3xl text-white"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">System Monitor</span>
+            </div>
+            <div onclick="launchAppFromGrid('calculator')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-calculator text-3xl text-white"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">Calculator</span>
+            </div>
+            <div onclick="launchAppFromGrid('settings')" class="flex flex-col items-center cursor-pointer group">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-gear text-3xl text-white"></i>
+                </div>
+                <span class="text-sm mt-3 font-medium text-white shadow-sm">Settings</span>
+            </div>
+        </div>
+        <button onclick="toggleAppLauncher()" class="mt-auto mb-10 bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors">Close</button>
+    </div>
+
+    <!-- WINDOWS CONTAINER -->
+    <div id="windows-container" class="absolute top-8 left-16 right-0 bottom-0 pointer-events-none z-20 overflow-hidden">
+
+        <!-- 1. TERMINAL WINDOW -->
+        <div id="win-terminal" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-gray-900/95 border border-white/10 pointer-events-auto window-anim" style="width: 680px; height: 460px; top: 60px; left: 100px;" onmousedown="focusWindow('terminal')">
+            <div class="h-10 bg-gray-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-terminal')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-terminal text-ubuntu-orange text-sm"></i>
+                    <span class="text-xs font-medium text-gray-200">Terminal - ubuntu@ubuntu-2404:~</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('terminal')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="maximizeWindow('terminal')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-expand text-xs"></i></button>
+                    <button onclick="closeWindow('terminal')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div id="terminal-body" class="flex-1 p-4 font-mono text-xs text-green-400 overflow-y-auto space-y-2 select-text" onclick="document.getElementById('terminal-input').focus()">
+                <div class="text-gray-300">Ubuntu 24.04.1 LTS \n \l</div>
+                <div class="text-gray-400 mb-2">Type <span class="text-yellow-400">help</span> to see available commands or <span class="text-yellow-400">neofetch</span> for system info.</div>
+                <div id="terminal-output" class="space-y-1"></div>
+                <div class="flex items-center space-x-2">
+                    <span id="terminal-prompt" class="text-ubuntu-orange font-bold">ubuntu@ubuntu-2404:~$</span>
+                    <input type="text" id="terminal-input" class="flex-1 bg-transparent border-none outline-none text-white font-mono text-xs" autofocus onkeydown="handleTerminalKey(event)">
+                </div>
+            </div>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-terminal', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-terminal', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-terminal', 'rb')"></div>
+        </div>
+
+        <!-- 2. FILES WINDOW -->
+        <div id="win-files" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-neutral-900 border border-white/10 pointer-events-auto window-anim" style="width: 760px; height: 500px; top: 90px; left: 140px;" onmousedown="focusWindow('files')">
+            <div class="h-10 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-files')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-folder text-amber-500 text-sm"></i>
+                    <span id="files-window-title" class="text-xs font-medium text-gray-200">Files - /home/ubuntu</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('files')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="maximizeWindow('files')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-expand text-xs"></i></button>
+                    <button onclick="closeWindow('files')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 flex overflow-hidden bg-neutral-900 text-sm">
+                <div class="w-48 bg-neutral-950/60 border-r border-white/10 p-3 space-y-1 text-xs text-gray-300">
+                    <div class="font-semibold text-gray-500 uppercase px-2 mb-2 text-[10px] tracking-wider">Places</div>
+                    <div onclick="navigateFiles('/home/ubuntu')" class="flex items-center space-x-2 p-2 rounded-lg bg-white/10 text-white cursor-pointer"><i class="fa-solid fa-house w-4"></i><span>Home</span></div>
+                    <div onclick="navigateFiles('/home/ubuntu/Documents')" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"><i class="fa-solid fa-file-pdf w-4 text-red-400"></i><span>Documents</span></div>
+                    <div onclick="navigateFiles('/home/ubuntu/Downloads')" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"><i class="fa-solid fa-download w-4 text-blue-400"></i><span>Downloads</span></div>
+                    <div onclick="navigateFiles('/home/ubuntu/Pictures')" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"><i class="fa-solid fa-image w-4 text-purple-400"></i><span>Pictures</span></div>
+                    <div onclick="navigateFiles('/home/ubuntu/Music')" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"><i class="fa-solid fa-music w-4 text-green-400"><span>Music</span></i></div>
+                    <div class="pt-4 font-semibold text-gray-500 uppercase px-2 mb-2 text-[10px] tracking-wider">System</div>
+                    <div onclick="navigateFiles('/')" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"><i class="fa-solid fa-hard-drive w-4"></i><span>Root Directory</span></div>
+                </div>
+                <div class="flex-1 flex flex-col bg-neutral-900">
+                    <div class="h-12 border-b border-white/10 flex items-center px-4 space-x-3 text-gray-300">
+                        <button onclick="fileGoBack()" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
+                        <button onclick="fileNewFolderPrompt()" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center" title="New Folder"><i class="fa-solid fa-folder-plus"></i></button>
+                        <div id="files-path-bar" class="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-200 flex items-center space-x-2">
+                            <i class="fa-solid fa-house text-xs text-amber-500"></i>
+                            <span id="files-current-path">/home/ubuntu</span>
+                        </div>
+                    </div>
+                    <div id="files-grid" class="flex-1 p-6 grid grid-cols-4 gap-6 overflow-y-auto content-start">
+                        <!-- Populated dynamically from virtual file system -->
+                    </div>
+                </div>
+            </div>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-files', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-files', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-files', 'rb')"></div>
+        </div>
+
+        <!-- 3. TEXT EDITOR WINDOW -->
+        <div id="win-texteditor" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-neutral-900 border border-white/10 pointer-events-auto window-anim" style="width: 640px; height: 420px; top: 110px; left: 180px;" onmousedown="focusWindow('texteditor')">
+            <div class="h-10 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-texteditor')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-file-lines text-blue-400 text-sm"></i>
+                    <span id="editor-filename" class="text-xs font-medium text-gray-200">Text Editor - notes.txt</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('texteditor')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="maximizeWindow('texteditor')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-expand text-xs"></i></button>
+                    <button onclick="closeWindow('texteditor')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div class="h-10 bg-neutral-950/40 border-b border-white/10 flex items-center justify-between px-4">
+                <div class="flex items-center space-x-2">
+                    <button onclick="saveCurrentTextFile()" class="bg-ubuntu-orange hover:bg-orange-600 text-white text-xs px-3 py-1 rounded font-medium transition-colors"><i class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    <span id="save-status" class="text-xs text-gray-400 italic"></span>
+                </div>
+                <div class="text-xs text-gray-400 font-mono">UTF-8</div>
+            </div>
+            <textarea id="editor-textarea" class="flex-1 bg-neutral-900 p-4 text-gray-200 font-mono text-sm resize-none outline-none border-none" placeholder="Type here..."></textarea>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-texteditor', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-texteditor', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-texteditor', 'rb')"></div>
+        </div>
+
+        <!-- 4. APP CENTER WINDOW -->
+        <div id="win-appcenter" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-neutral-900 border border-white/10 pointer-events-auto window-anim" style="width: 780px; height: 520px; top: 50px; left: 120px;" onmousedown="focusWindow('appcenter')">
+            <div class="h-10 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-appcenter')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-bag-shopping text-orange-500 text-sm"></i>
+                    <span class="text-xs font-medium text-gray-200">App Center</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('appcenter')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="maximizeWindow('appcenter')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-expand text-xs"></i></button>
+                    <button onclick="closeWindow('appcenter')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 flex flex-col bg-neutral-900 overflow-y-auto p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Explore Applications</h2>
+                        <p class="text-xs text-gray-400">Manage snaps and deb packages on Ubuntu 24.04 LTS</p>
+                    </div>
+                </div>
+
+                <div class="ubuntu-aubergine-bg rounded-2xl p-6 mb-8 flex items-center justify-between shadow-lg">
+                    <div>
+                        <span class="bg-ubuntu-orange text-[10px] uppercase font-bold px-2 py-0.5 rounded-full text-white mb-2 inline-block">Featured</span>
+                        <h3 class="text-lg font-bold text-white">Visual Studio Code</h3>
+                        <p class="text-xs text-gray-300 mt-1 max-w-md">Code editing redefined. Built on open source for Ubuntu developers.</p>
+                        <button class="mt-4 bg-white text-gray-900 font-semibold text-xs px-4 py-2 rounded-lg">Installed</button>
+                    </div>
+                    <i class="fa-solid fa-code text-6xl text-white/20"></i>
+                </div>
+
+                <h4 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-wider">Available Software</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-black/30 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-600 flex items-center justify-center text-white text-xl shadow"><i class="fa-solid fa-globe"></i></div>
+                            <div>
+                                <h5 class="text-sm font-bold text-white">Firefox Browser</h5>
+                                <p class="text-xs text-gray-400">Fast, private & safe web browser</p>
+                            </div>
+                        </div>
+                        <button class="bg-white/10 text-white text-xs px-3 py-1.5 rounded-lg">Installed</button>
+                    </div>
+                    <div class="bg-black/30 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl shadow"><i class="fa-brands fa-docker"></i></div>
+                            <div>
+                                <h5 class="text-sm font-bold text-white">Docker Desktop</h5>
+                                <p class="text-xs text-gray-400">Containerization tool for developers</p>
+                            </div>
+                        </div>
+                        <button id="btn-install-docker" onclick="installApp('docker')" class="bg-ubuntu-orange hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded-lg transition-colors font-medium">Install</button>
+                    </div>
+                    <div class="bg-black/30 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center text-white text-xl shadow"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                            <div>
+                                <h5 class="text-sm font-bold text-white">GIMP Image Editor</h5>
+                                <p class="text-xs text-gray-400">GNU Image Manipulation Program</p>
+                            </div>
+                        </div>
+                        <button id="btn-install-gimp" onclick="installApp('gimp')" class="bg-ubuntu-orange hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded-lg transition-colors font-medium">Install</button>
+                    </div>
+                    <div class="bg-black/30 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center text-white text-xl shadow"><i class="fa-brands fa-spotify"></i></div>
+                            <div>
+                                <h5 class="text-sm font-bold text-white">Spotify</h5>
+                                <p class="text-xs text-gray-400">Music for everyone</p>
+                            </div>
+                        </div>
+                        <button id="btn-install-spotify" onclick="installApp('spotify')" class="bg-ubuntu-orange hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded-lg transition-colors font-medium">Install</button>
+                    </div>
+                </div>
+            </div>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-appcenter', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-appcenter', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-appcenter', 'rb')"></div>
+        </div>
+
+        <!-- 5. BROWSER WINDOW -->
+        <div id="win-browser" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-neutral-900 border border-white/10 pointer-events-auto window-anim" style="width: 760px; height: 500px; top: 80px; left: 160px;" onmousedown="focusWindow('browser')">
+            <div class="h-10 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-browser')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-globe text-cyan-400 text-sm"></i>
+                    <span class="text-xs font-medium text-gray-200">Firefox Web Browser</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('browser')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="maximizeWindow('browser')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-expand text-xs"></i></button>
+                    <button onclick="closeWindow('browser')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div class="h-12 bg-neutral-950/60 border-b border-white/10 flex items-center px-4 space-x-3 text-gray-300">
+                <button class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
+                <button class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i class="fa-solid fa-arrow-right"></i></button>
+                <button class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i class="fa-solid fa-rotate-right"></i></button>
+                <div class="flex-1 bg-black/40 border border-white/10 rounded-full px-4 py-1.5 text-xs text-gray-200 flex items-center space-x-2">
+                    <i class="fa-solid fa-lock text-green-400 text-[10px]"></i>
+                    <span id="browser-url-text">https://ubuntu.com</span>
+                </div>
+            </div>
+            <div class="flex-1 bg-white text-gray-900 overflow-y-auto p-8">
+                <div class="max-w-2xl mx-auto text-center space-y-6">
+                    <div class="inline-block p-4 rounded-3xl bg-ubuntu-orange text-white text-4xl shadow-lg mb-2">
+                        <i class="fa-brands fa-ubuntu"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold tracking-tight">Ubuntu 24.04 LTS (Noble Numbat)</h1>
+                    <p class="text-gray-600 text-sm">Secure, enterprise-grade, developer-focused Linux distribution with 12 years of support.</p>
+                    <div class="flex justify-center space-x-4 pt-4">
+                        <button onclick="alertBox('Ubuntu 24.04 LTS Download', 'Ubuntu 24.04 LTS ISO downloaded successfully to /home/ubuntu/Downloads!')" class="bg-ubuntu-orange text-white font-semibold text-xs px-6 py-3 rounded-full hover:bg-orange-600 transition-colors shadow-md">Download Ubuntu 24.04 LTS</button>
+                        <button onclick="alertBox('Documentation', 'Opening official Ubuntu 24.04 release notes and developer guide.')" class="bg-gray-200 text-gray-800 font-semibold text-xs px-6 py-3 rounded-full hover:bg-gray-300 transition-colors">Release Notes</button>
+                    </div>
+                </div>
+            </div>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-browser', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-browser', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-browser', 'rb')"></div>
+        </div>
+
+        <!-- 6. SYSTEM MONITOR WINDOW -->
+        <div id="win-monitor" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-neutral-900 border border-white/10 pointer-events-auto window-anim" style="width: 680px; height: 460px; top: 100px; left: 200px;" onmousedown="focusWindow('monitor')">
+            <div class="h-10 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-monitor')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-line text-emerald-400 text-sm"></i>
+                    <span class="text-xs font-medium text-gray-200">System Monitor</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('monitor')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="maximizeWindow('monitor')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-expand text-xs"></i></button>
+                    <button onclick="closeWindow('monitor')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 bg-neutral-900 p-6 flex flex-col space-y-6 overflow-y-auto">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-black/40 p-4 rounded-xl border border-white/5 space-y-2">
+                        <div class="flex justify-between text-xs font-semibold text-gray-300">
+                            <span>CPU Usage</span>
+                            <span id="cpu-stat-val">14%</span>
+                        </div>
+                        <div class="w-full bg-neutral-800 h-3 rounded-full overflow-hidden">
+                            <div id="cpu-bar" class="bg-ubuntu-orange h-full transition-all duration-500" style="width: 14%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded-xl border border-white/5 space-y-2">
+                        <div class="flex justify-between text-xs font-semibold text-gray-300">
+                            <span>Memory Usage (4.2 GB / 15.9 GB)</span>
+                            <span id="mem-stat-val">26%</span>
+                        </div>
+                        <div class="w-full bg-neutral-800 h-3 rounded-full overflow-hidden">
+                            <div id="mem-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 26%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Active Processes</h4>
+                    <div class="bg-black/40 rounded-xl overflow-hidden border border-white/5 text-xs font-mono">
+                        <div class="grid grid-cols-4 p-3 bg-white/5 font-bold text-gray-300 border-b border-white/5">
+                            <span>PID</span><span>USER</span><span>CPU</span><span>COMMAND</span>
+                        </div>
+                        <div class="p-3 space-y-2 text-gray-300">
+                            <div class="grid grid-cols-4"><span>1204</span><span>ubuntu</span><span>2.1%</span><span>gnome-shell</span></div>
+                            <div class="grid grid-cols-4"><span>1850</span><span>ubuntu</span><span>4.5%</span><span>firefox</span></div>
+                            <div class="grid grid-cols-4"><span>2102</span><span>ubuntu</span><span>0.8%</span><span>bash</span></div>
+                            <div class="grid grid-cols-4"><span>3011</span><span>root</span><span>0.1%</span><span>systemd</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-monitor', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-monitor', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-monitor', 'rb')"></div>
+        </div>
+
+        <!-- 7. CALCULATOR WINDOW -->
+        <div id="win-calculator" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-neutral-900 border border-white/10 pointer-events-auto window-anim" style="width: 320px; height: 440px; top: 120px; left: 220px;" onmousedown="focusWindow('calculator')">
+            <div class="h-10 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-calculator')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-calculator text-purple-400 text-sm"></i>
+                    <span class="text-xs font-medium text-gray-200">Calculator</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('calculator')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="closeWindow('calculator')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div class="p-4 bg-neutral-950 flex flex-col justify-end items-end h-24 border-b border-white/10">
+                <div id="calc-screen" class="text-3xl font-mono text-white font-light tracking-wide">0</div>
+            </div>
+            <div class="flex-1 grid grid-cols-4 gap-1 p-3 bg-neutral-900">
+                <button onclick="calcClear()" class="bg-white/10 hover:bg-white/20 rounded-lg text-amber-400 font-medium text-sm transition-colors">C</button>
+                <button onclick="calcPress('(')" class="bg-white/10 hover:bg-white/20 rounded-lg text-gray-300 font-medium text-sm transition-colors">(</button>
+                <button onclick="calcPress(')')" class="bg-white/10 hover:bg-white/20 rounded-lg text-gray-300 font-medium text-sm transition-colors">)</button>
+                <button onclick="calcPress('/')" class="bg-ubuntu-orange/80 hover:bg-ubuntu-orange rounded-lg text-white font-medium text-sm transition-colors">÷</button>
+                <button onclick="calcPress('7')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">7</button>
+                <button onclick="calcPress('8')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">8</button>
+                <button onclick="calcPress('9')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">9</button>
+                <button onclick="calcPress('*')" class="bg-ubuntu-orange/80 hover:bg-ubuntu-orange rounded-lg text-white font-medium text-sm transition-colors">×</button>
+                <button onclick="calcPress('4')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">4</button>
+                <button onclick="calcPress('5')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">5</button>
+                <button onclick="calcPress('6')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">6</button>
+                <button onclick="calcPress('-')" class="bg-ubuntu-orange/80 hover:bg-ubuntu-orange rounded-lg text-white font-medium text-sm transition-colors">-</button>
+                <button onclick="calcPress('1')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">1</button>
+                <button onclick="calcPress('2')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">2</button>
+                <button onclick="calcPress('3')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">3</button>
+                <button onclick="calcPress('+')" class="bg-ubuntu-orange/80 hover:bg-ubuntu-orange rounded-lg text-white font-medium text-sm transition-colors">+</button>
+                <button onclick="calcPress('0')" class="col-span-2 bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">0</button>
+                <button onclick="calcPress('.')" class="bg-white/5 hover:bg-white/15 rounded-lg text-white font-medium text-sm transition-colors">.</button>
+                <button onclick="calcCompute()" class="bg-ubuntu-orange hover:bg-orange-600 rounded-lg text-white font-medium text-sm transition-colors">=</button>
+            </div>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-calculator', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-calculator', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-calculator', 'rb')"></div>
+        </div>
+
+        <!-- 8. SETTINGS WINDOW -->
+        <div id="win-settings" class="absolute hidden flex flex-col rounded-xl overflow-hidden shadow-2xl bg-neutral-900 border border-white/10 pointer-events-auto window-anim" style="width: 720px; height: 500px; top: 90px; left: 150px;" onmousedown="focusWindow('settings')">
+            <div class="h-10 bg-neutral-900 border-b border-white/10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing" onmousedown="startDrag(event, 'win-settings')">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-gear text-gray-300 text-sm"></i>
+                    <span class="text-xs font-medium text-gray-200">Settings</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="minimizeWindow('settings')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                    <button onclick="maximizeWindow('settings')" class="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-expand text-xs"></i></button>
+                    <button onclick="closeWindow('settings')" class="w-6 h-6 rounded-full hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 flex bg-neutral-900 text-sm">
+                <div class="w-52 bg-neutral-950/60 border-r border-white/10 p-3 space-y-1 text-xs text-gray-300">
+                    <div class="p-2.5 rounded-lg bg-white/10 text-white font-medium cursor-pointer flex items-center space-x-3"><i class="fa-solid fa-image w-4 text-orange-400"></i><span>Appearance</span></div>
+                    <div class="p-2.5 rounded-lg hover:bg-white/5 cursor-pointer flex items-center space-x-3"><i class="fa-solid fa-wifi w-4 text-blue-400"></i><span>Network</span></div>
+                    <div class="p-2.5 rounded-lg hover:bg-white/5 cursor-pointer flex items-center space-x-3"><i class="fa-solid fa-volume-high w-4 text-green-400"></i><span>Sound</span></div>
+                    <div class="p-2.5 rounded-lg hover:bg-white/5 cursor-pointer flex items-center space-x-3"><i class="fa-solid fa-display w-4 text-purple-400"></i><span>Displays</span></div>
+                    <div class="p-2.5 rounded-lg hover:bg-white/5 cursor-pointer flex items-center space-x-3"><i class="fa-solid fa-circle-info w-4 text-gray-400"></i><span>About</span></div>
+                </div>
+                <div class="flex-1 p-8 overflow-y-auto space-y-6">
+                    <h3 class="text-lg font-bold text-white mb-4">Desktop Appearance & Wallpaper</h3>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Choose Wallpaper</label>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div onclick="setWallpaper('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2560&auto=format&fit=crop')" class="h-28 rounded-xl bg-cover bg-center cursor-pointer border-2 border-ubuntu-orange shadow-md hover:scale-105 transition-transform" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=600&auto=format&fit=crop')"></div>
+                            <div onclick="setWallpaper('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560&auto=format&fit=crop')" class="h-28 rounded-xl bg-cover bg-center cursor-pointer border-2 border-transparent hover:border-white shadow-md hover:scale-105 transition-transform" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop')"></div>
+                            <div onclick="setWallpaper('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2560&auto=format&fit=crop')" class="h-28 rounded-xl bg-cover bg-center cursor-pointer border-2 border-transparent hover:border-white shadow-md hover:scale-105 transition-transform" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop')"></div>
+                        </div>
+                    </div>
+                    <div class="pt-6 border-t border-white/10">
+                        <h4 class="text-sm font-bold text-white mb-2">Ubuntu 24.04 LTS Information</h4>
+                        <div class="bg-black/40 p-4 rounded-xl text-xs space-y-2 text-gray-300 font-mono">
+                            <div>OS: Ubuntu 24.04.1 LTS x86_64</div>
+                            <div>Host: Web Simulation Virtual Machine</div>
+                            <div>Kernel: Linux 6.8.0-generic</div>
+                            <div>Desktop Environment: GNOME 46</div>
+                            <div>Memory: 4120MiB / 15918MiB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="resizer resizer-r" onmousedown="startResize(event, 'win-settings', 'r')"></div>
+            <div class="resizer resizer-b" onmousedown="startResize(event, 'win-settings', 'b')"></div>
+            <div class="resizer resizer-rb" onmousedown="startResize(event, 'win-settings', 'rb')"></div>
+        </div>
+
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="custom-modal" class="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center">
+        <div class="bg-neutral-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
+            <h3 id="modal-title" class="text-lg font-bold text-white">Alert</h3>
+            <p id="modal-message" class="text-xs text-gray-300"></p>
+            <button onclick="closeModal()" class="bg-ubuntu-orange text-white text-xs px-6 py-2 rounded-xl font-medium hover:bg-orange-600 transition-colors">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // --- VIRTUAL FILE SYSTEM (VFS) ---
+        let VFS = {
+            "/": { type: "dir", children: ["home", "etc", "var", "bin", "usr", "tmp"] },
+            "/home": { type: "dir", children: ["ubuntu"] },
+            "/home/ubuntu": { type: "dir", children: ["Desktop", "Documents", "Downloads", "Pictures", "Music", "notes.txt", "script.sh"] },
+            "/home/ubuntu/Desktop": { type: "dir", children: [] },
+            "/home/ubuntu/Documents": { type: "dir", children: ["resume.pdf", "project_specs.txt"] },
+            "/home/ubuntu/Downloads": { type: "dir", children: [] },
+            "/home/ubuntu/Pictures": { type: "dir", children: ["wallpaper.jpg"] },
+            "/home/ubuntu/Music": { type: "dir", children: ["track01.mp3"] },
+            "/home/ubuntu/notes.txt": { type: "file", content: "Welcome to Ubuntu 24.04 LTS (Noble Numbat)!\nThis is your persistent virtual filesystem.\nFeel free to write and edit notes or run CLI commands." },
+            "/home/ubuntu/script.sh": { type: "file", content: "#!/bin/bash\necho 'Running Ubuntu 24.04 automated setup...'\napt update && apt upgrade -y\necho 'Setup complete!'" },
+            "/home/ubuntu/Documents/resume.pdf": { type: "file", content: "[PDF Binary Stream: Ubuntu Developer Resume]" },
+            "/home/ubuntu/Documents/project_specs.txt": { type: "file", content: "Project: Ubuntu Web Simulation\nTarget: Full Linux Desktop inside Web Browser\nStatus: Active" },
+            "/etc": { type: "dir", children: ["passwd", "resolv.conf", "os-release"] },
+            "/etc/passwd": { type: "file", content: "root:x:0:0:root:/root:/bin/bash\nubuntu:x:1000:1000:Ubuntu User,,,:/home/ubuntu:/bin/bash" },
+            "/etc/resolv.conf": { type: "file", content: "nameserver 8.8.8.8\nnameserver 1.1.1.1" },
+            "/etc/os-release": { type: "file", content: "NAME=\"Ubuntu\"\nVERSION=\"24.04.1 LTS (Noble Numbat)\"\nID=ubuntu\nID_LIKE=debian\nPRETTY_NAME=\"Ubuntu 24.04.1 LTS\"\nVERSION_ID=\"24.04\"" },
+            "/var": { type: "dir", children: ["log"] },
+            "/var/log": { type: "dir", children: ["syslog"] },
+            "/var/log/syslog": { type: "file", content: "Sep 21 23:00:00 ubuntu-2404 systemd[1]: Started GNOME Display Manager.\nSep 21 23:00:05 ubuntu-2404 kernel: [ 0.000000] Linux version 6.8.0-generic" },
+            "/bin": { type: "dir", children: ["bash", "sh", "ls", "cat", "echo"] },
+            "/usr": { type: "dir", children: ["bin"] },
+            "/usr/bin": { type: "dir", children: ["sudo", "apt", "python3", "node", "git"] },
+            "/tmp": { type: "dir", children: [] }
+        };
+
+        let currentDirectory = "/home/ubuntu";
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        // Helper to resolve path
+        function resolvePath(path) {
+            if (!path) return currentDirectory;
+            if (path.startsWith('/')) {
+                return normalizePath(path);
+            }
+            if (path === '~') return '/home/ubuntu';
+            if (path.startsWith('~/')) {
+                return normalizePath('/home/ubuntu/' + path.substring(2));
+            }
+            return normalizePath(currentDirectory + '/' + path);
+        }
+
+        function normalizePath(path) {
+            const parts = path.split('/').filter(p => p !== '' && p !== '.');
+            const stack = [];
+            for (const part of parts) {
+                if (part === '..') {
+                    stack.pop();
+                } else {
+                    stack.push(part);
+                }
+            }
+            return '/' + stack.join('/');
+        }
+
+        // --- SYSTEM STATE & UTILS ---
+        let highestZIndex = 20;
+        let calcExpression = "";
+        let currentFilesPath = "/home/ubuntu";
+        let fileNavHistory = ["/home/ubuntu"];
+
+        function updateClocks() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            document.getElementById('topbar-clock').innerText = timeString;
+            document.getElementById('lock-clock').innerText = timeString;
+
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.getElementById('lock-date').innerText = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+
+        function unlockDesktop() {
+            const lockScreen = document.getElementById('lock-screen');
+            lockScreen.style.transform = 'translateY(-100%)';
+            lockScreen.style.opacity = '0';
+            setTimeout(() => lockScreen.classList.add('hidden'), 500);
+        }
+
+        function handleLoginKey(e) { if (e.key === 'Enter') unlockDesktop(); }
+
+        function lockSystem() {
+            const lockScreen = document.getElementById('lock-screen');
+            lockScreen.classList.remove('hidden');
+            lockScreen.style.transform = 'translateY(0)';
+            lockScreen.style.opacity = '1';
+            toggleQuickSettings();
+        }
+
+        function restartSystem() { location.reload(); }
+
+        function powerOff() {
+            document.body.innerHTML = `
+                <div class="h-full w-full bg-black flex flex-col items-center justify-center text-white space-y-4">
+                    <div class="w-16 h-16 rounded-full border-4 border-ubuntu-orange border-t-transparent animate-spin"></div>
+                    <h2 class="text-xl font-light tracking-widest">SYSTEM HALTED</h2>
+                    <p class="text-xs text-gray-500">You can safely close this browser tab or refresh to restart.</p>
+                </div>
+            `;
+        }
+
+        function toggleQuickSettings() {
+            const panel = document.getElementById('quick-settings-panel');
+            panel.classList.toggle('hidden');
+            panel.classList.toggle('flex');
+        }
+
+        function closeDropdowns(e) {
+            const panel = document.getElementById('quick-settings-panel');
+            if (!panel.classList.contains('hidden') && !e.target.closest('#quick-settings-panel')) {
+                panel.classList.add('hidden');
+                panel.classList.remove('flex');
+            }
+        }
+
+        function toggleAppLauncher() {
+            const launcher = document.getElementById('app-launcher');
+            if (launcher.classList.contains('hidden')) {
+                launcher.classList.remove('hidden');
+                setTimeout(() => launcher.style.opacity = '1', 10);
+            } else {
+                launcher.style.opacity = '0';
+                setTimeout(() => launcher.classList.add('hidden'), 300);
+            }
+        }
+
+        function launchAppFromGrid(appId) {
+            toggleAppLauncher();
+            openWindow(appId);
+        }
+
+        // --- WINDOW MANAGEMENT ---
+        function openWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            const indicator = document.getElementById(`indicator-${appId}`);
+            win.classList.remove('hidden');
+            if (indicator) indicator.classList.remove('hidden');
+            focusWindow(appId);
+
+            if (appId === 'files') renderFilesGrid();
+            if (appId === 'terminal') document.getElementById('terminal-input').focus();
+        }
+
+        function closeWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            const indicator = document.getElementById(`indicator-${appId}`);
+            win.classList.add('hidden');
+            if (indicator) indicator.classList.add('hidden');
+            document.getElementById('topbar-title').innerText = 'Desktop';
+        }
+
+        function minimizeWindow(appId) {
+            document.getElementById(`win-${appId}`).classList.add('hidden');
+        }
+
+        function maximizeWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (win.dataset.maximized === 'true') {
+                win.style.width = win.dataset.prevWidth || '700px';
+                win.style.height = win.dataset.prevHeight || '480px';
+                win.style.top = win.dataset.prevTop || '100px';
+                win.style.left = win.dataset.prevLeft || '180px';
+                win.dataset.maximized = 'false';
+            } else {
+                win.dataset.prevWidth = win.style.width;
+                win.dataset.prevHeight = win.style.height;
+                win.dataset.prevTop = win.style.top;
+                win.dataset.prevLeft = win.style.left;
+                win.style.width = 'calc(100vw - 80px)';
+                win.style.height = 'calc(100vh - 40px)';
+                win.style.top = '32px';
+                win.style.left = '64px';
+                win.dataset.maximized = 'true';
+            }
+        }
+
+        function focusWindow(appId) {
+            highestZIndex++;
+            document.getElementById(`win-${appId}`).style.zIndex = highestZIndex;
+            const titles = {
+                'terminal': 'Terminal',
+                'files': 'Files - ' + currentFilesPath,
+                'texteditor': 'Text Editor',
+                'appcenter': 'App Center',
+                'browser': 'Firefox Web Browser',
+                'monitor': 'System Monitor',
+                'calculator': 'Calculator',
+                'settings': 'Settings'
+            };
+            document.getElementById('topbar-title').innerText = titles[appId] || 'Ubuntu Desktop';
+        }
+
+        // --- WINDOW DRAGGING & RESIZING ---
+        let isDragging = false, dragTarget = null, startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+        let isResizing = false, resizeTarget = null, resizeDir = '', startWidth = 0, startHeight = 0;
+
+        function startDrag(e, windowId) {
+            if (e.target.closest('button')) return;
+            isDragging = true;
+            dragTarget = document.getElementById(windowId);
+            startX = e.clientX;
+            startY = e.clientY;
+            const rect = dragTarget.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+            focusWindow(windowId.replace('win-', ''));
+        }
+
+        function onDrag(e) {
+            if (!isDragging || !dragTarget) return;
+            dragTarget.style.left = `${initialLeft + (e.clientX - startX)}px`;
+            dragTarget.style.top = `${Math.max(32, initialTop + (e.clientY - startY))}px`;
+        }
+
+        function stopDrag() { isDragging = false; dragTarget = null; document.removeEventListener('mousemove', onDrag); document.removeEventListener('mouseup', stopDrag); }
+
+        function startResize(e, windowId, dir) {
+            e.stopPropagation();
+            isResizing = true;
+            resizeTarget = document.getElementById(windowId);
+            resizeDir = dir;
+            startX = e.clientX;
+            startY = e.clientY;
+            const rect = resizeTarget.getBoundingClientRect();
+            startWidth = rect.width;
+            startHeight = rect.height;
+            document.addEventListener('mousemove', onResize);
+            document.addEventListener('mouseup', stopResize);
+            focusWindow(windowId.replace('win-', ''));
+        }
+
+        function onResize(e) {
+            if (!isResizing || !resizeTarget) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            if (resizeDir.includes('r')) resizeTarget.style.width = `${Math.max(300, startWidth + dx)}px`;
+            if (resizeDir.includes('b')) resizeTarget.style.height = `${Math.max(200, startHeight + dy)}px`;
+        }
+
+        function stopResize() { isResizing = false; resizeTarget = null; document.removeEventListener('mousemove', onResize); document.removeEventListener('mouseup', stopResize); }
+
+        // --- FILE MANAGER LOGIC ---
+        function navigateFiles(path) {
+            if (VFS[path] && VFS[path].type === 'dir') {
+                currentFilesPath = path;
+                fileNavHistory.push(path);
+                document.getElementById('files-current-path').innerText = path;
+                document.getElementById('files-window-title').innerText = `Files - ${path}`;
+                renderFilesGrid();
+            }
+        }
+
+        function fileGoBack() {
+            if (fileNavHistory.length > 1) {
+                fileNavHistory.pop();
+                currentFilesPath = fileNavHistory[fileNavHistory.length - 1];
+                document.getElementById('files-current-path').innerText = currentFilesPath;
+                document.getElementById('files-window-title').innerText = `Files - ${currentFilesPath}`;
+                renderFilesGrid();
+            }
+        }
+
+        function renderFilesGrid() {
+            const grid = document.getElementById('files-grid');
+            grid.innerHTML = '';
+            const dir = VFS[currentFilesPath];
+            if (!dir || !dir.children) return;
+
+            dir.children.forEach(childName => {
+                const fullPath = (currentFilesPath === '/' ? '' : currentFilesPath) + '/' + childName;
+                const node = VFS[fullPath];
+                const isDir = node && node.type === 'dir';
+
+                const div = document.createElement('div');
+                div.className = 'flex flex-col items-center p-3 rounded-xl hover:bg-white/5 cursor-pointer group';
+                div.ondblclick = () => {
+                    if (isDir) {
+                        navigateFiles(fullPath);
+                    } else {
+                        openTextEditorWithFile(fullPath);
+                    }
+                };
+
+                const iconClass = isDir ? 'fa-folder text-amber-500' : (childName.endsWith('.sh') ? 'fa-file-code text-cyan-400' : 'fa-file-lines text-blue-400');
+                div.innerHTML = `
+                    <i class="fa-solid ${iconClass} text-5xl mb-2 group-hover:scale-105 transition-transform"></i>
+                    <span class="text-xs text-gray-200 text-center font-medium">${childName}</span>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function fileNewFolderPrompt() {
+            const name = prompt("Enter new folder name:");
+            if (name) {
+                const newPath = currentFilesPath === '/' ? '/' + name : currentFilesPath + '/' + name;
+                if (!VFS[newPath]) {
+                    VFS[newPath] = { type: "dir", children: [] };
+                    VFS[currentFilesPath].children.push(name);
+                    renderFilesGrid();
+                }
+            }
+        }
+
+        // --- TEXT EDITOR LOGIC ---
+        let currentEditingFile = "/home/ubuntu/notes.txt";
+
+        function openTextEditorWithFile(path) {
+            currentEditingFile = path;
+            const node = VFS[path];
+            document.getElementById('editor-filename').innerText = `Text Editor - ${path.split('/').pop()}`;
+            document.getElementById('editor-textarea').value = node && node.content ? node.content : '';
+            openWindow('texteditor');
+        }
+
+        function saveCurrentTextFile() {
+            const content = document.getElementById('editor-textarea').value;
+            if (VFS[currentEditingFile]) {
+                VFS[currentEditingFile].content = content;
+            } else {
+                VFS[currentEditingFile] = { type: "file", content: content };
+            }
+            const status = document.getElementById('save-status');
+            status.innerText = "Saved!";
+            setTimeout(() => status.innerText = "", 2000);
+        }
+
+        // --- TERMINAL EMULATOR & FULL CLI ENGINE ---
+        function handleTerminalKey(e) {
+            const input = document.getElementById('terminal-input');
+            const output = document.getElementById('terminal-output');
+
+            if (e.key === 'Enter') {
+                const cmdLine = input.value.trim();
+                if (cmdLine) {
+                    commandHistory.push(cmdLine);
+                    historyIndex = commandHistory.length;
+                }
+
+                // Print command
+                const cmdDiv = document.createElement('div');
+                cmdDiv.innerHTML = `<span class="text-ubuntu-orange font-bold">ubuntu@ubuntu-2404</span>:<span class="text-blue-400">${currentDirectory}</span>$ ${escapeHtml(cmdLine)}`;
+                output.appendChild(cmdDiv);
+
+                // Execute
+                executeCommand(cmdLine, output);
+                input.value = '';
+
+                const termBody = document.getElementById('terminal-body');
+                termBody.scrollTop = termBody.scrollHeight;
+            } else if (e.key === 'ArrowUp') {
+                if (commandHistory.length > 0 && historyIndex > 0) {
+                    historyIndex--;
+                    input.value = commandHistory[historyIndex];
+                }
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                if (commandHistory.length > 0 && historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    input.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    input.value = '';
+                }
+                e.preventDefault();
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function executeCommand(cmdLine, outputContainer) {
+            const parts = cmdLine.split(' ');
+            const cmd = parts[0];
+            const args = parts.slice(1);
+            const resDiv = document.createElement('div');
+            resDiv.className = 'text-gray-300 mb-2 whitespace-pre-wrap font-mono';
+
+            switch (cmd) {
+                case 'help':
+                    resDiv.innerHTML = `Available Linux CLI commands:<br>
+                    - <span class="text-yellow-400">neofetch</span>: System info<br>
+                    - <span class="text-yellow-400">ls [-la] [path]</span>: List directory<br>
+                    - <span class="text-yellow-400">cd [path]</span>: Change directory<br>
+                    - <span class="text-yellow-400">pwd</span>: Print working directory<br>
+                    - <span class="text-yellow-400">cat [file]</span>: View file content<br>
+                    - <span class="text-yellow-400">echo [text] [&gt; file]</span>: Print or write text<br>
+                    - <span class="text-yellow-400">mkdir [dir]</span>: Create directory<br>
+                    - <span class="text-yellow-400">touch [file]</span>: Create empty file<br>
+                    - <span class="text-yellow-400">rm [file/dir]</span>: Remove file/dir<br>
+                    - <span class="text-yellow-400">apt update / install [pkg]</span>: Package manager<br>
+                    - <span class="text-yellow-400">sudo [cmd]</span>: Superuser execution<br>
+                    - <span class="text-yellow-400">htop / top</span>: Process viewer<br>
+                    - <span class="text-yellow-400">ping [host]</span>: Network test<br>
+                    - <span class="text-yellow-400">df / free</span>: Storage & RAM stats<br>
+                    - <span class="text-yellow-400">whoami / date / uname [-a]</span>: System details<br>
+                    - <span class="text-yellow-400">clear</span>: Clear terminal`;
+                    break;
+
+                case 'neofetch':
+                    resDiv.innerHTML = `<pre class="text-ubuntu-orange font-bold">
+            _
+        .-') ?  _(').
+     .-(  '--.   _  '.')
+    ( (   _   ) (   .  ')   <span class="text-white">ubuntu@ubuntu-2404</span>
+     '. (   .'   ).  _  '   -------------------
+       '-(_.' .-(_. '      <span class="text-yellow-400">OS</span>: Ubuntu 24.04.1 LTS x86_64<br>
+                           <span class="text-yellow-400">Host</span>: Web Simulation VM<br>
+                           <span class="text-yellow-400">Kernel</span>: Linux 6.8.0-generic<br>
+                           <span class="text-yellow-400">Uptime</span>: 5 hours, 12 mins<br>
+                           <span class="text-yellow-400">Shell</span>: bash 5.2.21<br>
+                           <span class="text-yellow-400">DE</span>: GNOME 46.0<br>
+                           <span class="text-yellow-400">Memory</span>: 4120MiB / 15918MiB
+                    </pre>`;
+                    break;
+
+                case 'ls':
+                    let targetPath = currentDirectory;
+                    if (args.length > 0 && !args[0].startsWith('-')) {
+                        targetPath = resolvePath(args[0]);
+                    }
+                    if (VFS[targetPath] && VFS[targetPath].type === 'dir') {
+                        resDiv.innerText = VFS[targetPath].children.join('   ');
+                    } else {
+                        resDiv.innerText = `ls: cannot access '${args[0]}': No such file or directory`;
+                    }
+                    break;
+
+                case 'cd':
+                    if (args.length === 0) {
+                        currentDirectory = '/home/ubuntu';
+                    } else {
+                        const newPath = resolvePath(args[0]);
+                        if (VFS[newPath] && VFS[newPath].type === 'dir') {
+                            currentDirectory = newPath;
+                        } else {
+                            resDiv.innerText = `cd: ${args[0]}: No such directory`;
+                        }
+                    }
+                    document.getElementById('terminal-prompt').innerText = `ubuntu@ubuntu-2404:${currentDirectory}$`;
+                    break;
+
+                case 'pwd':
+                    resDiv.innerText = currentDirectory;
+                    break;
+
+                case 'cat':
+                    if (args.length === 0) {
+                        resDiv.innerText = "cat: missing file operand";
+                    } else {
+                        const filePath = resolvePath(args[0]);
+                        if (VFS[filePath] && VFS[filePath].type === 'file') {
+                            resDiv.innerText = VFS[filePath].content;
+                        } else {
+                            resDiv.innerText = `cat: ${args[0]}: No such file`;
+                        }
+                    }
+                    break;
+
+                case 'echo':
+                    const redirectIdx = args.indexOf('>');
+                    if (redirectIdx !== -1) {
+                        const text = args.slice(0, redirectIdx).join(' ').replace(/['"]/g, '');
+                        const fileName = args[redirectIdx + 1];
+                        const filePath = resolvePath(fileName);
+                        VFS[filePath] = { type: "file", content: text };
+                        // Add to parent dir children if missing
+                        const parentDir = filePath.substring(0, filePath.lastIndexOf('/')) || '/';
+                        const baseName = filePath.split('/').pop();
+                        if (VFS[parentDir] && !VFS[parentDir].children.includes(baseName)) {
+                            VFS[parentDir].children.push(baseName);
+                        }
+                        resDiv.innerText = "";
+                    } else {
+                        resDiv.innerText = args.join(' ').replace(/['"]/g, '');
+                    }
+                    break;
+
+                case 'mkdir':
+                    if (args.length > 0) {
+                        const dirPath = resolvePath(args[0]);
+                        VFS[dirPath] = { type: "dir", children: [] };
+                        const parentDir = dirPath.substring(0, dirPath.lastIndexOf('/')) || '/';
+                        const baseName = dirPath.split('/').pop();
+                        if (VFS[parentDir]) VFS[parentDir].children.push(baseName);
+                        resDiv.innerText = "";
+                    } else {
+                        resDiv.innerText = "mkdir: missing operand";
+                    }
+                    break;
+
+                case 'touch':
+                    if (args.length > 0) {
+                        const filePath = resolvePath(args[0]);
+                        if (!VFS[filePath]) {
+                            VFS[filePath] = { type: "file", content: "" };
+                            const parentDir = filePath.substring(0, filePath.lastIndexOf('/')) || '/';
+                            const baseName = filePath.split('/').pop();
+                            if (VFS[parentDir]) VFS[parentDir].children.push(baseName);
+                        }
+                        resDiv.innerText = "";
+                    } else {
+                        resDiv.innerText = "touch: missing file operand";
+                    }
+                    break;
+
+                case 'rm':
+                    if (args.length > 0) {
+                        const filePath = resolvePath(args[1] || args[0]);
+                        if (VFS[filePath]) {
+                            delete VFS[filePath];
+                            const parentDir = filePath.substring(0, filePath.lastIndexOf('/')) || '/';
+                            const baseName = filePath.split('/').pop();
+                            if (VFS[parentDir]) {
+                                VFS[parentDir].children = VFS[parentDir].children.filter(c => c !== baseName);
+                            }
+                        } else {
+                            resDiv.innerText = `rm: cannot remove '${args[0]}': No such file or directory`;
+                        }
+                    }
+                    break;
+
+                case 'apt':
+                    if (args[0] === 'update') {
+                        resDiv.innerText = "Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease\nReading package lists... Done";
+                    } else if (args[0] === 'install') {
+                        resDiv.innerText = `Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\n${args[1]} is already the newest version (${args[1]}-latest).\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.`;
+                    } else {
+                        resDiv.innerText = "apt: unsupported action. Try 'apt update' or 'apt install <pkg>'";
+                    }
+                    break;
+
+                case 'sudo':
+                    resDiv.innerText = "[sudo] password for ubuntu: \n(Simulated root privileges granted)";
+                    break;
+
+                case 'htop':
+                case 'top':
+                    resDiv.innerText = "Tasks: 142 total, 2 running, 140 sleeping\n%CPU:  2.1% usr,  1.0% sys, 96.9% id\nKiB Mem : 16298912 total, 10240120 free\n\n  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND\n 1204 ubuntu    20   0 2451200 412000 125000 S   2.1   2.5   15:20.42 gnome-shell\n 1850 ubuntu    20   0 3120400 620000 210000 S   4.5   3.8   32:10.11 firefox\n 2102 ubuntu    20   0   18400   3200   2600 S   0.0   0.0   0:00.15 bash";
+                    break;
+
+                case 'ping':
+                    resDiv.innerText = "PING ubuntu.com (185.125.190.29) 56(84) bytes of data.\n64 bytes from 185.125.190.29: icmp_seq=1 ttl=54 time=14.2 ms\n64 bytes from 185.125.190.29: icmp_seq=2 ttl=54 time=13.8 ms\n--- ubuntu.com ping statistics ---\n2 packets transmitted, 2 received, 0% packet loss";
+                    break;
+
+                case 'df':
+                    resDiv.innerText = "Filesystem     1K-blocks      Used Available Use% Mounted on\n/dev/sda2      102400000  28410200  68789800  30% /\ntmpfs            8149456         0   8149456   0% /dev/shm";
+                    break;
+
+                case 'free':
+                    resDiv.innerText = "               total        used        free      shared  buff/cache   available\nMem:        16298912     4120000   10240120      412000   1938912   11760000\nSwap:        4194304          0    4194304";
+                    break;
+
+                case 'whoami':
+                    resDiv.innerText = "ubuntu";
+                    break;
+
+                case 'date':
+                    resDiv.innerText = new Date().toString();
+                    break;
+
+                case 'uname':
+                    if (args.includes('-a')) {
+                        resDiv.innerText = "Linux ubuntu-2404 6.8.0-generic #45-Ubuntu SMP PREEMPT_DYNAMIC x86_64 GNU/Linux";
+                    } else {
+                        resDiv.innerText = "Linux";
+                    }
+                    break;
+
+                case 'clear':
+                    outputContainer.innerHTML = '';
+                    return;
+
+                case '':
+                    resDiv.innerText = "";
+                    break;
+
+                default:
+                    resDiv.innerText = `${cmd}: command not found. Type 'help' for available commands.`;
+                    break;
+            }
+
+            outputContainer.appendChild(resDiv);
+        }
+
+        // --- CALCULATOR ENGINE ---
+        function calcPress(val) {
+            calcExpression += val;
+            document.getElementById('calc-screen').innerText = calcExpression;
+        }
+
+        function calcClear() {
+            calcExpression = "";
+            document.getElementById('calc-screen').innerText = "0";
+        }
+
+        function calcCompute() {
+            try {
+                const res = eval(calcExpression);
+                document.getElementById('calc-screen').innerText = res;
+                calcExpression = String(res);
+            } catch (err) {
+                document.getElementById('calc-screen').innerText = "Error";
+                calcExpression = "";
+            }
+        }
+
+        // --- QUICK SETTINGS ACTIONS ---
+        function updateVolume(val) {
+            const icon = document.getElementById('topbar-sound-icon');
+            if (val == 0) icon.className = "fa-solid fa-volume-xmark hover:text-ubuntu-orange transition-colors";
+            else if (val < 50) icon.className = "fa-solid fa-volume-low hover:text-ubuntu-orange transition-colors";
+            else icon.className = "fa-solid fa-volume-high hover:text-ubuntu-orange transition-colors";
+        }
+
+        function updateBrightness(val) {
+            document.body.style.filter = `brightness(${val}%)`;
+        }
+
+        function toggleQuickToggle(type) {
+            const btn = document.getElementById(`toggle-${type}-btn`);
+            if (btn.classList.contains('bg-ubuntu-orange')) {
+                btn.classList.remove('bg-ubuntu-orange');
+                btn.classList.add('bg-white/10');
+            } else {
+                btn.classList.remove('bg-white/10');
+                btn.classList.add('bg-ubuntu-orange');
+            }
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            alertBox('Theme Changed', 'System color scheme updated.');
+        }
+
+        function setWallpaper(url) {
+            document.body.style.backgroundImage = `url('${url}')`;
+        }
+
+        function installApp(appName) {
+            const btn = document.getElementById(`btn-install-${appName}`);
+            btn.innerText = "Installing...";
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerText = "Installed";
+                btn.classList.remove('bg-ubuntu-orange', 'hover:bg-orange-600');
+                btn.classList.add('bg-green-600');
+            }, 1800);
+        }
+
+        function alertBox(title, message) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        // App Launcher filter
+        function filterApps(query) {
+            // Simple filter implementation
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bab 1 - Sub-Bab 1.3: Hirarki Direktori (FHS) & Hak Akses | TKJ SMK Wikrama Bogor</title>
+  <style>
+    :root {
+      --bg-outer: #0a0e17;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent-cyan: #0284c7;
+      --accent-blue: #1d4ed8;
+      --accent-red: #dc2626;
+      --accent-green: #10b981;
+      --terminal-bg: #0c1017;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "Fira Code", "Consolas", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      height: 56px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 14, 23, 0.95);
+      z-index: 20;
+    }
+
+    .top-left-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu-toggle-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .menu-toggle-btn:hover {
+      background: #334155;
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .top-bar .title {
+      color: #f8fafc;
+      font-weight: 700;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .session-badge {
+      background: rgba(2, 132, 199, 0.15);
+      color: #38bdf8;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      text-transform: uppercase;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .counter-text {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #cbd5e1;
+      font-size: 0.88rem;
+    }
+
+    .nav-arrow-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .nav-arrow-btn:hover {
+      background: #334155;
+    }
+
+    /* Sidebar Drawer (Thumbnail Preview) */
+    .sidebar-overlay {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 100vw;
+      height: calc(100vh - 56px);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .slide-sidebar {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 380px;
+      max-width: 85vw;
+      height: calc(100vh - 56px);
+      background: #0f172a;
+      border-right: 1px solid #1e293b;
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f8fafc;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .sidebar-close-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .sidebar-close-btn:hover { color: #fff; }
+
+    .sidebar-search-box {
+      padding: 12px 18px;
+      border-bottom: 1px solid #1e293b;
+      background: #09101f;
+    }
+
+    .sidebar-search-input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      font-family: var(--font-sans);
+    }
+    .sidebar-search-input:focus { border-color: #38bdf8; }
+
+    .sidebar-scroll-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Thumbnail Card */
+    .thumb-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .thumb-card:hover {
+      background: #273549;
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+    }
+
+    .thumb-card.active {
+      background: rgba(2, 132, 199, 0.15);
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+
+    .thumb-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+    }
+
+    .thumb-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .thumb-tag {
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      font-weight: 600;
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .thumb-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Stage Presentation */
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 28px;
+      min-height: 0;
+    }
+
+    .slide-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      width: 96%;
+      max-width: 1260px;
+      height: 92%;
+      padding: 32px 42px;
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide-card.active {
+      display: flex;
+    }
+
+    /* Cover Card */
+    .slide-card.cover-card {
+      background: radial-gradient(circle at 50% 20%, #172554 0%, #09101f 75%);
+      color: #ffffff;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      padding: 30px 40px;
+    }
+
+    .cover-top-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cover-program {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .cover-subprogram {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .cover-chapter-badge {
+      background: rgba(56, 189, 248, 0.1);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 14px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .cover-main-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .cover-title {
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.15;
+    }
+
+    .cover-subtitle {
+      font-size: 1.05rem;
+      color: #94a3b8;
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    .cover-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 860px;
+      gap: 16px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .teacher-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .teacher-avatar {
+      width: 38px;
+      height: 38px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .teacher-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .teacher-certs {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: #38bdf8;
+    }
+
+    .meta-pills {
+      display: flex;
+      gap: 10px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: #cbd5e1;
+    }
+
+    .meta-pill-item {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    /* Standard Card Header */
+    .slide-header {
+      margin-bottom: 14px;
+    }
+
+    .slide-category {
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 4px;
+    }
+
+    .slide-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    /* Split Layout */
+    .slide-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    .text-content {
+      font-size: 1.08rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .text-content ul {
+      margin-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .text-content li strong {
+      color: var(--text-main);
+    }
+
+    /* Live Interactive Terminal */
+    .terminal-container {
+      background: var(--terminal-bg);
+      border: 1px solid #1f293d;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      height: 100%;
+      min-height: 310px;
+    }
+
+    .terminal-header-bar {
+      background: #111722;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1f293d;
+    }
+
+    .terminal-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-tab-title {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: #94a3b8;
+    }
+
+    .challenge-status {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: var(--font-sans);
+    }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+    .status-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+
+    .terminal-screen {
+      flex: 1;
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #f1f5f9;
+      overflow-y: auto;
+      cursor: text;
+    }
+
+    .history-entry {
+      margin-bottom: 6px;
+    }
+
+    .term-prompt {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .term-path {
+      color: #a855f7;
+    }
+
+    .term-char {
+      color: #f8fafc;
+    }
+
+    .term-output {
+      color: #cbd5e1;
+      margin-top: 2px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .term-output.error {
+      color: #f87171;
+    }
+
+    .term-output.success-msg {
+      color: #34d399;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      border-left: 3px solid #10b981;
+    }
+
+    .terminal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #a7f3d0;
+      caret-color: #38bdf8;
+    }
+
+    .terminal-footer-hint {
+      background: #080c14;
+      padding: 6px 14px;
+      font-size: 0.72rem;
+      color: #64748b;
+      border-top: 1px solid #1f293d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+    }
+    .copy-btn:hover { background: #334155; }
+
+    /* Outro Slide (Slide 50) */
+    .slide-card.outro-card {
+      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #09101f 80%);
+      color: #ffffff;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 32px 40px;
+    }
+
+    .outro-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .outro-quote {
+      font-size: 1.05rem;
+      color: #93c5fd;
+      max-width: 760px;
+      line-height: 1.55;
+      font-style: italic;
+      margin-bottom: 24px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 820px;
+      margin-bottom: 20px;
+    }
+
+    .contact-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .contact-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: #38bdf8;
+    }
+
+    .contact-icon {
+      font-size: 1.6rem;
+    }
+
+    .contact-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .contact-val {
+      font-size: 0.9rem;
+      font-family: var(--font-mono);
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      height: 44px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 0.82rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .bottom-bar kbd {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-left-group">
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Buka Daftar 50 Slide (Tekan M)">
+        <span>☰</span>
+        <span>Daftar Slide</span>
+      </button>
+      <div class="title">
+        <span>TKJ SMK Wikrama • Bab 1 Sub-Bab 1.3: Hirarki Direktori (FHS) & Hak Akses</span>
+        <span class="session-badge" id="session-tag">COVER MODUL</span>
+      </div>
+    </div>
+    <div class="top-controls">
+      <span class="counter-text" id="slide-num">Slide 1 of 50</span>
+      <button class="nav-arrow-btn" onclick="prevSlide()">❮</button>
+      <button class="nav-arrow-btn" onclick="nextSlide()">❯</button>
+    </div>
+  </div>
+
+  <!-- Sidebar Overlay & Drawer -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <div class="slide-sidebar" id="slide-sidebar">
+    <div class="sidebar-header">
+      <span>🗂️ Navigasi Daftar 50 Slide</span>
+      <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
+    </div>
+    <div class="sidebar-search-box">
+      <input type="text" class="sidebar-search-input" id="sidebar-filter" placeholder="Cari materi slide (contoh: chmod, umask, SUID)..." oninput="filterThumbnails()" />
+    </div>
+    <div class="sidebar-scroll-list" id="thumb-list"></div>
+  </div>
+
+  <!-- Stage Presentation -->
+  <div class="stage" id="deck"></div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <span>Navigasi Slide: <kbd>←</kbd> dan <kbd>→</kbd> | Buka Menu: <kbd>M</kbd> | Terminal: Ketik lalu tekan <kbd>Enter</kbd></span>
+    <span>Teknik Komputer dan Jaringan — SMK Wikrama Bogor</span>
+  </div>
+
+  <script>
+    let currentDir = "~";
+    let cmdHistory = [];
+    let historyIdx = -1;
+
+    // Database 50 Slide Lengkap Sub-Bab 1.3
+    const slidesData = [
+      // SLIDE 1: COVER
+      {
+        isCover: true,
+        program: "Program Keahlian: Teknik Jaringan Komputer dan Telekomunikasi",
+        subprogram: "Konsentrasi Keahlian: Teknik Komputer dan Jaringan",
+        chapter: "Bab 1: Arsitektur OS (Linux & Windows) & CLI",
+        title: "Sub-Bab 1.3: Hirarki Direktori (FHS) & Hak Akses",
+        subtitle: "Penguasaan Struktur Direktori Standar UNIX/Linux, Model Hak Akses POSIX (rwx), Nilai Oktal, Bit Khusus (SUID/SGID/Sticky), dan Rumus Formulasi Umask",
+        teacher: "Ardi Ariansyah, S.Kom., Gr.",
+        certs: "MTCNA, MTCRE, ACTR, JPT, DFA, L1 SOC, EHE",
+        meta1: "Alokasi: 3 Sesi Praktikum",
+        meta2: "Total: 50 Slide Interaktif",
+        terminalCmd: "ls -ld /tmp && stat -c \"%a %n\" /etc/shadow",
+        terminalOut: "drwxrwxrwt 25 root root 4096 Sep 21 09:30 /tmp\n640 /etc/shadow",
+        sesi: "COVER MODUL"
+      },
+      // SLIDE 2: ROADMAP
+      {
+        cat: "PETA KOMPETENSI",
+        title: "Roadmap Pembelajaran Sub-Bab 1.3",
+        bullets: [
+          "<strong>Sesi 1 (Slide 1–17):</strong> Filesystem Hierarchy Standard (FHS), Pohon Akar Tunggal (/), Direktori Kritis (/etc, /var, /proc, /dev, /tmp), dan Komparasi Windows.",
+          "<strong>Sesi 2 (Slide 18–34):</strong> Hak Akses POSIX Triad (u-g-o), Perbedaan Berkas vs Direktori, Kalkulasi Oktal (4-2-1), Perintah chmod, chown, dan chgrp.",
+          "<strong>Sesi 3 (Slide 35–50):</strong> Bit Khusus (SUID 4000, SGID 2000, Sticky Bit 1000), Celah Eskalasi GTFOBins, Formulasi Umask, dan Proyek Pengamanan Folder Bersama."
+        ],
+        targetCmd: "ls -ld /",
+        targetHint: "Periksa atribut akar sistem Linux dengan mengetik: ls -ld /",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 3: FILOSOFI
+      {
+        cat: "FILOSOFI SISTEM",
+        title: "Prinsip UNIX: Everything is a File",
+        bullets: [
+          "Di sistem UNIX dan Linux, hampir seluruh entitas direpresentasikan dan diperlakukan sebagai berkas.",
+          "<strong>Berkas Reguler:</strong> Dokumen, biner program, dan teks konfigurasi.",
+          "<strong>Direktori:</strong> Berkas penampung nomor Inode dan nama berkas lain.",
+          "<strong>Hardware:</strong> Perangkat fisik dimodelkan sebagai berkas simpul di `/dev/sda` atau `/dev/tty`.",
+          "Keunggulan: Model pengamanan sistem menjadi sangat seragam dan konsisten!"
+        ],
+        targetCmd: "ls -l /dev/null",
+        targetHint: "Periksa berkas perangkat virtual /dev/null dengan: ls -l /dev/null",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 4: PENGENALAN FHS
+      {
+        cat: "STANDAR INDUSTRI",
+        title: "Mengenal Filesystem Hierarchy Standard (FHS)",
+        bullets: [
+          "Standar resmi yang mengatur penamaan dan lokasi direktori di seluruh distribusi Linux.",
+          "Memastikan aplikasi pihak ketiga dan analis keamanan dapat menemukan file konfigurasi secara konsisten.",
+          "Memisahkan berkas yang bersifat statis (tidak berubah) vs dinamis/variabel.",
+          "Memisahkan berkas yang dapat dibagikan di jaringan (*shareable*) vs lokal sistem."
+        ],
+        targetCmd: "ls -F /",
+        targetHint: "Tampilkan direktori tingkat atas standar FHS dengan: ls -F /",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 5: AKAR POHON
+      {
+        cat: "TOPOLOGI AKAR",
+        title: "Akar Tunggal: The Root Directory ( / )",
+        bullets: [
+          "Linux hanya memiliki **satu akar tunggal ( / )** tanpa konsep huruf drive (C:, D:) seperti Windows.",
+          "Semua partisi fisik, SSD, atau USB flashdisk ditautkan (*mounted*) ke cabang folder di bawah /.",
+          "<strong>Peringatan Penting:</strong> Jangan keliru antara <strong>/</strong> (Root Directory) dengan <strong>/root</strong> (Home milik superuser).",
+          "Kehilangan integritas pada partisi root akan merobohkan kestabilan seluruh sistem operasi."
+        ],
+        targetCmd: "cd / && pwd",
+        targetHint: "Masuk ke akar sistem dan konfirmasi lokasinya: cd / && pwd",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 6: /bin & /sbin
+      {
+        cat: "BINER ESENSIAL",
+        title: "Direktori Biner Inti: /bin dan /sbin",
+        bullets: [
+          "<strong>/bin:</strong> Berisi biner perintah dasar yang digunakan oleh seluruh pengguna (ls, cp, rm, bash).",
+          "<strong>/sbin:</strong> Biner administrasi khusus superuser untuk pengelolaan disk dan firewall (iptables, fdisk).",
+          "Pada Linux modern (*UsrMerge*), kedua folder ini berupa tautan symlink menuju `/usr/bin`.",
+          "Keduanya mutlak tersedia bahkan saat sistem berada dalam mode darurat (*single-user mode*)."
+        ],
+        targetCmd: "ls -ld /bin /sbin",
+        targetHint: "Periksa status symlink UsrMerge dengan: ls -ld /bin /sbin",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 7: /etc
+      {
+        cat: "KONFIGURASI SISTEM",
+        title: "Direktori /etc: Jantung Setelan Mesin",
+        bullets: [
+          "Menyimpan seluruh berkas konfigurasi statis berbasis teks di sistem Linux.",
+          "<strong>/etc/passwd:</strong> Basis data akun pengguna lokal sistem.",
+          "<strong>/etc/shadow:</strong> Berkas sangat rahasia berisi hash kata sandi terenkripsi.",
+          "<strong>/etc/sudoers:</strong> Kebijakan delegasi hak superuser.",
+          "Hanya superuser (root) yang diizinkan menulis di direktori ini demi menjaga integritas OS."
+        ],
+        targetCmd: "ls -l /etc/shadow",
+        targetHint: "Periksa izin ketat berkas kredensial sistem: ls -l /etc/shadow",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 8: /var
+      {
+        cat: "DATA DINAMIS & FORENSIK",
+        title: "Direktori /var: Jejak Log & Bukti Digital",
+        bullets: [
+          "Menampung data variabel yang ukurannya terus bertambah seiring operasi sistem.",
+          "<strong>/var/log:</strong> Repositori utama berkas log peristiwa sistem dan layanan aplikasi.",
+          "<strong>/var/log/auth.log:</strong> Bukti digital otentikasi login SSH dan penggunaan perintah sudo.",
+          "Area pertama yang dituju analis keamanan siber saat investigasi insiden intrusi."
+        ],
+        targetCmd: "ls /var/log",
+        targetHint: "Periksa daftar berkas log forensik sistem dengan: ls /var/log",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 9: PARTISI /var
+      {
+        cat: "ARSITEKTUR PERTAHANAN",
+        title: "Mengapa Partisi /var Wajib Dipisah?",
+        bullets: [
+          "Serangan *Log Flooding* dapat menghasilkan jutaan entri log dalam hitungan menit.",
+          "Jika /var digabung dengan partisi root (/), ruang disk akan habis total dalam sekejap.",
+          "Kehabisan ruang partisi root menyebabkan kernel hang dan server mati (*Denial of Service*).",
+          "Standar keamanan CIS Benchmark mewajibkan /var dipasang di partisi LVM terpisah."
+        ],
+        targetCmd: "df -h /var",
+        targetHint: "Periksa kapasitas partisi direktori var dengan: df -h /var",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 10: /proc
+      {
+        cat: "MEMORI KERNEL",
+        title: "Direktori /proc: Pseudo-Filesystem di RAM",
+        bullets: [
+          "Bukan berkas yang disimpan di hard disk, melainkan struktur data virtual di memori RAM.",
+          "Kernel membuat berkas representasi ini secara instan saat sistem diakses.",
+          "Setiap proses aktif memiliki folder berpenomorkan PID di <code>/proc/[PID]/</code>.",
+          "Memungkinkan inspeksi memori proses tanpa perlu melakukan debugging tingkat lanjut."
+        ],
+        targetCmd: "cat /proc/uptime",
+        targetHint: "Lihat total detik operasional sistem dari kernel: cat /proc/uptime",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 11: /sys & /dev
+      {
+        cat: "ANTARMUKA PERANGKAT",
+        title: "Direktori /sys dan /dev",
+        bullets: [
+          "<strong>/sys (sysfs):</strong> Metadata hierarkis driver dan perangkat keras dari kernel.",
+          "<strong>/dev (Devices):</strong> Simpul representasi periferal fisik (disk, terminal konsol).",
+          "<strong>/dev/null:</strong> Lubang hitam data (apapun yang dikirim langsung dimusnahkan).",
+          "<strong>/dev/urandom:</strong> Generator bilangan acak berkualitas tinggi untuk kriptografi."
+        ],
+        targetCmd: "ls -l /dev/urandom",
+        targetHint: "Periksa berkas generator acak kriptografi: ls -l /dev/urandom",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 12: /tmp
+      {
+        cat: "AREA RAWAN",
+        title: "Direktori /tmp: Sarang Malware Sementara",
+        bullets: [
+          "Folder penyimpanan sementara dengan izin tulis terbuka bagi seluruh pengguna sistem.",
+          "Menjadi lokasi favorit malware untuk mengunduh payload karena akun unprivileged pasti bisa menulis di sini.",
+          "Direktori `/var/tmp` serupa dengan `/tmp`, namun berkasnya tidak dihapus saat sistem *reboot*.",
+          "Wajib dikeraskan (*hardened*) menggunakan opsi mount ketat di fstab."
+        ],
+        targetCmd: "ls -ld /tmp",
+        targetHint: "Periksa izin direktori temporer publik: ls -ld /tmp",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 13: HARDENING /tmp
+      {
+        cat: "MITIGASI SIBER",
+        title: "Hardening /tmp: noexec, nosuid, nodev",
+        bullets: [
+          "<strong>noexec:</strong> Menolak eksekusi biner apapun secara langsung dari folder /tmp.",
+          "<strong>nosuid:</strong> Menonaktifkan efek bit SUID agar penyerang tidak bisa eskalasi hak.",
+          "<strong>nodev:</strong> Mencegah pembuatan simpul perangkat tiruan oleh program jahat.",
+          "Langkah mitigasi mendasar untuk menutup celah web shell dan malware dropper."
+        ],
+        targetCmd: "grep tmpfs /etc/fstab",
+        targetHint: "Periksa aturan proteksi partisi fstab dengan: grep tmpfs /etc/fstab",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 14: /boot & /home
+      {
+        cat: "DIREKTORI LAINNYA",
+        title: "Peran /boot, /home, dan /opt",
+        bullets: [
+          "<strong>/boot:</strong> Menyimpan berkas biner kernel vmlinuz, initramfs, dan bootloader GRUB.",
+          "<strong>/home:</strong> Direktori kerja pribadi bagi masing-masing akun pengguna biasa.",
+          "<strong>/opt:</strong> Lokasi penempatan aplikasi pihak ketiga yang mandiri (misal Splunk, Google Chrome).",
+          "Pemisahan partisi /home melindungi dokumen pengguna dari kehabisan kuota sistem."
+        ],
+        targetCmd: "ls /boot",
+        targetHint: "Lihat berkas kernel dan bootloader di /boot: ls /boot",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 15: LAB 1
+      {
+        cat: "PRAKTIK LAB SESI 1",
+        title: "Lab 1: Pemetaan Pohon Direktori & Titik Mount",
+        bullets: [
+          "Gunakan utilitas `tree` untuk memvisualisasikan hirarki level atas sistem.",
+          "Periksa sistem berkas yang sedang aktif dikaitkan menggunakan perintah `findmnt`.",
+          "Cek kapasitas bebas partisi /var dan /tmp untuk mengantisipasi serangan DoS.",
+          "Identifikasi apakah direktori /bin di mesin lab Anda berstatus folder riil atau symlink."
+        ],
+        targetCmd: "findmnt",
+        targetHint: "Tampilkan tabel mount titik kait sistem dengan: findmnt",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 16: KUIS 1
+      {
+        cat: "EVALUASI SESI 1",
+        title: "Analisis Insiden: Penolakan Eksekusi di /tmp",
+        bullets: [
+          "<strong>Skenario:</strong> Siswa mengunduh skrip `exploit.sh` ke folder `/tmp`.",
+          "Siswa telah memberikan hak penuh `chmod 777 exploit.sh`.",
+          "Namun saat menjalankan `./exploit.sh`, muncul error: <em>'Permission denied'</em>.",
+          "<strong>Analisis:</strong> Opsi keamanan apa yang bekerja menggagalkan skrip tersebut?"
+        ],
+        targetCmd: "cat /etc/fstab",
+        targetHint: "Lihat opsi noexec pada berkas fstab dengan: cat /etc/fstab",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+      // SLIDE 17: RINGKASAN SESI 1
+      {
+        cat: "RINGKASAN SESI 1",
+        title: "Rangkuman Kunci Arsitektur FHS",
+        bullets: [
+          "Linux menggunakan akar tunggal ( / ) sebagai fondasi seluruh penyimpanan.",
+          "Direktori /etc mengendalikan konfigurasi; /var menyimpan bukti jejak serangan.",
+          "Direktori /proc memberikan visibilitas real-time langsung ke memori kernel di RAM.",
+          "Isolasi partisi dan pengetatan mount point (/tmp) meminimalkan dampak eksploitasi."
+        ],
+        targetCmd: "clear",
+        targetHint: "Bersihkan layar terminal untuk melanjutkan ke materi hak akses: clear",
+        sesi: "SESI 1: STRUKTUR FHS"
+      },
+
+      // SESI 2: MODEL HAK AKSES POSIX & NOTASI
+      {
+        cat: "PENGANTAR SESI 2",
+        title: "Model Hak Akses Berkas Tradisional POSIX",
+        bullets: [
+          "Linux dirancang sebagai sistem multi-user dengan pemisahan hak yang ketat.",
+          "Setiap berkas dan folder terikat pada matriks izin akses pemilik dan kelompoknya.",
+          "Mencegah pengguna umum merusak berkas sistem atau mencuri dokumen rekan lainnya.",
+          "Merupakan fondasi utama penerapan kontrol akses teknis di tingkat OS."
+        ],
+        targetCmd: "id",
+        targetHint: "Periksa identitas dan grup akun aktif dengan: id",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 19: TRIAD ENTITAS
+      {
+        cat: "TRIAD ENTITAS",
+        title: "Tiga Kelompok Entitas Pengguna: U-G-O",
+        bullets: [
+          "<strong>User / Owner (u):</strong> Akun individu yang memiliki berkas (biasanya pembuatnya).",
+          "<strong>Group (g):</strong> Kelompok pengguna yang memiliki izin akses kolaboratif pada berkas.",
+          "<strong>Others / World (o):</strong> Semua pengguna lain di sistem yang bukan pemilik dan bukan anggota grup.",
+          "Sistem mengecek kecocokan hak secara hierarkis: jika cocok User, hak Group/Others diabaikan."
+        ],
+        code: "# Skema Triad Hak Akses POSIX\n[ USER (u) ]   -> Pemilik Berkas\n[ GROUP (g) ]  -> Rekan Tim Kerja\n[ OTHERS (o) ] -> Seluruh Akun Lain",
+        targetCmd: "whoami",
+        targetHint: "Ketik whoami untuk memastikan user aktif Anda: whoami",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 20: TIGA HAK DASAR
+      {
+        cat: "HAK DASAR",
+        title: "Tiga Izin Fundamental: Read, Write, Execute",
+        bullets: [
+          "<strong>Read (r):</strong> Izin membuka dan membaca isi konten berkas.",
+          "<strong>Write (w):</strong> Izin mengubah, memodifikasi, atau memotong konten berkas.",
+          "<strong>Execute (x):</strong> Izin mengeksekusi berkas sebagai program aplikasi biner atau skrip.",
+          "Ketiadaan hak akses ditandai dengan karakter tanda hubung (-)."
+        ],
+        targetCmd: "ls -l /etc/passwd",
+        targetHint: "Lihat susunan izin dasar berkas passwd: ls -l /etc/passwd",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 21: DISTINSI BERKAS VS DIREKTORI
+      {
+        cat: "DISTINSI ENTITAS",
+        title: "Perbedaan Makna r-w-x: Berkas vs Direktori",
+        bullets: [
+          "Izin pada berkas dan direktori memiliki dampak perilaku teknis yang berbeda drastis.",
+          "<strong>Read pada folder:</strong> Hanya mengizinkan melihat daftar nama berkas (ls).",
+          "<strong>Write pada folder:</strong> Mengizinkan membuat, mengubah nama, atau <strong>menghapus berkas</strong> di dalamnya!",
+          "<strong>Execute pada folder:</strong> Mengizinkan pengguna masuk melintasinya (cd) dan membaca metadata Inode."
+        ],
+        targetCmd: "ls -ld /home/siswa",
+        targetHint: "Periksa hak r-w-x pada direktori home Anda: ls -ld /home/siswa",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 22: DEKODIFIKASI TERMINAL
+      {
+        cat: "DEKODIFIKASI TERMINAL",
+        title: "Anatomi Baris Izin Perintah ls -l",
+        bullets: [
+          "Karakter ke-1: Tipe berkas (- berkas reguler, d direktori, l symlink).",
+          "Karakter 2–4: Hak akses bagi User pemilik berkas (u).",
+          "Karakter 5–7: Hak akses bagi Group pemilik berkas (g).",
+          "Karakter 8–10: Hak akses bagi Others / Pihak luar (o)."
+        ],
+        targetCmd: "touch app.sh && ls -l app.sh",
+        targetHint: "Buat berkas skrip dan periksa anatomi izinnya: touch app.sh && ls -l app.sh",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 23: MATEMATIKA OKTAL
+      {
+        cat: "MATEMATIKA OKTAL",
+        title: "Sistem Bilangan Oktal (Basis 8)",
+        bullets: [
+          "Setiap triad izin (rwx) dipetakan ke dalam 3 digit biner berbobot nilai pangkat dua.",
+          "<strong>Read (r):</strong> Bernilai 4 (biner 100).",
+          "<strong>Write (w):</strong> Bernilai 2 (biner 010).",
+          "<strong>Execute (x):</strong> Bernilai 1 (biner 001).",
+          "Jumlah ketiga bobot menghasilkan 1 digit nilai oktal (rentang 0 hingga 7)."
+        ],
+        targetCmd: "stat -c \"%a %n\" app.sh",
+        targetHint: "Tampilkan izin app.sh dalam format angka oktal: stat -c \"%a %n\" app.sh",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 24: MATRIKS POPULER
+      {
+        cat: "STANDAR INDUSTRI",
+        title: "Matriks Izin Populer: 755 dan 644",
+        bullets: [
+          "<strong>Mode 755 (rwxr-xr-x):</strong> Standar direktori dan program aplikasi biner umum.",
+          "Pemilik leluasa memodifikasi (7); grup dan publik boleh membaca serta mengeksekusi (5).",
+          "<strong>Mode 644 (rw-r--r--):</strong> Standar dokumen teks biasa, web HTML, dan konfigurasi.",
+          "Pemilik boleh mengedit (6); pihak luar hanya boleh membaca tanpa merusak data (4)."
+        ],
+        targetCmd: "chmod 755 app.sh",
+        targetHint: "Atur izin eksekusi biner standar 755: chmod 755 app.sh",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 25: BAHAYA 777
+      {
+        cat: "DOSA BESAR SIBER",
+        title: "Mengapa Dilarang Keras: chmod 777?",
+        bullets: [
+          "Memberikan hak membaca, mengubah kode, dan mengeksekusi ke seluruh akun di OS.",
+          "Sering menjadi jalan pintas pemula saat menghadapi error 'Permission Denied'.",
+          "Membuat web shell yang diunggah penyerang dapat langsung dieksekusi oleh server.",
+          "Prinsip keamanan mensyaratkan hak seminimal mungkin (*Least Privilege*)."
+        ],
+        targetCmd: "chmod 700 app.sh",
+        targetHint: "Kunci berkas app.sh hanya untuk pemilik sendiri (700): chmod 700 app.sh",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 26: CHMOD OKTAL
+      {
+        cat: "MANIPULASI HAK",
+        title: "Mengubah Izin via Angka Oktal: chmod",
+        bullets: [
+          "Perintah <strong>chmod (Change Mode)</strong> digunakan untuk merombak konfigurasi izin.",
+          "Menggunakan 3 digit angka oktal untuk mengatur User, Group, dan Others sekaligus.",
+          "Hanya pemilik berkas atau superuser (root) yang berhak mengubah izin ini.",
+          "Krusial untuk mengamankan kredensial dan kunci privat kriptografi."
+        ],
+        targetCmd: "touch id_rsa && chmod 600 id_rsa",
+        targetHint: "Kunci berkas kunci privat SSH dengan mode 600: touch id_rsa && chmod 600 id_rsa",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 27: CHMOD SIMBOLIK
+      {
+        cat: "MANIPULASI SIMBOLIK",
+        title: "Mengubah Izin via Notasi Simbolik",
+        bullets: [
+          "Mengubah izin secara selektif tanpa perlu menghitung ulang angka oktal entitas lain.",
+          "<strong>Entitas Target:</strong> u (user), g (group), o (others), a (all/semua).",
+          "<strong>Operator:</strong> + (tambah), - (cabut), = (tetapkan persis).",
+          "Paling sering dipakai untuk memberi izin eksekusi pada berkas skrip buatan sendiri."
+        ],
+        targetCmd: "chmod u+x app.sh",
+        targetHint: "Tambahkan izin eksekusi untuk user pemilik: chmod u+x app.sh",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 28: CHMOD REKURSIF
+      {
+        cat: "AKSI MASSAL",
+        title: "Penerapan Izin Rekursif: Flag -R",
+        bullets: [
+          "Opsi <strong>-R</strong> menerapkan perubahan izin ke seluruh sub-folder dan berkas di dalamnya.",
+          "<strong>Bahaya:</strong> Jangan menjalankan chmod -R 777 / karena akan merusak keamanan OS secara permanen!",
+          "Jika folder kehilangan izin 'x' secara rekursif, Anda tidak akan bisa masuk ke dalam folder tersebut.",
+          "Gunakan utilitas `find` untuk membedakan perlakuan izin folder dan berkas."
+        ],
+        targetCmd: "chmod -R 750 evidence",
+        targetHint: "Terapkan izin 750 ke folder evidence secara rekursif: chmod -R 750 evidence",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 29: CHOWN
+      {
+        cat: "KEPEMILIKAN USER",
+        title: "Mengubah Pemilik Berkas: chown",
+        bullets: [
+          "Perintah <strong>chown (Change Owner)</strong> memindahkan kepemilikan berkas ke akun lain.",
+          "Hanya superuser (root) yang berwenang memindahkan pemilik berkas.",
+          "Dapat mengganti user dan group sekaligus menggunakan pemisah titik dua (:).",
+          "Digunakan saat migrasi direktori aplikasi ke akun service khusus (*daemon*)."
+        ],
+        targetCmd: "chown siswa:siswa app.sh",
+        targetHint: "Tetapkan kepemilikan user dan grup siswa: chown siswa:siswa app.sh",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 30: CHGRP
+      {
+        cat: "KEPEMILIKAN GRUP",
+        title: "Mengubah Grup Berkas: chgrp",
+        bullets: [
+          "Perintah <strong>chgrp (Change Group)</strong> khusus untuk mengganti kepemilikan grup berkas.",
+          "Pengguna biasa dapat mengubah grup berkasnya ke grup lain asalkan ia terdaftar di grup tersebut.",
+          "Memfasilitasi kerja kolaborasi antar-rekan satu divisi tanpa perlu meminta bantuan root.",
+          "Mendukung opsi -R untuk perubahan berkas secara massal."
+        ],
+        targetCmd: "chgrp tkj app.sh",
+        targetHint: "Ganti kepemilikan grup berkas menjadi grup tkj: chgrp tkj app.sh",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 31: LAB 2
+      {
+        cat: "PRAKTIK LAB SESI 2",
+        title: "Lab 2: Eksperimen Matriks Hak Akses",
+        bullets: [
+          "Buat berkas skrip bash baru dan amati pesan galat saat dijalankan tanpa izin eksekusi.",
+          "Ubah izin menggunakan notasi simbolik `chmod +x`.",
+          "Kunci berkas rahasia dengan mode `chmod 600`.",
+          "Ganti sesi ke akun pengguna lain dan verifikasi penolakan akses oleh sistem."
+        ],
+        targetCmd: "chmod 600 status.txt",
+        targetHint: "Kunci berkas status.txt agar hanya bisa dibaca pemilik: chmod 600 status.txt",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 32: KASUS SSH KEY
+      {
+        cat: "STUDI KASUS INSIDEN",
+        title: "Kasus: Kunci Privat SSH Terlalu Terbuka",
+        bullets: [
+          "Pengguna melakukan SSH remote: <code>ssh -i id_rsa root@192.168.1.10</code>.",
+          "Koneksi ditolak: <em>'Permissions 0644 for id_rsa are too open'</em>.",
+          "Klien SSH menolak membaca kunci privat yang dapat diakses oleh pihak luar.",
+          "<strong>Solusi:</strong> Kunci wajib dikunci dengan izin absolut <code>chmod 600 id_rsa</code>."
+        ],
+        targetCmd: "ls -l id_rsa",
+        targetHint: "Pastikan izin id_rsa berformat -rw-------: ls -l id_rsa",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 33: KUIS SESI 2
+      {
+        cat: "EVALUASI SESI 2",
+        title: "Kuis Cepat: Menghitung Nilai Oktal",
+        bullets: [
+          "Konversikan notasi simbolik berikut ke dalam nilai 3 digit oktal:",
+          "1. <code>-rwxr-xr--</code>  →  ( Bobot: ? )",
+          "2. <code>-rw-r-----</code>  →  ( Bobot: ? )",
+          "3. <code>drwxr-x---</code>  →  ( Bobot: ? )",
+          "4. <code>-r--------</code>  →  ( Bobot: ? )"
+        ],
+        targetCmd: "echo \"754, 640, 750, 400\"",
+        targetHint: "Ketik jawaban kalkulasi oktal dengan: echo \"754, 640, 750, 400\"",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+      // SLIDE 34: RINGKASAN SESI 2
+      {
+        cat: "RINGKASAN SESI 2",
+        title: "Rangkuman Kunci Hak Akses POSIX",
+        bullets: [
+          "Hak akses dikelompokkan ke dalam Triad Entitas: User, Group, dan Others.",
+          "Sistem oktal menjumlahkan bobot biner: Read (4), Write (2), dan Execute (1).",
+          "Izin Execute pada folder mutlak dibutuhkan untuk berpindah direktori (cd).",
+          "Terapkan Prinsip Privilese Terendah: gunakan 600 untuk kunci privat, 640 untuk kredensial."
+        ],
+        targetCmd: "clear",
+        targetHint: "Bersihkan layar terminal untuk bersiap ke Sesi 3: clear",
+        sesi: "SESI 2: MODEL HAK AKSES POSIX"
+      },
+
+      // SESI 3: SPECIAL BITS, UMASK & SECURITY
+      {
+        cat: "PENGANTAR SESI 3",
+        title: "Bit Izin Khusus & Pengendalian Umask",
+        bullets: [
+          "Matriks standar (rwx) tidak mampu menyelesaikan seluruh kebutuhan sistem multi-user.",
+          "Tersedia 3 bit khusus: <strong>SUID (4000)</strong>, <strong>SGID (2000)</strong>, dan <strong>Sticky Bit (1000)</strong>.",
+          "Penentuan hak bawaan saat berkas baru dibuat dikendalikan oleh filter <strong>Umask</strong>.",
+          "Merupakan area audit paling krusial untuk mencegah eskalasi hak akses (*Privilege Escalation*)."
+        ],
+        targetCmd: "umask",
+        targetHint: "Periksa nilai filter umask bawaan sesi Anda: umask",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 36: SUID
+      {
+        cat: "SPECIAL BITS 1",
+        title: "SUID (Set User ID): Eksekusi Atas Nama Pemilik",
+        bullets: [
+          "Saat biner dieksekusi, proses berjalan dengan hak akses **pemilik berkas**, bukan hak si pengeksekusi.",
+          "Memiliki bobot oktal <strong>4000</strong>; ditandai huruf <strong>s</strong> pada kolom execute User.",
+          "Dibutuhkan oleh program sistem yang perlu mengubah berkas penting atas nama pengguna umum.",
+          "Contoh klasik: biner `/usr/bin/passwd` yang perlu mengedit berkas `/etc/shadow` milik root."
+        ],
+        targetCmd: "ls -l /usr/bin/passwd",
+        targetHint: "Periksa keberadaan bit SUID pada biner passwd: ls -l /usr/bin/passwd",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 37: BAHAYA SUID
+      {
+        cat: "VEKTOR SERANGAN SIBER",
+        title: "Bahaya Eksploitasi SUID: Privilege Escalation",
+        bullets: [
+          "Jika admin secara keliru memberi bit SUID pada biner yang bisa membaca disk atau memanggil shell.",
+          "Pengguna umum dapat mengeksploitasinya untuk meloncat seketika menjadi superuser **root**.",
+          "Biner berbahaya jika diberi SUID: vim, bash, find, python, nmap, less, curl.",
+          "Daftar biner rentan terdokumentasi lengkap dalam basis data peretasan **GTFOBins**."
+        ],
+        targetCmd: "find / -perm -4000 2>/dev/null",
+        targetHint: "Pindai biner yang memiliki bit SUID di sistem: find / -perm -4000 2>/dev/null",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 38: SGID
+      {
+        cat: "SPECIAL BITS 2",
+        title: "SGID (Set Group ID): Kolaborasi Folder Bersama",
+        bullets: [
+          "Memiliki bobot oktal <strong>2000</strong>; ditandai huruf <strong>s</strong> pada kolom execute Group.",
+          "<strong>Pada Berkas:</strong> Berjalan menggunakan hak akses grup pemilik berkas.",
+          "<strong>Pada Direktori:</strong> Setiap berkas baru yang dibuat di dalamnya otomatis **mewarisi grup folder tersebut**.",
+          "Sangat berguna untuk direktori kolaborasi tim tanpa perlu mengubah grup berkas satu per satu."
+        ],
+        targetCmd: "chmod 2770 evidence",
+        targetHint: "Terapkan bit SGID pada folder evidence: chmod 2770 evidence",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 39: STICKY BIT
+      {
+        cat: "SPECIAL BITS 3",
+        title: "Sticky Bit: Pengaman Direktori Publik",
+        bullets: [
+          "Memiliki bobot oktal <strong>1000</strong>; ditandai huruf <strong>t</strong> pada kolom execute Others.",
+          "Mencegah pengguna menghapus atau memindahkan berkas milik pengguna lain di folder bersama.",
+          "Meskipun folder berizin tulis terbuka (777), berkas hanya boleh dihapus oleh **pembuat aslinya** atau root.",
+          "Merupakan mekanisme pertahanan mutlak pada folder bersama seperti /tmp dan /var/tmp."
+        ],
+        targetCmd: "ls -ld /tmp",
+        targetHint: "Periksa karakter t Sticky Bit pada direktori /tmp: ls -ld /tmp",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 40: HURUF BESAR VS KECIL
+      {
+        cat: "TATA HURUF SIMBOLIK",
+        title: "Arti Huruf Besar vs Huruf Kecil (s/S dan t/T)",
+        bullets: [
+          "<strong>Huruf Kecil (s / t):</strong> Konfigurasi SEHAT. Izin eksekusi dasar (x) aktif sebelum bit khusus dipasang.",
+          "<strong>Huruf Besar (S / T):</strong> Peringatan! Bit khusus dipasang, tetapi **izin eksekusi dasar (x) TIDAK ADA**.",
+          "Contoh <code>-rwSr-xr-x</code>: SUID dipasang pada berkas yang tidak bisa dieksekusi oleh siapapun.",
+          "Keberadaan huruf besar menandakan anomali konfigurasi dari administrator."
+        ],
+        targetCmd: "ls -ld /var/tmp",
+        targetHint: "Pastikan direktori /var/tmp juga berstatus sehat (t kecil): ls -ld /var/tmp",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 41: UMASK DASAR
+      {
+        cat: "FILTER BAWAAN",
+        title: "Mengenal Umask (User Mask)",
+        bullets: [
+          "Menentukan hak akses secara otomatis saat berkas atau folder baru dibuat oleh pengguna.",
+          "Berfungsi sebagai filter <strong>pengurang (topeng masker)</strong> dari izin maksimal sistem.",
+          "Linux secara default **tidak pernah memberi izin eksekusi (x) pada berkas baru** demi keselamatan.",
+          "Nilai umask bawaan pada kebanyakan distribusi Linux adalah <code>0022</code> atau <code>0002</code>."
+        ],
+        targetCmd: "umask -S",
+        targetHint: "Tampilkan filter umask dalam format simbolik: umask -S",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 42: RUMUS UMASK
+      {
+        cat: "RUMUS KALKULASI",
+        title: "Perhitungan Matematika Umask 022",
+        bullets: [
+          "Rumus dasar: <strong>Izin Maksimal - Nilai Umask = Izin Akhir</strong>.",
+          "<strong>Untuk Direktori:</strong> 777 - 022 = <strong>755</strong> (rwxr-xr-x).",
+          "<strong>Untuk Berkas Reguler:</strong> 666 - 022 = <strong>644</strong> (rw-r--r--).",
+          "Hasilnya: Others kehilangan izin tulis sehingga tidak bisa mengubah dokumen baru Anda."
+        ],
+        targetCmd: "touch test_umask.txt && ls -l test_umask.txt",
+        targetHint: "Buktikan izin 644 berkas baru: touch test_umask.txt && ls -l test_umask.txt",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 43: UMASK 027 HARDENING
+      {
+        cat: "PENGERASAN SERVER",
+        title: "Hardening Server dengan Umask 027",
+        bullets: [
+          "Umask 022 masih mengizinkan pihak luar membaca dokumen baru Anda (Others berizin 4 / r--).",
+          "Pada server dengan standar keamanan tinggi, umask diperketat menjadi <strong>027</strong>.",
+          "<strong>Direktori Baru:</strong> 777 - 027 = <strong>750</strong> (rwxr-x---).",
+          "<strong>Berkas Baru:</strong> 666 - 027 = <strong>640</strong> (rw-r-----).",
+          "Pengguna luar (Others) langsung mendapatkan nilai 0 (ditutup total tanpa akses)."
+        ],
+        targetCmd: "umask 027",
+        targetHint: "Perketat umask sesi aktif menjadi 027: umask 027",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 44: MEMBUKTIKAN UMASK 027
+      {
+        cat: "VERIFIKASI PENGUATAN",
+        title: "Verifikasi Berkas Baru Pasca-Umask 027",
+        bullets: [
+          "Setelah umask 027 diterapkan, setiap berkas baru yang dibuat otomatis berizin 640.",
+          "Orang lain (*Others*) sama sekali tidak bisa membaca atau menyalin isi dokumen.",
+          "Mencegah kebocoran data sensitif antar-pengguna lokal di server *multi-tenant*.",
+          "Konfigurasi permanen disimpan di berkas `/etc/profile` atau `/etc/login.defs`."
+        ],
+        targetCmd: "touch secure_doc.txt && ls -l secure_doc.txt",
+        targetHint: "Buktikan berkas baru kini berizin 640: touch secure_doc.txt && ls -l secure_doc.txt",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 45: AUDIT SUID LIAR
+      {
+        cat: "AUDIT PERBURUAN",
+        title: "Perintah Sakti Berburu Biner SUID Liar",
+        bullets: [
+          "Analis keamanan wajib rutin memindai biner SUID untuk mendeteksi instalasi pintu belakang (*backdoor*).",
+          "Menggunakan perintah `find` dengan parameter filter izin <code>-perm -4000</code>.",
+          "Mengarahkan pesan galat penolakan hak ke saluran <code>2>/dev/null</code>.",
+          "Bandingkan hasilnya dengan biner SUID legal bawaan distro (sudo, passwd, ping)."
+        ],
+        targetCmd: "find /usr/bin -perm -4000 2>/dev/null",
+        targetHint: "Pindai biner SUID di /usr/bin: find /usr/bin -perm -4000 2>/dev/null",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 46: AUDIT SGID & STICKY
+      {
+        cat: "AUDIT PERBURUAN",
+        title: "Memindai Direktori SGID dan Sticky Bit",
+        bullets: [
+          "Filter <code>-perm -2000</code> untuk melacak berkas dan folder berstatus SGID.",
+          "Filter <code>-perm -1000</code> untuk melacak direktori publik berstatus Sticky Bit.",
+          "Pastikan folder bersama tidak kehilangan Sticky Bit agar tidak terjadi sabotase penghapusan berkas.",
+          "Dokumentasikan seluruh direktori publik dalam laporan inventarisasi aset TI."
+        ],
+        targetCmd: "find / -perm -1000 -type d 2>/dev/null",
+        targetHint: "Cari direktori Sticky Bit di sistem: find / -perm -1000 -type d 2>/dev/null",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 47: TANTANGAN PROYEK
+      {
+        cat: "TANTANGAN PROYEK",
+        title: "Tantangan Proyek: Mengamankan Folder Keuangan",
+        bullets: [
+          "Buat direktori kolaborasi: <code>finance_share</code>.",
+          "Atur agar anggota tim keuangan (`tkj`) dapat membaca dan mengedit berkas.",
+          "Setiap berkas baru wajib otomatis mewarisi grup `tkj` (Gunakan SGID!).",
+          "Anggota tim dilarang saling menghapus berkas rekan kerjanya (Gunakan Sticky Bit!).",
+          "Kombinasi bobot 4 digit: 1000 (Sticky) + 2000 (SGID) = <strong>3000</strong>. Triad: <strong>770</strong>."
+        ],
+        targetCmd: "mkdir finance_share && chmod 3770 finance_share",
+        targetHint: "Terapkan mode 4 digit 3770 pada folder: mkdir finance_share && chmod 3770 finance_share",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 48: VERIFIKASI PROYEK
+      {
+        cat: "VERIFIKASI PROYEK",
+        title: "Validasi Hasil Akhir Tantangan Proyek",
+        bullets: [
+          "Periksa izin folder menggunakan perintah <code>ls -ld finance_share</code>.",
+          "Output izin yang benar harus berformat: <strong>drwxrws--t</strong>.",
+          "Karakter 's' pada kolom grup memvalidasi bahwa pewarisan SGID aktif.",
+          "Karakter 't' pada kolom others memvalidasi bahwa proteksi Sticky Bit aktif mengunci berkas."
+        ],
+        targetCmd: "ls -ld finance_share",
+        targetHint: "Validasi format drwxrws--t dengan: ls -ld finance_share",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 49: RANGKUMAN FINAL
+      {
+        cat: "RANGKUMAN FINAL",
+        title: "Rangkuman Menyeluruh Sub-Bab 1.3",
+        bullets: [
+          "FHS menyeragamkan struktur direktori inti (/etc, /var, /proc, /dev, /tmp) di seluruh sistem Linux.",
+          "Model hak akses POSIX mengontrol akses berkas melalui Triad u-g-o dan nilai oktal 4-2-1.",
+          "SUID (4000) menjalankan biner atas nama pemilik; rawan eksploitasi jika disematkan sembarangan.",
+          "Umask menyaring hak akses bawaan berkas baru sejak detik pertama berkas tersebut diciptakan."
+        ],
+        targetCmd: "echo \"Sub-Bab 1.3 Tuntas!\"",
+        targetHint: "Rayakan ketuntasan materi dengan mengetik: echo \"Sub-Bab 1.3 Tuntas!\"",
+        sesi: "SESI 3: SPECIAL BITS & UMASK"
+      },
+      // SLIDE 50: SLIDE PENUTUP & KONTAK RESMI
+      {
+        isOutro: true,
+        title: "Terima Kasih & Tetap Semangat Belajar!",
+        quote: "“Penguasaan hirarki direktori dan tata kelola hak akses adalah garis pertahanan pertama kedaulatan data. Sistem yang kokoh dibangun dari izin berkas yang disiplin dan presisi.”",
+        email: "tkj@smkwikrama.sch.id",
+        instagram: "@tkjwikrama74",
+        website: "www.smkwikrama.sch.id",
+        sesi: "PENUTUP & KONTAK"
+      }
+    ];
+
+    let currentSlide = 0;
+    const totalSlides = slidesData.length;
+    const deck = document.getElementById("deck");
+    const slideNum = document.getElementById("slide-num");
+    const sessionTag = document.getElementById("session-tag");
+    const thumbList = document.getElementById("thumb-list");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+    const slideSidebar = document.getElementById("slide-sidebar");
+
+    // Virtual Database Sistem Berkas & Hak Akses
+    const virtualFiles = {
+      "/etc/shadow": "root:$6$rounds=4096$salt$hash:19820:0:99999:7:::\nsiswa:$6$rounds=4096$salt$hash:19820:0:99999:7:::",
+      "/etc/fstab": "# /etc/fstab: static file system information.\n/dev/sda2   /       ext4    defaults        0   1\ntmpfs       /tmp    tmpfs   defaults,noexec,nosuid,nodev  0  0",
+      "/proc/uptime": "14285.24 28410.12",
+      "status.txt": "Kasus 01 Selesai\nKasus 02 Dibuka"
+    };
+
+    let userUmask = "0022";
+
+    // Render Thumbnail Drawer
+    function renderThumbnails() {
+      thumbList.innerHTML = "";
+      slidesData.forEach((slide, idx) => {
+        const thumb = document.createElement("div");
+        thumb.className = "thumb-card" + (idx === currentSlide ? " active" : "");
+        thumb.id = `thumb-${idx}`;
+        thumb.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+
+        const tagText = slide.isCover ? "COVER" : (slide.isOutro ? "PENUTUP" : (slide.cat || "MATERI"));
+        const titleText = slide.title || `Slide #${idx + 1}`;
+
+        thumb.innerHTML = `
+          <div class="thumb-top-row">
+            <span class="thumb-num">#${String(idx + 1).padStart(2, '0')}</span>
+            <span class="thumb-tag">${tagText}</span>
+          </div>
+          <div class="thumb-title">${titleText}</div>
+        `;
+        thumbList.appendChild(thumb);
+      });
+    }
+
+    function filterThumbnails() {
+      const q = document.getElementById("sidebar-filter").value.toLowerCase();
+      slidesData.forEach((slide, idx) => {
+        const el = document.getElementById(`thumb-${idx}`);
+        const textToSearch = `${idx + 1} ${slide.title || ""} ${slide.cat || ""} ${slide.subtitle || ""}`.toLowerCase();
+        if (textToSearch.includes(q)) {
+          el.style.display = "flex";
+        } else {
+          el.style.display = "none";
+        }
+      });
+    }
+
+    function toggleSidebar() {
+      const isOpen = slideSidebar.classList.contains("open");
+      if (isOpen) {
+        slideSidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("open");
+      } else {
+        slideSidebar.classList.add("open");
+        sidebarOverlay.classList.add("open");
+        const activeThumb = document.getElementById(`thumb-${currentSlide}`);
+        if (activeThumb) {
+          activeThumb.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+        document.getElementById("sidebar-filter").focus();
+      }
+    }
+
+    function renderDeck() {
+      deck.innerHTML = "";
+      slidesData.forEach((slide, idx) => {
+        const card = document.createElement("div");
+        card.className = "slide-card" + (idx === currentSlide ? " active" : "") 
+          + (slide.isCover ? " cover-card" : "")
+          + (slide.isOutro ? " outro-card" : "");
+
+        if (slide.isCover) {
+          card.innerHTML = `
+            <div class="cover-top-header">
+              <div class="cover-program">${slide.program}</div>
+              <div class="cover-subprogram">${slide.subprogram}</div>
+              <div class="cover-chapter-badge">${slide.chapter}</div>
+            </div>
+
+            <div class="cover-main-hero">
+              <h1 class="cover-title">${slide.title}</h1>
+              <p class="cover-subtitle">${slide.subtitle}</p>
+            </div>
+            
+            <div class="terminal-container" style="max-width: 680px; width: 100%; height: 200px; min-height: 200px;">
+              <div class="terminal-header-bar">
+                <div class="terminal-dots">
+                  <span class="dot dot-red"></span>
+                  <span class="dot dot-yellow"></span>
+                  <span class="dot dot-green"></span>
+                </div>
+                <div class="terminal-tab-title">bash — siswa@wikrama-lab:~</div>
+                <span class="challenge-status status-success">FHS & Permissions Engine Ready</span>
+              </div>
+              <div class="terminal-screen" style="font-size: 0.8rem;">
+                <div><span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">~</span><span class="term-char">$</span> ${slide.terminalCmd}</div>
+                <div class="term-output" style="color:#a7f3d0;">${slide.terminalOut}</div>
+                <div style="margin-top: 8px; color: #94a3b8;">💡 <em>Klik tombol "☰ Daftar Slide" di kiri atas untuk berpindah ke 50 materi slide lainnya!</em></div>
+              </div>
+            </div>
+
+            <div class="cover-bottom-bar">
+              <div class="teacher-card">
+                <div class="teacher-avatar">👨‍🏫</div>
+                <div>
+                  <div class="teacher-name">Guru Pengampu: ${slide.teacher}</div>
+                  <div class="teacher-certs">${slide.certs}</div>
+                </div>
+              </div>
+              <div class="meta-pills">
+                <span class="meta-pill-item">📅 ${slide.meta1}</span>
+                <span class="meta-pill-item">📊 ${slide.meta2}</span>
+              </div>
+            </div>
+          `;
+        } else if (slide.isOutro) {
+          card.innerHTML = `
+            <h1 class="outro-title">${slide.title}</h1>
+            <p class="outro-quote">${slide.quote}</p>
+            
+            <div class="contact-grid">
+              <div class="contact-card">
+                <div class="contact-icon">✉️</div>
+                <div class="contact-label">Email Kejuruan</div>
+                <div class="contact-val">${slide.email}</div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-icon">📸</div>
+                <div class="contact-label">Instagram TKJ</div>
+                <div class="contact-val">${slide.instagram}</div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-icon">🌐</div>
+                <div class="contact-label">Portal Sekolah</div>
+                <div class="contact-val">${slide.website}</div>
+              </div>
+            </div>
+
+            <div class="meta-pill-item" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); padding: 8px 18px; border-radius: 8px; color: #cbd5e1; font-size: 0.85rem; margin-top: 10px;">
+              <span>🛡️ Laboratorium Jaringan Komputer & Keamanan Siber — SMK Wikrama Kota Bogor</span>
+            </div>
+          `;
+        } else {
+          let bulletsHtml = slide.bullets.map(b => `<li>${b}</li>`).join("");
+
+          card.innerHTML = `
+            <div class="slide-header">
+              <div class="slide-category">${slide.cat}</div>
+              <h2 class="slide-title">${slide.title}</h2>
+            </div>
+            <div class="slide-body">
+              <div class="text-content">
+                <ul>${bulletsHtml}</ul>
+                <div style="margin-top: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 0.95rem;">
+                  <strong style="color: #1e40af;">🎯 Tantangan Praktik Slide Ini:</strong><br>
+                  <span style="color: #1e3a8a;">${slide.targetHint || "Ketik perintah di terminal interaktif sebelah kanan."}</span>
+                </div>
+              </div>
+
+              <!-- Terminal Ubuntu Simulasi Interaktif -->
+              <div class="terminal-container">
+                <div class="terminal-header-bar">
+                  <div class="terminal-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </div>
+                  <div class="terminal-tab-title">bash — siswa@wikrama-lab:${currentDir}</div>
+                  <span class="challenge-status status-pending" id="status-badge-${idx}">Tantangan Belum Dicoba</span>
+                </div>
+                
+                <div class="terminal-screen" id="term-screen-${idx}" onclick="focusTerminalInput(${idx})">
+                  <div class="history-entry">
+                    <span style="color: #64748b;"># Ubuntu FHS & Permissions Interactive Terminal Lab</span><br>
+                    <span style="color: #64748b;"># Jalankan perintah Linux sesuai materi dan perhatikan hasilnya.</span>
+                  </div>
+                  <div id="cmd-history-output-${idx}"></div>
+                  
+                  <div class="terminal-input-row">
+                    <span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">${currentDir}</span><span class="term-char">$</span>
+                    <input type="text" class="term-input" id="term-input-${idx}" autocomplete="off" spellcheck="false" 
+                      onkeydown="handleTerminalInput(event, ${idx}, '${slide.targetCmd || ""}')" />
+                  </div>
+                </div>
+
+                <div class="terminal-footer-hint">
+                  <span>Target: <code style="color: #38bdf8;">${slide.targetCmd || "Bebas Eksplorasi"}</code></span>
+                  ${slide.targetCmd ? `<button class="copy-btn" onclick="autoFillCmd(${idx}, '${slide.targetCmd}')">Salin ke Input</button>` : ""}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        deck.appendChild(card);
+      });
+      renderThumbnails();
+      updateMeta();
+    }
+
+    function updateMeta() {
+      slideNum.innerText = `Slide ${currentSlide + 1} of ${totalSlides}`;
+      sessionTag.innerText = slidesData[currentSlide].sesi;
+      
+      const cards = document.querySelectorAll(".slide-card");
+      cards.forEach((c, i) => c.classList.toggle("active", i === currentSlide));
+
+      const thumbs = document.querySelectorAll(".thumb-card");
+      thumbs.forEach((t, i) => t.classList.toggle("active", i === currentSlide));
+
+      setTimeout(() => {
+        focusTerminalInput(currentSlide);
+      }, 100);
+    }
+
+    function focusTerminalInput(slideIdx) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      if (inp) inp.focus();
+    }
+
+    function autoFillCmd(slideIdx, cmdText) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      if (inp) {
+        inp.value = cmdText;
+        inp.focus();
+      }
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateMeta();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateMeta();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateMeta();
+      }
+    }
+
+    // Engine Eksekusi Terminal FHS & Hak Akses
+    function handleTerminalInput(e, slideIdx, targetCommand) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      const historyDiv = document.getElementById(`cmd-history-output-${slideIdx}`);
+      const statusBadge = document.getElementById(`status-badge-${slideIdx}`);
+
+      if (e.key === "Enter") {
+        const rawCmd = inp.value.trim();
+        if (!rawCmd) return;
+
+        cmdHistory.push(rawCmd);
+        historyIdx = cmdHistory.length;
+
+        const entryHtml = document.createElement("div");
+        entryHtml.className = "history-entry";
+        entryHtml.innerHTML = `<div><span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">${currentDir}</span><span class="term-char">$</span> ${escapeHtml(rawCmd)}</div>`;
+
+        const [outputHtml, isSuccess] = executeMockFHSBash(rawCmd);
+        entryHtml.innerHTML += outputHtml;
+        historyDiv.appendChild(entryHtml);
+
+        const cleanRaw = rawCmd.replace(/\s+/g, " ").trim();
+        const cleanTarget = targetCommand.replace(/\s+/g, " ").trim();
+
+        if (cleanTarget && (cleanRaw === cleanTarget || cleanRaw.includes(cleanTarget))) {
+          statusBadge.className = "challenge-status status-success";
+          statusBadge.innerText = "✓ TANTANGAN BERHASIL!";
+          const successAlert = document.createElement("div");
+          successAlert.className = "term-output success-msg";
+          successAlert.innerText = "🎉 Bagus sekali! Sintaks perintah FHS / Hak Akses berhasil dievaluasi tepat.";
+          historyDiv.appendChild(successAlert);
+        }
+
+        inp.value = "";
+        const screen = document.getElementById(`term-screen-${slideIdx}`);
+        screen.scrollTop = screen.scrollHeight;
+      } else if (e.key === "ArrowUp") {
+        if (cmdHistory.length > 0 && historyIdx > 0) {
+          historyIdx--;
+          inp.value = cmdHistory[historyIdx];
+        }
+      } else if (e.key === "ArrowDown") {
+        if (historyIdx < cmdHistory.length - 1) {
+          historyIdx++;
+          inp.value = cmdHistory[historyIdx];
+        } else {
+          historyIdx = cmdHistory.length;
+          inp.value = "";
+        }
+      }
+    }
+
+    function executeMockFHSBash(cmd) {
+      const parts = cmd.split(" ");
+      const base = parts[0].toLowerCase();
+
+      // Penanganan Pipeline & Redirection
+      if (cmd.includes("grep tmpfs")) {
+        return [`<div class="term-output">tmpfs       /tmp    tmpfs   defaults,noexec,nosuid,nodev  0  0</div>`, true];
+      }
+      if (cmd.includes("find / -perm -4000") || cmd.includes("find /usr/bin -perm -4000") || cmd.includes("find /usr -perm -4000")) {
+        return [`<div class="term-output">/usr/bin/passwd\n/usr/bin/sudo\n/usr/bin/chsh\n/usr/bin/newgrp\n/usr/bin/pkexec</div>`, true];
+      }
+      if (cmd.includes("find / -perm -1000") || cmd.includes("find / -perm -2000")) {
+        return [`<div class="term-output">/tmp\n/var/tmp\n/var/crash</div>`, true];
+      }
+
+      switch (base) {
+        case "pwd":
+          return [`<div class="term-output">${currentDir === "~" ? "/home/siswa" : currentDir}</div>`, true];
+
+        case "whoami":
+          return [`<div class="term-output">siswa</div>`, true];
+
+        case "id":
+          return [`<div class="term-output">uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo),1001(tkj)</div>`, true];
+
+        case "clear":
+          setTimeout(() => {
+            const hist = document.getElementById(`cmd-history-output-${currentSlide}`);
+            if (hist) hist.innerHTML = "";
+          }, 50);
+          return ["", true];
+
+        case "cd":
+          const target = parts[1] || "~";
+          if (target === "/" || target === "/root") {
+            currentDir = "/";
+            return ["", true];
+          } else if (target === "~" || target === "/home/siswa") {
+            currentDir = "~";
+            return ["", true];
+          } else if (target === "/var/log" || target === "/var" || target === "/tmp") {
+            currentDir = target;
+            return ["", true];
+          }
+          return [`<div class="term-output error">bash: cd: ${escapeHtml(target)}: No such file or directory</div>`, false];
+
+        case "ls":
+          if (cmd.includes("-ld /") || cmd === "ls -ld /") {
+            return [`<div class="term-output">drwxr-xr-x 19 root root 4096 Sep 21 08:00 /</div>`, true];
+          }
+          if (cmd.includes("-ld /tmp")) {
+            return [`<div class="term-output">drwxrwxrwt 25 root root 4096 Sep 21 09:30 /tmp</div>`, true];
+          }
+          if (cmd.includes("-ld /var/tmp")) {
+            return [`<div class="term-output">drwxrwxrwt  2 root root 4096 Sep 21 08:00 /var/tmp</div>`, true];
+          }
+          if (cmd.includes("-ld /bin /sbin")) {
+            return [`<div class="term-output">lrwxrwxrwx 1 root root 7 Sep 21 08:00 /bin -> usr/bin\nlrwxrwxrwx 1 root root 8 Sep 21 08:00 /sbin -> usr/bin</div>`, true];
+          }
+          if (cmd.includes("-F /")) {
+            return [`<div class="term-output" style="color:#38bdf8;">bin@   boot/  dev/   etc/   home/  lib@   opt/   proc/  root/  run/   sbin@  sys/   tmp/   usr/   var/</div>`, true];
+          }
+          if (cmd.includes("-l /etc/shadow")) {
+            return [`<div class="term-output">-rw-r----- 1 root shadow 1420 Sep 21 08:30 /etc/shadow</div>`, true];
+          }
+          if (cmd.includes("/var/log")) {
+            return [`<div class="term-output">auth.log   syslog   dpkg.log   nginx/   journal/   kern.log</div>`, true];
+          }
+          if (cmd.includes("-l /dev/urandom") || cmd.includes("-l /dev/null")) {
+            return [`<div class="term-output">crw-rw-rw- 1 root root 1, 3 Sep 21 08:00 /dev/null\ncrw-rw-rw- 1 root root 1, 9 Sep 21 08:00 /dev/urandom</div>`, true];
+          }
+          if (cmd.includes("/boot")) {
+            return [`<div class="term-output">vmlinuz-6.8.0-45-generic   initrd.img-6.8.0-45-generic   config-6.8.0-45-generic   grub/</div>`, true];
+          }
+          if (cmd.includes("-l /etc/passwd")) {
+            return [`<div class="term-output">-rw-r--r-- 1 root root 1840 Sep 21 08:30 /etc/passwd</div>`, true];
+          }
+          if (cmd.includes("-ld /home/siswa")) {
+            return [`<div class="term-output">drwxr-x--- 14 siswa siswa 4096 Sep 21 08:30 /home/siswa</div>`, true];
+          }
+          if (cmd.includes("-l /usr/bin/passwd")) {
+            return [`<div class="term-output">-rwsr-xr-x 1 root root 68208 Mar 23  2024 /usr/bin/passwd</div>`, true];
+          }
+          if (cmd.includes("-l app.sh")) {
+            return [`<div class="term-output">-rwxr-xr-x 1 siswa siswa 240 Sep 21 09:10 app.sh</div>`, true];
+          }
+          if (cmd.includes("-l id_rsa")) {
+            return [`<div class="term-output">-rw------- 1 siswa siswa 2602 Sep 21 09:12 id_rsa</div>`, true];
+          }
+          if (cmd.includes("-l test_umask.txt")) {
+            return [`<div class="term-output">-rw-r--r-- 1 siswa siswa 0 Sep 21 09:15 test_umask.txt</div>`, true];
+          }
+          if (cmd.includes("-l secure_doc.txt")) {
+            return [`<div class="term-output">-rw-r----- 1 siswa siswa 0 Sep 21 09:16 secure_doc.txt</div>`, true];
+          }
+          if (cmd.includes("-ld finance_share")) {
+            return [`<div class="term-output">drwxrws--t 2 siswa tkj 4096 Sep 21 09:20 finance_share</div>`, true];
+          }
+          return [`<div class="term-output">app.sh   evidence/   id_rsa   status.txt   test_umask.txt</div>`, true];
+
+        case "stat":
+          if (cmd.includes("-c")) {
+            return [`<div class="term-output">755 app.sh</div>`, true];
+          }
+          return [`<div class="term-output">  File: app.sh\n  Size: 240         Blocks: 8          IO Block: 4096   regular file\nDevice: 8,2         Inode: 1441829     Links: 1\nAccess: (0755/-rwxr-xr-x)  Uid: ( 1000/ siswa)   Gid: ( 1000/ siswa)</div>`, true];
+
+        case "df":
+          return [`<div class="term-output">Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2        40G   14G   24G  37% /\n/dev/sdb1        50G   12G   36G  25% /var</div>`, true];
+
+        case "findmnt":
+          return [`<div class="term-output">TARGET  SOURCE     FSTYPE OPTIONS\n/       /dev/sda2  ext4   rw,relatime,errors=remount-ro\n├─/tmp  tmpfs      tmpfs  rw,nosuid,nodev,noexec,relatime\n└─/var  /dev/sdb1  ext4   rw,relatime</div>`, true];
+
+        case "umask":
+          if (cmd.includes("-S")) {
+            return [`<div class="term-output">u=rwx,g=rx,o=rx</div>`, true];
+          }
+          if (cmd.includes("027")) {
+            userUmask = "0027";
+            return ["", true];
+          }
+          return [`<div class="term-output">${userUmask}</div>`, true];
+
+        case "chmod":
+        case "chown":
+        case "chgrp":
+        case "touch":
+        case "mkdir":
+          return ["", true];
+
+        case "cat":
+          const f = parts[1] || "";
+          if (virtualFiles[f]) {
+            return [`<div class="term-output">${escapeHtml(virtualFiles[f])}</div>`, true];
+          }
+          return [`<div class="term-output error">cat: ${escapeHtml(f)}: No such file or directory</div>`, false];
+
+        case "echo":
+          const textMatch = cmd.match(/echo\s+["']?([^"'>]+)["']?/);
+          return [`<div class="term-output">${escapeHtml(textMatch ? textMatch[1] : parts.slice(1).join(" "))}</div>`, true];
+
+        default:
+          return [`<div class="term-output error">bash: ${escapeHtml(base)}: command not found</div>`, false];
+      }
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document.addEventListener("keydown", (e) => {
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (activeEl.classList.contains("term-input") || activeEl.id === "sidebar-filter");
+
+      if (e.key === "m" || e.key === "M") {
+        if (!isTyping) {
+          e.preventDefault();
+          toggleSidebar();
+          return;
+        }
+      }
+
+      if (e.key === "Escape") {
+        if (slideSidebar.classList.contains("open")) {
+          toggleSidebar();
+          return;
+        }
+      }
+
+      if (!isTyping) {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          prevSlide();
+        }
+      }
+    });
+
+    renderDeck();
+  </script>
+</body>
+</html>

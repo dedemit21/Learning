@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Server 22.04 LTS Installer & Full Linux CLI Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap');
+
+        :root {
+            --subiquity-bg: #300a24;
+            --subiquity-header-bg: #1e0015;
+            --subiquity-green: #5c8001;
+            --subiquity-orange: #e95420;
+            --subiquity-text: #ffffff;
+            --subiquity-border: #4a1540;
+            --font-subiquity: 'Ubuntu Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: var(--font-subiquity);
+            background: #000000;
+            color: var(--subiquity-text);
+        }
+
+        .sim-screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            inset: 0;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sim-screen.active {
+            display: flex;
+        }
+
+        /* Container Installer Subiquity */
+        .installer-container {
+            width: 960px;
+            height: 640px;
+            background: var(--subiquity-bg);
+            border: 1px solid #5e2750;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        }
+
+        .subiquity-header {
+            height: 32px;
+            background: var(--subiquity-header-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .subiquity-content {
+            flex: 1;
+            padding: 20px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .subiquity-footer {
+            height: 32px;
+            background: var(--subiquity-header-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 13px;
+            color: #d3c6d0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Form Controls */
+        .sub-input {
+            background: #1e0015;
+            border: 1px solid #5e2750;
+            color: #ffffff;
+            padding: 4px 10px;
+            outline: none;
+            width: 100%;
+            font-family: var(--font-subiquity);
+            font-size: 14px;
+        }
+
+        .sub-input:focus {
+            background: #411035;
+            border-color: var(--subiquity-orange);
+        }
+
+        .sub-option {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sub-option:hover, .sub-option.active {
+            background: #5e2750;
+            border-color: var(--subiquity-orange);
+        }
+
+        .sub-button-done {
+            background: var(--subiquity-green);
+            color: #ffffff;
+            padding: 4px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .sub-button-done:hover {
+            background: #6ea101;
+        }
+
+        .sub-button-secondary {
+            background: #5e2750;
+            color: #ffffff;
+            padding: 4px 16px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .sub-button-secondary:hover {
+            background: #77216f;
+        }
+
+        /* Dialog Modal */
+        .sub-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .sub-modal-box {
+            width: 560px;
+            background: #300a24;
+            border: 2px solid var(--subiquity-orange);
+            padding: 20px;
+            font-family: var(--font-subiquity);
+        }
+
+        /* Terminal Input Line Styling */
+        .cli-input-line {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-family: var(--font-subiquity);
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .cli-output-block {
+            white-space: pre-wrap;
+            font-family: var(--font-subiquity);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #5e2750; }
+    </style>
+</head>
+<body>
+
+    <!-- 0. MODE SELECTION LAUNCHER SCREEN -->
+    <div id="screen-mode-select" class="sim-screen active" style="background: #1e0015;">
+        <div class="max-w-xl w-full p-8 bg-[#300a24] border border-[#5e2750] text-center font-mono">
+            <div class="flex justify-center mb-4">
+                <div class="w-12 h-12 bg-[#e95420] flex items-center justify-center text-white text-2xl font-bold">
+                    ubuntu
+                </div>
+            </div>
+            <h1 class="text-xl font-bold text-white mb-2">Ubuntu Server 22.04 LTS Installer</h1>
+            <p class="text-slate-300 text-xs mb-6">Simulasi Penginstalan TUI Subiquity & Full Linux CLI Simulator</p>
+
+            <div class="space-y-3 text-left">
+                <div onclick="startSimulation('clean')" class="p-4 bg-[#1e0015] border border-[#5e2750] hover:border-[#e95420] cursor-pointer">
+                    <div class="font-bold text-[#e95420] text-sm mb-1">[1] Clean Install (Guided LVM)</div>
+                    <div class="text-xs text-slate-300">Disk kosong baru. Penginstalan otomatis menggunakan LVM volume.</div>
+                </div>
+
+                <div onclick="startSimulation('reinstall')" class="p-4 bg-[#1e0015] border border-[#5e2750] hover:border-[#e95420] cursor-pointer">
+                    <div class="font-bold text-[#e95420] text-sm mb-1">[2] Custom Storage Layout</div>
+                    <div class="text-xs text-slate-300">Disk berisi partisi lama. Pengaturan manual titik kait (mount point / dan /data).</div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-[11px] text-slate-400 flex justify-between border-t border-[#5e2750] pt-3">
+                <span>Modul Laboratorium Komputer Jaringan</span>
+                <span class="text-[#5c8001]">Subiquity v22.04.1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. BIOS / UEFI BOOT SCREEN -->
+    <div id="screen-bios" class="sim-screen bg-black font-mono">
+        <div class="flex flex-col items-center justify-center h-full">
+            <div class="mb-6 text-center">
+                <div class="text-slate-400 text-sm tracking-widest mb-2">SERVER SYSTEM BIOS v2.40</div>
+                <div class="text-white text-base font-bold">Press F12 or DEL to enter Boot Menu</div>
+            </div>
+            <div id="bios-menu" class="bg-[#1e0015] border border-[#5e2750] p-4 w-96 text-xs text-left">
+                <div class="text-[#e95420] font-bold mb-3 border-b border-[#5e2750] pb-1">Please select boot device:</div>
+                <div onclick="bootFromUSB()" class="p-2 bg-[#5e2750] text-white font-bold cursor-pointer mb-2 flex justify-between">
+                    <span>> UEFI: USB Installer Drive 32GB</span>
+                    <span>[BOOT]</span>
+                </div>
+                <div class="p-2 text-slate-500 flex justify-between">
+                    <span>  NVMe SSD 512GB (Internal Drive)</span>
+                    <span>[DISK]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. OFFICIAL SUBIQUIDY INSTALLER -->
+    <div id="screen-subiquity" class="sim-screen bg-black">
+        <div class="installer-container">
+            <div class="subiquity-header">
+                <span>ubuntu_server_installer</span>
+                <span id="sub-header-title" class="text-[#e95420]">Welcome</span>
+            </div>
+
+            <!-- STEP 1: CHOOSE LANGUAGE -->
+            <div id="sub-step-1" class="subiquity-content">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Choose your preferred language</div>
+                    <div class="text-xs text-slate-300 mb-4">Select the language to be used for the installation process:</div>
+
+                    <div id="lang-list" class="space-y-1 max-w-lg">
+                        <div onclick="selectLang(this, 'English')" class="sub-option active">
+                            <span>English</span>
+                            <span class="text-xs text-slate-400">[default]</span>
+                        </div>
+                        <div onclick="selectLang(this, 'Indonesian')" class="sub-option">
+                            <span>Indonesian - Bahasa Indonesia</span>
+                        </div>
+                        <div onclick="selectLang(this, 'German')" class="sub-option">
+                            <span>Deutsch</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center border-t border-[#5e2750] pt-3">
+                    <span class="text-xs text-slate-400">Language: <strong id="selected-lang-label" class="text-white">English</strong></span>
+                    <button onclick="goToSubStep(2)" class="sub-button-done">Done</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: KEYBOARD CONFIGURATION -->
+            <div id="sub-step-2" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Keyboard configuration</div>
+                    <div class="text-xs text-slate-300 mb-6">Select layout and variant for keyboard input:</div>
+
+                    <div class="space-y-4 max-w-md text-xs">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Layout:</label>
+                            <input type="text" value="English (US)" class="sub-input" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Variant:</label>
+                            <input type="text" value="English (US)" class="sub-input" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between border-t border-[#5e2750] pt-3">
+                    <button onclick="goToSubStep(1)" class="sub-button-secondary">Back</button>
+                    <button onclick="goToSubStep(3)" class="sub-button-done">Done</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: TYPE OF INSTALLATION -->
+            <div id="sub-step-3" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Type of installation</div>
+                    <div class="text-xs text-slate-300 mb-4">Choose the base package selection:</div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3 bg-[#1e0015] border border-[#e95420]">
+                            <div class="font-bold text-white">[X] Ubuntu Server</div>
+                            <div class="text-slate-400 text-[11px] mt-1">Default installation containing a curated set of server utilities.</div>
+                        </div>
+                        <div class="p-3 bg-[#1e0015] border border-[#5e2750] text-slate-500">
+                            <div>[ ] Ubuntu Server (minimized)</div>
+                            <div class="text-[11px] mt-1">A minimal footprint runtime for lightweight container environments.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between border-t border-[#5e2750] pt-3">
+                    <button onclick="goToSubStep(2)" class="sub-button-secondary">Back</button>
+                    <button onclick="goToSubStep(4)" class="sub-button-done">Done</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: NETWORK CONNECTIONS -->
+            <div id="sub-step-4" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Network connections</div>
+                    <div class="text-xs text-slate-300 mb-4">Interface configuration summary:</div>
+
+                    <div class="bg-[#1e0015] border border-[#5e2750] p-4 text-xs font-mono space-y-2 mb-4">
+                        <div class="flex justify-between border-b border-[#5e2750] pb-2">
+                            <span class="text-[#e95420] font-bold">eth0 ethernet</span>
+                            <span class="text-[#5c8001] font-bold">DHCP IPv4 (192.168.1.150/24)</span>
+                        </div>
+                        <div class="text-slate-300 text-[11px]">
+                            Subnet: 192.168.1.0/24<br>
+                            Address: 192.168.1.150<br>
+                            Gateway: 192.168.1.1<br>
+                            Name servers: 8.8.8.8, 1.1.1.1
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between border-t border-[#5e2750] pt-3">
+                    <button onclick="goToSubStep(3)" class="sub-button-secondary">Back</button>
+                    <button onclick="goToSubStep(5)" class="sub-button-done">Done</button>
+                </div>
+            </div>
+
+            <!-- STEP 5: PROXY & ARCHIVE MIRROR -->
+            <div id="sub-step-5" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Configure proxy and archive mirror</div>
+                    <div class="space-y-4 text-xs max-w-lg mb-4">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Proxy address (optional):</label>
+                            <input type="text" placeholder="http://proxy.example.com:8080" class="sub-input">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Ubuntu mirror address:</label>
+                            <input type="text" value="http://id.archive.ubuntu.com/ubuntu" class="sub-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between border-t border-[#5e2750] pt-3">
+                    <button onclick="goToSubStep(4)" class="sub-button-secondary">Back</button>
+                    <button onclick="goToSubStep(6)" class="sub-button-done">Done</button>
+                </div>
+            </div>
+
+            <!-- STEP 6: GUIDED STORAGE CONFIGURATION -->
+            <div id="sub-step-6" class="subiquity-content hidden">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="text-sm font-bold text-white">Guided storage layout</div>
+                        <span id="sub-scenario-badge" class="text-xs text-[#e95420] font-bold">[ Guided LVM ]</span>
+                    </div>
+
+                    <div class="bg-[#1e0015] border border-[#5e2750] p-3 text-xs mb-4 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <input type="radio" checked class="accent-[#e95420]">
+                            <span class="font-bold text-white">Use an entire disk</span>
+                        </div>
+                        <div class="flex items-center gap-2 pl-5">
+                            <input type="checkbox" checked class="accent-[#e95420]">
+                            <span class="text-slate-300">Set up this disk as an LVM group</span>
+                        </div>
+                    </div>
+
+                    <div class="border border-[#5e2750] bg-black text-xs overflow-hidden mb-3">
+                        <table class="w-full text-left">
+                            <thead class="bg-[#1e0015] text-slate-400 border-b border-[#5e2750]">
+                                <tr>
+                                    <th class="p-2">FILE SYSTEM / MOUNT</th>
+                                    <th class="p-2">TYPE</th>
+                                    <th class="p-2">SIZE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sub-partition-table-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-t border-[#5e2750] pt-3">
+                    <span class="text-xs text-[#5c8001]">Storage partition layout verified.</span>
+                    <div class="space-x-2">
+                        <button onclick="goToSubStep(5)" class="sub-button-secondary">Back</button>
+                        <button onclick="promptStorageConfirm()" class="sub-button-done">Done</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 7: PROFILE SETUP -->
+            <div id="sub-step-7" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Profile setup</div>
+                    <div class="text-xs text-slate-300 mb-4">Specify administrator account details and hostname:</div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs max-w-xl">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Your name:</label>
+                            <input type="text" id="prof-name" value="Siswa Admin" class="sub-input">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Your server's name:</label>
+                            <input type="text" id="prof-hostname" value="ubuntu-server-lab" class="sub-input">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Pick a username:</label>
+                            <input type="text" id="prof-username" value="ubuntu" class="sub-input">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Choose a password:</label>
+                            <input type="password" id="prof-password" value="ubuntu123" class="sub-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between border-t border-[#5e2750] pt-3">
+                    <button onclick="goToSubStep(6)" class="sub-button-secondary">Back</button>
+                    <button onclick="goToSubStep(8)" class="sub-button-done">Done</button>
+                </div>
+            </div>
+
+            <!-- STEP 8: SSH SETUP -->
+            <div id="sub-step-8" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">SSH Setup</div>
+                    <div class="text-xs text-slate-300 mb-4">Choose whether to enable OpenSSH server:</div>
+
+                    <div class="p-4 bg-[#1e0015] border border-[#e95420] text-xs space-y-2 max-w-lg">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="ssh-check" checked class="accent-[#e95420] w-4 h-4">
+                            <span class="font-bold text-white text-sm">[X] Install OpenSSH server</span>
+                        </label>
+                        <p class="text-slate-400 text-[11px] pl-7">Enables secure remote access to command line interfaces over Port 22.</p>
+                    </div>
+                </div>
+                <div class="flex justify-between border-t border-[#5e2750] pt-3">
+                    <button onclick="goToSubStep(7)" class="sub-button-secondary">Back</button>
+                    <button onclick="goToSubStep(9)" class="sub-button-done">Done</button>
+                </div>
+            </div>
+
+            <!-- STEP 9: FEATURED SERVER SNAPS -->
+            <div id="sub-step-9" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Featured Server Snaps</div>
+                    <div class="text-xs text-slate-300 mb-3">Select software packages to automatically install:</div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs max-h-48 overflow-y-auto">
+                        <label class="p-2 bg-[#1e0015] border border-[#5e2750] flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked class="accent-[#e95420]">
+                            <span>docker (Docker Container Runtime)</span>
+                        </label>
+                        <label class="p-2 bg-[#1e0015] border border-[#5e2750] flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="accent-[#e95420]">
+                            <span>microk8s (Lightweight Kubernetes)</span>
+                        </label>
+                        <label class="p-2 bg-[#1e0015] border border-[#5e2750] flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="accent-[#e95420]">
+                            <span>nextcloud (Private Cloud Storage)</span>
+                        </label>
+                        <label class="p-2 bg-[#1e0015] border border-[#5e2750] flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="accent-[#e95420]">
+                            <span>powershell (PowerShell Core)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex justify-between border-t border-[#5e2750] pt-3">
+                    <button onclick="goToSubStep(8)" class="sub-button-secondary">Back</button>
+                    <button onclick="startSubiquityInstalling()" class="sub-button-done">Done [Start Install]</button>
+                </div>
+            </div>
+
+            <!-- STEP 10: INSTALLING PROGRESS & LOGS -->
+            <div id="sub-step-10" class="subiquity-content hidden">
+                <div>
+                    <div class="text-sm font-bold text-white mb-2">Installing system...</div>
+                    <div id="sub-install-logs" class="h-56 bg-black border border-[#5e2750] p-3 text-[11px] text-[#5c8001] font-mono overflow-y-auto leading-relaxed space-y-1">
+                        <div>> Beginning installation sequence...</div>
+                    </div>
+                </div>
+
+                <div class="border-t border-[#5e2750] pt-3">
+                    <div class="w-full bg-[#1e0015] h-2 rounded overflow-hidden mb-3">
+                        <div id="sub-progress-bar" class="bg-[#e95420] h-full w-0 transition-all duration-200"></div>
+                    </div>
+                    <div id="sub-reboot-box" class="hidden flex justify-end">
+                        <button onclick="triggerRebootToTerminal()" class="sub-button-done animate-pulse">Reboot Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subiquity-footer">
+                <span>[Tab] Move focus | [Enter] Select button | [Space] Toggle checkbox</span>
+                <span class="text-[#e95420] font-bold">Ubuntu Subiquity 22.04</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. INTERACTIVE TERMINAL CLI & ASSESMENT REPORT -->
+    <div id="screen-terminal" class="sim-screen bg-black font-mono" onclick="focusCliInput()">
+        <div class="w-full h-full p-6 text-xs text-white flex flex-col justify-between overflow-hidden">
+            <!-- TERMINAL OUTPUT CONTAINER -->
+            <div id="terminal-screen-output" class="flex-1 overflow-y-auto space-y-1 mb-4 pr-2">
+                <div>Ubuntu 22.04.1 LTS <span id="term-host-display">ubuntu-server-lab</span> tty1</div>
+                <br>
+                <div id="login-prompt-block" class="text-slate-300">
+                    <span id="term-host-login-label">ubuntu-server-lab</span> login: 
+                </div>
+            </div>
+
+            <!-- EVALUATION REPORT POPUP (HIDDEN AT FIRST) -->
+            <div id="eval-report-card" class="hidden bg-[#1e0015] border border-[#5c8001] p-4 text-xs space-y-2 mb-2">
+                <div class="text-[#5c8001] font-bold text-sm">
+                    ✓ PRAKTIKUM INSTALASI UBUNTU SERVER 22.04 LTS BERHASIL!
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-slate-300 font-mono border-t border-b border-[#5e2750] py-1.5">
+                    <div>Mode Partisi: <span id="eval-mode" class="text-[#e95420] font-bold">Guided LVM</span></div>
+                    <div>Hostname Server: <span id="eval-hostname" class="text-yellow-400 font-bold">ubuntu-server-lab</span></div>
+                    <div>Pengguna Administrator: <span id="eval-username" class="text-cyan-400 font-bold">ubuntu</span></div>
+                    <div>Status Remote SSH: <span class="text-[#5c8001] font-bold">Enabled</span></div>
+                </div>
+                <button onclick="location.reload()" class="sub-button-done w-full py-1 text-xs">Ulangi Latihan Simulasi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMATION DIALOG -->
+    <div id="sub-modal-confirm" class="sub-modal-overlay">
+        <div class="sub-modal-box">
+            <div class="text-sm font-bold text-[#e95420] mb-2">Confirm destructive action</div>
+            <div class="text-xs text-slate-300 leading-relaxed mb-6">
+                Are you sure you want to write changes to disk? Installing Ubuntu Server will reformat selected partitions and destroy existing files.
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeModal(false)" class="sub-button-secondary">Back</button>
+                <button onclick="closeModal(true)" class="sub-button-done">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let simMode = 'clean';
+        let selectedLang = 'English';
+        let modalCallback = null;
+
+        // User Account & Superuser State
+        let createdHostname = 'ubuntu-server-lab';
+        let createdUsername = 'ubuntu';
+        let createdPassword = 'ubuntu123';
+        let currentUser = 'ubuntu';
+        let isRootUser = false;
+
+        // CLI Terminal State Engine
+        let isLoggedIn = false;
+        let authState = 'LOGIN'; // 'LOGIN', 'PASSWORD', 'SHELL', or 'SU_PASSWORD'
+        let currentAbsPath = '/home/ubuntu';
+        let commandHistory = [];
+
+        // Dynamic Virtual File System Tree (Nodes)
+        let vfs = {
+            '/': { 
+                type: 'dir', 
+                children: ['bin', 'boot', 'dev', 'etc', 'home', 'lib', 'mnt', 'proc', 'root', 'sys', 'tmp', 'usr', 'var'],
+                hiddenChildren: ['.', '..']
+            },
+            '/root': { 
+                type: 'dir', 
+                children: ['root_notes.txt'],
+                hiddenChildren: ['.', '..', '.bashrc', '.profile']
+            },
+            '/etc': { 
+                type: 'dir', 
+                children: ['netplan', 'ssh', 'os-release', 'hostname', 'ufw', 'sudoers'],
+                hiddenChildren: ['.', '..']
+            },
+            '/home': { 
+                type: 'dir', 
+                children: ['ubuntu'],
+                hiddenChildren: ['.', '..']
+            },
+            '/home/ubuntu': { 
+                type: 'dir', 
+                children: ['documents', 'downloads', 'server_config.sh', 'notes.txt'],
+                hiddenChildren: ['.', '..', '.bash_logout', '.bashrc', '.profile', '.ssh', '.cache']
+            },
+            '/home/ubuntu/.ssh': {
+                type: 'dir',
+                children: ['authorized_keys'],
+                hiddenChildren: ['.', '..']
+            },
+            '/home/ubuntu/documents': { 
+                type: 'dir', 
+                children: ['report.docx'],
+                hiddenChildren: ['.', '..'] 
+            },
+            '/home/ubuntu/downloads': { 
+                type: 'dir', 
+                children: ['ubuntu-22.04-live-server.iso'],
+                hiddenChildren: ['.', '..'] 
+            },
+            '/home/ubuntu/server_config.sh': { type: 'file', content: '#!/bin/bash\necho "Ubuntu Server 22.04 LTS Ready"' },
+            '/home/ubuntu/notes.txt': { type: 'file', content: 'Praktikum instalasi server selesai dengan sukses.' },
+            '/home/ubuntu/.bashrc': { type: 'file', content: '# ~/.bashrc: executed by bash(1) for non-login shells.' },
+            '/home/ubuntu/.profile': { type: 'file', content: '# ~/.profile: executed by the command interpreter for login shells.' },
+            '/home/ubuntu/.bash_logout': { type: 'file', content: '# ~/.bash_logout: executed by bash(1) when login shell exits.' },
+            '/home/ubuntu/.ssh/authorized_keys': { type: 'file', content: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' },
+            '/root/root_notes.txt': { type: 'file', content: 'Privileged root access active.' },
+            '/home/ubuntu/documents/report.docx': { type: 'file', content: '[Binary Word Document]' },
+            '/home/ubuntu/downloads/ubuntu-22.04-live-server.iso': { type: 'file', content: '[ISO Image File]' }
+        };
+
+        function setScreen(screenId) {
+            document.querySelectorAll('.sim-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startSimulation(mode) {
+            simMode = mode;
+            setScreen('screen-bios');
+        }
+
+        function bootFromUSB() {
+            setScreen('screen-subiquity');
+            goToSubStep(1);
+        }
+
+        function goToSubStep(stepNum) {
+            for (let i = 1; i <= 10; i++) {
+                const el = document.getElementById(`sub-step-${i}`);
+                if (el) el.classList.add('hidden');
+            }
+            document.getElementById(`sub-step-${stepNum}`).classList.remove('hidden');
+
+            const headers = [
+                "Language", "Keyboard", "Installer Type", "Networking", 
+                "Proxy & Mirror", "Guided Storage", "Profile Setup", 
+                "SSH Configuration", "Featured Snaps", "Installing System"
+            ];
+            document.getElementById('sub-header-title').textContent = headers[stepNum - 1] || "Installer";
+
+            if (stepNum === 6) {
+                renderStorageTable();
+            }
+        }
+
+        function selectLang(el, lang) {
+            document.querySelectorAll('#lang-list .sub-option').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+            selectedLang = lang;
+            document.getElementById('selected-lang-label').textContent = selectedLang;
+        }
+
+        function renderStorageTable() {
+            const badge = document.getElementById('sub-scenario-badge');
+            const tbody = document.getElementById('sub-partition-table-body');
+            tbody.innerHTML = '';
+
+            if (simMode === 'clean') {
+                badge.textContent = '[ Guided LVM - Clean Disk ]';
+                tbody.innerHTML = `
+                    <tr class="border-b border-[#5e2750]">
+                        <td class="p-2 text-white font-bold">/boot/efi</td>
+                        <td class="p-2 text-slate-400">fat32</td>
+                        <td class="p-2 text-slate-300">1.00 GB</td>
+                    </tr>
+                    <tr class="border-b border-[#5e2750]">
+                        <td class="p-2 text-white font-bold">/boot</td>
+                        <td class="p-2 text-slate-400">ext4</td>
+                        <td class="p-2 text-slate-300">2.00 GB</td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 text-[#e95420] font-bold">/ (ubuntu-lv)</td>
+                        <td class="p-2 text-slate-400">ext4 (LVM)</td>
+                        <td class="p-2 text-slate-300">497.00 GB</td>
+                    </tr>
+                `;
+            } else {
+                badge.textContent = '[ Custom Storage Layout ]';
+                tbody.innerHTML = `
+                    <tr class="border-b border-[#5e2750]">
+                        <td class="p-2 text-white font-bold">/boot/efi</td>
+                        <td class="p-2 text-slate-400">fat32</td>
+                        <td class="p-2 text-slate-300">512 MB</td>
+                    </tr>
+                    <tr class="border-b border-[#5e2750]">
+                        <td class="p-2 text-[#e95420] font-bold">/ (Root Partition C:)</td>
+                        <td class="p-2 text-slate-400">ext4 (Format)</td>
+                        <td class="p-2 text-slate-300">150.00 GB</td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 text-[#5c8001] font-bold">/mnt/data (Data D:)</td>
+                        <td class="p-2 text-slate-400">ext4 (Preserve)</td>
+                        <td class="p-2 text-slate-300">349.48 GB</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function promptStorageConfirm() {
+            openModal((confirmed) => {
+                if (confirmed) {
+                    goToSubStep(7);
+                }
+            });
+        }
+
+        function openModal(cb) {
+            document.getElementById('sub-modal-confirm').style.display = 'flex';
+            modalCallback = cb;
+        }
+
+        function closeModal(res) {
+            document.getElementById('sub-modal-confirm').style.display = 'none';
+            if (modalCallback) modalCallback(res);
+        }
+
+        function startSubiquityInstalling() {
+            goToSubStep(10);
+
+            const logs = document.getElementById('sub-install-logs');
+            const progress = document.getElementById('sub-progress-bar');
+
+            const logSequence = [
+                "> Mounting target filesystems...",
+                "> Fetching package lists from mirror...",
+                "> Unpacking base system packages...",
+                "> Installing Linux kernel 5.15.0-43-generic...",
+                "> Configuring network interfaces (netplan)...",
+                "> Creating local account & configuring sudoers...",
+                "> Generating OpenSSH server host keys...",
+                "> Installing selected snap packages (docker)...",
+                "> Running cloud-init finalization sequence...",
+                "> Installation complete!"
+            ];
+
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < logSequence.length) {
+                    const line = document.createElement('div');
+                    line.textContent = logSequence[index];
+                    logs.appendChild(line);
+                    logs.scrollTop = logs.scrollHeight;
+
+                    index++;
+                    progress.style.width = `${(index / logSequence.length) * 100}%`;
+                } else {
+                    clearInterval(interval);
+                    document.getElementById('sub-reboot-box').classList.remove('hidden');
+                }
+            }, 200);
+        }
+
+        // ==========================================
+        // REBOOT & INTERACTIVE CLI TERMINAL ENGINE
+        // ==========================================
+        function triggerRebootToTerminal() {
+            createdHostname = document.getElementById('prof-hostname').value || 'ubuntu-server-lab';
+            createdUsername = document.getElementById('prof-username').value || 'ubuntu';
+            createdPassword = document.getElementById('prof-password').value || 'ubuntu123';
+            currentUser = createdUsername;
+            isRootUser = false;
+
+            currentAbsPath = `/home/${createdUsername}`;
+            vfs['/home'].children = [createdUsername];
+            vfs[currentAbsPath] = { 
+                type: 'dir', 
+                children: ['documents', 'downloads', 'server_config.sh', 'notes.txt'],
+                hiddenChildren: ['.', '..', '.bash_logout', '.bashrc', '.profile', '.ssh', '.cache']
+            };
+
+            document.getElementById('term-host-display').textContent = createdHostname;
+            document.getElementById('term-host-login-label').textContent = createdHostname;
+            document.getElementById('eval-mode').textContent = simMode === 'clean' ? 'Guided LVM' : 'Custom Layout';
+            document.getElementById('eval-hostname').textContent = createdHostname;
+            document.getElementById('eval-username').textContent = createdUsername;
+
+            setScreen('screen-terminal');
+            initTerminalLogin();
+        }
+
+        function initTerminalLogin() {
+            const out = document.getElementById('terminal-screen-output');
+            out.innerHTML = `
+                <div>Ubuntu 22.04.1 LTS ${createdHostname} tty1</div>
+                <br>
+                <div id="active-cli-line-block" class="flex items-center gap-1">
+                    <span class="text-slate-300">${createdHostname} login:</span>
+                    <input type="text" id="cli-active-input" class="cli-input-line" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            `;
+            authState = 'LOGIN';
+            currentUser = createdUsername;
+            isRootUser = false;
+            bindCliInput();
+        }
+
+        function focusCliInput() {
+            const inp = document.getElementById('cli-active-input');
+            if (inp && !inp.disabled) inp.focus();
+        }
+
+        function bindCliInput() {
+            const input = document.getElementById('cli-active-input');
+            if (!input) return;
+
+            input.focus();
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const val = input.value.trim();
+                    processCliCommand(val);
+                }
+            });
+        }
+
+        function getDisplayPath(path) {
+            if (isRootUser && path === '/root') return '~';
+            const userHome = `/home/${createdUsername}`;
+            if (path === userHome) return '~';
+            if (path.startsWith(userHome + '/')) return '~' + path.substring(userHome.length);
+            return path;
+        }
+
+        function resolvePath(target) {
+            const homePath = isRootUser ? '/root' : `/home/${createdUsername}`;
+            if (!target || target === '~') return homePath;
+            if (target === '/') return '/';
+
+            let base = target.startsWith('/') ? '' : currentAbsPath;
+            let parts = (base + '/' + target).split('/').filter(p => p.length > 0 && p !== '.');
+            let resolvedParts = [];
+
+            for (let part of parts) {
+                if (part === '..') {
+                    resolvedParts.pop();
+                } else if (part === '~') {
+                    resolvedParts = isRootUser ? ['root'] : ['home', createdUsername];
+                } else {
+                    resolvedParts.push(part);
+                }
+            }
+
+            return '/' + resolvedParts.join('/');
+        }
+
+        function renderPrompt() {
+            const userColor = isRootUser ? 'text-red-500' : 'text-[#5c8001]';
+            const promptSymbol = isRootUser ? '#' : '$';
+            return `
+                <div id="active-cli-line-block" class="flex items-center gap-1 mt-1">
+                    <span class="${userColor} font-bold">${currentUser}@${createdHostname}</span>:<span class="text-blue-400 font-bold">${getDisplayPath(currentAbsPath)}</span>${promptSymbol} 
+                    <input type="text" id="cli-active-input" class="cli-input-line" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            `;
+        }
+
+        // PERBAIKAN LOGIKA: HELPER UNTUK MENGECER DAN MEMBUAT DIRECTORY HIRARKI (-p)
+        function createDirectoryRecursive(targetPath) {
+            const parts = targetPath.split('/').filter(p => p.length > 0);
+            let currentPath = '';
+
+            for (let part of parts) {
+                let parentPath = currentPath === '' ? '/' : currentPath;
+                currentPath = currentPath + '/' + part;
+
+                if (!vfs[parentPath]) {
+                    vfs[parentPath] = { type: 'dir', children: [], hiddenChildren: ['.', '..'] };
+                }
+
+                if (part.startsWith('.')) {
+                    if (!vfs[parentPath].hiddenChildren) vfs[parentPath].hiddenChildren = ['.', '..'];
+                    if (!vfs[parentPath].hiddenChildren.includes(part)) {
+                        vfs[parentPath].hiddenChildren.push(part);
+                    }
+                } else {
+                    if (!vfs[parentPath].children) vfs[parentPath].children = [];
+                    if (!vfs[parentPath].children.includes(part)) {
+                        vfs[parentPath].children.push(part);
+                    }
+                }
+
+                if (!vfs[currentPath]) {
+                    vfs[currentPath] = { type: 'dir', children: [], hiddenChildren: ['.', '..'] };
+                }
+            }
+        }
+
+        function processCliCommand(val) {
+            const out = document.getElementById('terminal-screen-output');
+            const activeInput = document.getElementById('cli-active-input');
+
+            if (activeInput) {
+                activeInput.removeAttribute('id');
+                activeInput.disabled = true;
+            }
+
+            if (authState === 'LOGIN') {
+                if (val === createdUsername || val === 'root') {
+                    out.insertAdjacentHTML('beforeend', `
+                        <div id="active-cli-line-block" class="flex items-center gap-1">
+                            <span class="text-slate-300">Password:</span>
+                            <input type="password" id="cli-active-input" class="cli-input-line" autofocus autocomplete="off">
+                        </div>
+                    `);
+                    authState = 'PASSWORD';
+                } else {
+                    out.insertAdjacentHTML('beforeend', `
+                        <div class="text-red-400">Login incorrect</div>
+                        <br>
+                        <div id="active-cli-line-block" class="flex items-center gap-1">
+                            <span class="text-slate-300">${createdHostname} login:</span>
+                            <input type="text" id="cli-active-input" class="cli-input-line" autofocus autocomplete="off">
+                        </div>
+                    `);
+                }
+                bindCliInput();
+                out.scrollTop = out.scrollHeight;
+                return;
+            }
+
+            if (authState === 'PASSWORD') {
+                if (val === createdPassword) {
+                    isLoggedIn = true;
+                    authState = 'SHELL';
+
+                    out.insertAdjacentHTML('beforeend', `
+                        <br>
+                        <div class="text-[#5c8001]">Welcome to Ubuntu 22.04.1 LTS (GNU/Linux 5.15.0-43-generic x86_64)</div>
+                        <br>
+                        <div class="text-slate-300">
+                            * Documentation:  https://help.ubuntu.com<br>
+                            * Management:     https://landscape.canonical.com<br>
+                            * Support:        https://ubuntu.com/advantage
+                        </div>
+                        <br>
+                        <div class="text-slate-400">System information summary:</div>
+                        <div class="text-slate-400 pl-4">
+                            IPv4 address for eth0: <span class="text-[#e95420] font-bold">192.168.1.150</span><br>
+                            Memory usage:          12% of 4096MB<br>
+                            SSH server status:     <span class="text-[#5c8001] font-bold">Active (Port 22)</span>
+                        </div>
+                        <br>
+                        <div class="text-yellow-400">Ketik '<span class="font-bold underline">help</span>' untuk melihat daftar perintah Linux CLI (termasuk <span class="font-bold">su</span> / <span class="font-bold">sudo</span>).</div>
+                        <br>
+                        ${renderPrompt()}
+                    `);
+
+                    document.getElementById('eval-report-card').classList.remove('hidden');
+                } else {
+                    out.insertAdjacentHTML('beforeend', `
+                        <div class="text-red-400">Login incorrect</div>
+                        <br>
+                        <div id="active-cli-line-block" class="flex items-center gap-1">
+                            <span class="text-slate-300">${createdHostname} login:</span>
+                            <input type="text" id="cli-active-input" class="cli-input-line" autofocus autocomplete="off">
+                        </div>
+                    `);
+                    authState = 'LOGIN';
+                }
+                bindCliInput();
+                out.scrollTop = out.scrollHeight;
+                return;
+            }
+
+            if (authState === 'SU_PASSWORD') {
+                if (val === createdPassword) {
+                    isRootUser = true;
+                    currentUser = 'root';
+                    currentAbsPath = '/root';
+                    authState = 'SHELL';
+
+                    out.insertAdjacentHTML('beforeend', `
+                        ${renderPrompt()}
+                    `);
+                } else {
+                    out.insertAdjacentHTML('beforeend', `
+                        <div class="text-red-400">su: Authentication failure</div>
+                        ${renderPrompt()}
+                    `);
+                    authState = 'SHELL';
+                }
+                bindCliInput();
+                out.scrollTop = out.scrollHeight;
+                return;
+            }
+
+            // ==========================================
+            // AUTHSTATE === 'SHELL' (COMPREHENSIVE PARSER ENGINE)
+            // ==========================================
+            if (val !== '') commandHistory.push(val);
+
+            // MEMPROSES REDIREKSI OUTPUT (> dan >>)
+            let rawCmd = val;
+            let redirectFile = null;
+            let redirectMode = null; // 'write' or 'append'
+
+            if (rawCmd.includes('>>')) {
+                const parts = rawCmd.split('>>');
+                rawCmd = parts[0].trim();
+                redirectFile = parts[1].trim();
+                redirectMode = 'append';
+            } else if (rawCmd.includes('>')) {
+                const parts = rawCmd.split('>');
+                rawCmd = parts[0].trim();
+                redirectFile = parts[1].trim();
+                redirectMode = 'write';
+            }
+
+            // PARSING ARGUMEN & FLAG
+            const rawTokens = rawCmd.split(' ').filter(a => a.length > 0);
+            const cmd = rawTokens.length > 0 ? rawTokens[0].toLowerCase() : '';
+            const flags = rawTokens.filter(t => t.startsWith('-'));
+            const targets = rawTokens.slice(1).filter(t => !t.startsWith('-'));
+
+            let responseHTML = '';
+
+            switch(cmd) {
+                case 'su':
+                case 'su-':
+                    if (targets.includes('-') || flags.length > 0 || targets.length === 0 || targets.includes('root')) {
+                        out.insertAdjacentHTML('beforeend', `
+                            <div id="active-cli-line-block" class="flex items-center gap-1">
+                                <span class="text-slate-300">Password:</span>
+                                <input type="password" id="cli-active-input" class="cli-input-line" autofocus autocomplete="off">
+                            </div>
+                        `);
+                        authState = 'SU_PASSWORD';
+                        bindCliInput();
+                        out.scrollTop = out.scrollHeight;
+                        return;
+                    } else {
+                        responseHTML = `<div class="cli-output-block text-slate-300">su: user ${targets[0]} does not exist</div>`;
+                    }
+                    break;
+
+                case 'exit':
+                case 'logout':
+                    if (isRootUser) {
+                        isRootUser = false;
+                        currentUser = createdUsername;
+                        currentAbsPath = `/home/${createdUsername}`;
+                        responseHTML = '<div class="cli-output-block text-slate-300">exit</div>';
+                    } else {
+                        initTerminalLogin();
+                        return;
+                    }
+                    break;
+
+                case 'help':
+                    responseHTML = `
+<div class="cli-output-block text-slate-300">
+<span class="text-yellow-400 font-bold">Daftar Lengkap Perintah Linux CLI Ubuntu Server:</span>
+  <span class="text-cyan-400">su / su -</span>             - Beralih ke pengguna Root / Superuser
+  <span class="text-cyan-400">exit / logout</span>        - Keluar dari mode root / sesi terminal
+  <span class="text-cyan-400">sudo [perintah]</span>       - Jalankan perintah dengan hak akses admin
+  <span class="text-cyan-400">ls [-l|-a|-la]</span>        - Menampilkan isi direktori
+  <span class="text-cyan-400">cd [dir]</span>             - Perpindahan direktori dinamis
+  <span class="text-cyan-400">pwd</span>                  - Menampilkan lokasi direktori saat ini
+  <span class="text-cyan-400">mkdir [-p] [dir]</span>     - Membuat direktori (dukung hirarki -p)
+  <span class="text-cyan-400">rmdir [dir]</span>          - Menghapus direktori kosong
+  <span class="text-cyan-400">touch [file]</span>         - Membuat berkas kosong baru
+  <span class="text-cyan-400">rm [-rf] [file/dir]</span>  - Menghapus berkas/direktori secara rekursif
+  <span class="text-cyan-400">cat [file]</span>           - Membaca isi berkas
+  <span class="text-cyan-400">echo [teks] [> file]</span> - Menampilkan atau menulis teks ke berkas
+  <span class="text-cyan-400">ip a / ifconfig</span>      - Cek jaringan & alamat IP server
+  <span class="text-cyan-400">ping [host]</span>          - Tes jaringan ICMP
+  <span class="text-cyan-400">systemctl [status]</span>   - Kelola layanan sistem (ssh, docker)
+  <span class="text-cyan-400">whoami / id</span>          - Cek nama pengguna & grup aktif
+  <span class="text-cyan-400">clear</span>                - Membersihkan layar terminal
+</div>`;
+                    break;
+
+                case 'ls':
+                    const dirNode = vfs[currentAbsPath];
+                    if (dirNode) {
+                        const showHidden = flags.some(f => f.includes('a'));
+                        const showLong = flags.some(f => f.includes('l'));
+
+                        let fileList = [...dirNode.children];
+                        if (showHidden && dirNode.hiddenChildren) {
+                            fileList = [...dirNode.hiddenChildren, ...fileList];
+                        }
+
+                        if (showLong) {
+                            const lines = fileList.map(childName => {
+                                const fullChildPath = currentAbsPath === '/' ? '/' + childName : currentAbsPath + '/' + childName;
+                                const childNode = vfs[fullChildPath];
+                                const isDir = (childNode && childNode.type === 'dir') || childName.startsWith('.') || !childName.includes('.');
+                                const owner = isRootUser ? 'root' : createdUsername;
+                                const isHidden = childName.startsWith('.');
+                                const displayName = isDir ? `${childName}/` : childName;
+                                const colorClass = isDir ? 'text-blue-400 font-bold' : (isHidden ? 'text-slate-400' : 'text-white');
+
+                                return `<div>${isDir ? 'drwxr-xr-x' : '-rw-r--r--'} 1 ${owner} ${owner} 4096 Sep 21 10:00 <span class="${colorClass}">${displayName}</span></div>`;
+                            }).join('');
+                            responseHTML = `<div class="cli-output-block space-y-0.5">${lines}</div>`;
+                        } else {
+                            const items = fileList.map(childName => {
+                                const fullChildPath = currentAbsPath === '/' ? '/' + childName : currentAbsPath + '/' + childName;
+                                const childNode = vfs[fullChildPath];
+                                const isDir = (childNode && childNode.type === 'dir') || childName.startsWith('.') || !childName.includes('.');
+                                const isHidden = childName.startsWith('.');
+                                const displayName = isDir ? `${childName}/` : childName;
+                                const colorClass = isDir ? 'text-blue-400 font-bold' : (isHidden ? 'text-slate-400' : 'text-white');
+
+                                return `<span class="${colorClass}">${displayName}</span>`;
+                            }).join('  ');
+                            responseHTML = `<div class="cli-output-block text-slate-300">${items}</div>`;
+                        }
+                    } else {
+                        responseHTML = '';
+                    }
+                    break;
+
+                case 'cd':
+                    if (targets.length === 0) {
+                        currentAbsPath = isRootUser ? '/root' : `/home/${createdUsername}`;
+                    } else {
+                        const targetPath = resolvePath(targets[0]);
+                        if (vfs[targetPath] && vfs[targetPath].type === 'dir') {
+                            currentAbsPath = targetPath;
+                        } else {
+                            responseHTML = `<div class="cli-output-block text-slate-300">bash: cd: ${targets[0]}: No such file or directory</div>`;
+                        }
+                    }
+                    break;
+
+                case 'mkdir':
+                    if (targets.length > 0) {
+                        const hasParentsFlag = flags.some(f => f.includes('p'));
+                        const targetFolder = targets[0];
+
+                        if (hasParentsFlag || targetFolder.includes('/')) {
+                            const fullResolved = resolvePath(targetFolder);
+                            createDirectoryRecursive(fullResolved);
+                        } else {
+                            const newDirPath = currentAbsPath === '/' ? '/' + targetFolder : currentAbsPath + '/' + targetFolder;
+                            if (targetFolder.startsWith('.')) {
+                                if (!vfs[currentAbsPath].hiddenChildren) vfs[currentAbsPath].hiddenChildren = ['.', '..'];
+                                if (!vfs[currentAbsPath].hiddenChildren.includes(targetFolder)) vfs[currentAbsPath].hiddenChildren.push(targetFolder);
+                            } else {
+                                if (!vfs[currentAbsPath].children.includes(targetFolder)) vfs[currentAbsPath].children.push(targetFolder);
+                            }
+                            vfs[newDirPath] = { type: 'dir', children: [], hiddenChildren: ['.', '..'] };
+                        }
+                        responseHTML = '';
+                    } else {
+                        responseHTML = '<div class="cli-output-block text-slate-300">mkdir: missing operand</div>';
+                    }
+                    break;
+
+                case 'rm':
+                    if (targets.length > 0) {
+                        const targetItem = targets[0];
+                        const fullPath = resolvePath(targetItem);
+                        const parentPath = fullPath.substring(0, fullPath.lastIndexOf('/')) || '/';
+                        const itemName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+
+                        if (vfs[parentPath]) {
+                            vfs[parentPath].children = vfs[parentPath].children.filter(c => c !== itemName);
+                            if (vfs[parentPath].hiddenChildren) {
+                                vfs[parentPath].hiddenChildren = vfs[parentPath].hiddenChildren.filter(c => c !== itemName);
+                            }
+                        }
+                        delete vfs[fullPath];
+                        responseHTML = '';
+                    } else {
+                        responseHTML = '<div class="cli-output-block text-slate-300">rm: missing operand</div>';
+                    }
+                    break;
+
+                case 'touch':
+                    if (targets.length > 0) {
+                        const newFileName = targets[0];
+                        const newFilePath = resolvePath(newFileName);
+                        const parentPath = newFilePath.substring(0, newFilePath.lastIndexOf('/')) || '/';
+                        const fileName = newFilePath.substring(newFilePath.lastIndexOf('/') + 1);
+
+                        if (vfs[parentPath]) {
+                            if (fileName.startsWith('.')) {
+                                if (!vfs[parentPath].hiddenChildren) vfs[parentPath].hiddenChildren = ['.', '..'];
+                                if (!vfs[parentPath].hiddenChildren.includes(fileName)) vfs[parentPath].hiddenChildren.push(fileName);
+                            } else {
+                                if (!vfs[parentPath].children.includes(fileName)) vfs[parentPath].children.push(fileName);
+                            }
+                        }
+                        vfs[newFilePath] = { type: 'file', content: '' };
+                        responseHTML = '';
+                    } else {
+                        responseHTML = '<div class="cli-output-block text-slate-300">touch: missing file operand</div>';
+                    }
+                    break;
+
+                case 'echo':
+                    let textOutput = targets.join(' ').replace(/^['"]|['"]$/g, '');
+                    if (redirectFile) {
+                        const targetFilePath = resolvePath(redirectFile);
+                        const parentPath = targetFilePath.substring(0, targetFilePath.lastIndexOf('/')) || '/';
+                        const fileName = targetFilePath.substring(targetFilePath.lastIndexOf('/') + 1);
+
+                        if (vfs[parentPath]) {
+                            if (!vfs[parentPath].children.includes(fileName)) vfs[parentPath].children.push(fileName);
+                        }
+
+                        if (!vfs[targetFilePath]) {
+                            vfs[targetFilePath] = { type: 'file', content: textOutput };
+                        } else {
+                            if (redirectMode === 'append') {
+                                vfs[targetFilePath].content = (vfs[targetFilePath].content || '') + '\n' + textOutput;
+                            } else {
+                                vfs[targetFilePath].content = textOutput;
+                            }
+                        }
+                        responseHTML = '';
+                    } else {
+                        responseHTML = `<div class="cli-output-block text-slate-300">${textOutput}</div>`;
+                    }
+                    break;
+
+                case 'cat':
+                    if (targets.length > 0) {
+                        const targetFilePath = resolvePath(targets[0]);
+                        if (vfs[targetFilePath] && vfs[targetFilePath].type === 'file') {
+                            responseHTML = `<div class="cli-output-block text-slate-300">${vfs[targetFilePath].content || ''}</div>`;
+                        } else {
+                            responseHTML = `<div class="cli-output-block text-slate-300">cat: ${targets[0]}: No such file or directory</div>`;
+                        }
+                    } else {
+                        responseHTML = '<div class="cli-output-block text-slate-300">cat: missing file operand</div>';
+                    }
+                    break;
+
+                case 'pwd':
+                    responseHTML = `<div class="cli-output-block text-slate-300">${currentAbsPath}</div>`;
+                    break;
+
+                case 'whoami':
+                    responseHTML = `<div class="cli-output-block text-slate-300">${currentUser}</div>`;
+                    break;
+
+                case 'id':
+                    responseHTML = `<div class="cli-output-block text-slate-300">${isRootUser 
+                        ? 'uid=0(root) gid=0(root) groups=0(root)' 
+                        : `uid=1000(${createdUsername}) gid=1000(${createdUsername}) groups=1000(${createdUsername}),4(adm),27(sudo),110(lxd)`}</div>`;
+                    break;
+
+                case 'hostname':
+                    responseHTML = `<div class="cli-output-block text-slate-300">${createdHostname}</div>`;
+                    break;
+
+                case 'uname':
+                    responseHTML = '<div class="cli-output-block text-slate-300">Linux ubuntu-server-lab 5.15.0-43-generic #46-Ubuntu SMP x86_64 GNU/Linux</div>';
+                    break;
+
+                case 'ip':
+                    if (targets.includes('a') || targets.includes('addr') || targets.includes('address')) {
+                        responseHTML = `
+<div class="cli-output-block text-slate-300">
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP
+    link/ether 52:54:00:12:34:56 brd ff:ff:ff:ff:ff:ff
+    inet <span class="text-[#e95420] font-bold">192.168.1.150/24</span> brd 192.168.1.255 scope global dynamic eth0
+</div>`;
+                    } else {
+                        responseHTML = '<div class="cli-output-block text-slate-300">default via 192.168.1.1 dev eth0 proto dhcp src 192.168.1.150 metric 100</div>';
+                    }
+                    break;
+
+                case 'ifconfig':
+                    responseHTML = `
+<div class="cli-output-block text-slate-300">
+eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+        inet <span class="text-[#e95420] font-bold">192.168.1.150</span>  netmask 255.255.255.0  broadcast 192.168.1.255
+        ether 52:54:00:12:34:56  txqueuelen 1000  (Ethernet)
+</div>`;
+                    break;
+
+                case 'ping':
+                    const dest = targets[0] || 'google.com';
+                    responseHTML = `
+<div class="cli-output-block text-slate-300">
+PING ${dest} (${dest}) 56(84) bytes of data.
+64 bytes from ${dest}: icmp_seq=1 ttl=117 time=12.4 ms
+64 bytes from ${dest}: icmp_seq=2 ttl=117 time=11.8 ms
+--- ${dest} ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss
+</div>`;
+                    break;
+
+                case 'sudo':
+                    if (targets.includes('su') || flags.includes('-i')) {
+                        isRootUser = true;
+                        currentUser = 'root';
+                        currentAbsPath = '/root';
+                        responseHTML = '<div class="cli-output-block text-slate-300">[sudo] root privileges granted.</div>';
+                    } else {
+                        responseHTML = `<div class="cli-output-block text-slate-300">${targets.length > 0 ? `[sudo] executing '${targets.join(' ')}' as root.` : 'usage: sudo command'}</div>`;
+                    }
+                    break;
+
+                case 'clear':
+                    out.innerHTML = '';
+                    break;
+
+                case 'reboot':
+                case 'poweroff':
+                case 'shutdown':
+                    initTerminalLogin();
+                    return;
+
+                case '':
+                    responseHTML = '';
+                    break;
+
+                default:
+                    responseHTML = `<div class="cli-output-block text-slate-300">Command '${cmd}' not found. Type '<span class="text-yellow-400 font-bold">help</span>' for available Linux CLI commands.</div>`;
+            }
+
+            if (responseHTML !== '' && cmd !== 'clear') {
+                out.insertAdjacentHTML('beforeend', responseHTML);
+            }
+
+            out.insertAdjacentHTML('beforeend', renderPrompt());
+
+            bindCliInput();
+            out.scrollTop = out.scrollHeight;
+        }
+    </script>
+</body>
+</html>

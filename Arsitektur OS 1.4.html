@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bab 1 - Sub-Bab 1.4: Manajemen Akun & Hak Istimewa | TKJ SMK Wikrama Bogor</title>
+  <style>
+    :root {
+      --bg-outer: #0a0e17;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent-cyan: #0284c7;
+      --accent-blue: #1d4ed8;
+      --accent-red: #dc2626;
+      --accent-green: #10b981;
+      --terminal-bg: #0c1017;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "Fira Code", "Consolas", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      height: 56px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 14, 23, 0.95);
+      z-index: 20;
+    }
+
+    .top-left-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu-toggle-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .menu-toggle-btn:hover {
+      background: #334155;
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .top-bar .title {
+      color: #f8fafc;
+      font-weight: 700;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .session-badge {
+      background: rgba(2, 132, 199, 0.15);
+      color: #38bdf8;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      text-transform: uppercase;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .counter-text {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #cbd5e1;
+      font-size: 0.88rem;
+    }
+
+    .nav-arrow-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .nav-arrow-btn:hover {
+      background: #334155;
+    }
+
+    /* Sidebar Drawer (Thumbnail Preview) */
+    .sidebar-overlay {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 100vw;
+      height: calc(100vh - 56px);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .slide-sidebar {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 380px;
+      max-width: 85vw;
+      height: calc(100vh - 56px);
+      background: #0f172a;
+      border-right: 1px solid #1e293b;
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f8fafc;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .sidebar-close-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .sidebar-close-btn:hover { color: #fff; }
+
+    .sidebar-search-box {
+      padding: 12px 18px;
+      border-bottom: 1px solid #1e293b;
+      background: #09101f;
+    }
+
+    .sidebar-search-input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      font-family: var(--font-sans);
+    }
+    .sidebar-search-input:focus { border-color: #38bdf8; }
+
+    .sidebar-scroll-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Thumbnail Card */
+    .thumb-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .thumb-card:hover {
+      background: #273549;
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+    }
+
+    .thumb-card.active {
+      background: rgba(2, 132, 199, 0.15);
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+
+    .thumb-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+    }
+
+    .thumb-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .thumb-tag {
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      font-weight: 600;
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .thumb-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Stage Presentation */
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 28px;
+      min-height: 0;
+    }
+
+    .slide-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      width: 96%;
+      max-width: 1260px;
+      height: 92%;
+      padding: 32px 42px;
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide-card.active {
+      display: flex;
+    }
+
+    /* Cover Card */
+    .slide-card.cover-card {
+      background: radial-gradient(circle at 50% 20%, #172554 0%, #09101f 75%);
+      color: #ffffff;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      padding: 30px 40px;
+    }
+
+    .cover-top-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cover-program {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .cover-subprogram {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .cover-chapter-badge {
+      background: rgba(56, 189, 248, 0.1);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 14px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .cover-main-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .cover-title {
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.15;
+    }
+
+    .cover-subtitle {
+      font-size: 1.05rem;
+      color: #94a3b8;
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    .cover-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 860px;
+      gap: 16px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .teacher-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .teacher-avatar {
+      width: 38px;
+      height: 38px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .teacher-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .teacher-certs {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: #38bdf8;
+    }
+
+    .meta-pills {
+      display: flex;
+      gap: 10px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: #cbd5e1;
+    }
+
+    .meta-pill-item {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    /* Standard Card Header */
+    .slide-header {
+      margin-bottom: 14px;
+    }
+
+    .slide-category {
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 4px;
+    }
+
+    .slide-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    /* Split Layout */
+    .slide-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    .text-content {
+      font-size: 1.08rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .text-content ul {
+      margin-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .text-content li strong {
+      color: var(--text-main);
+    }
+
+    /* Live Interactive Terminal */
+    .terminal-container {
+      background: var(--terminal-bg);
+      border: 1px solid #1f293d;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      height: 100%;
+      min-height: 310px;
+    }
+
+    .terminal-header-bar {
+      background: #111722;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1f293d;
+    }
+
+    .terminal-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-tab-title {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: #94a3b8;
+    }
+
+    .challenge-status {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: var(--font-sans);
+    }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+    .status-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+
+    .terminal-screen {
+      flex: 1;
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #f1f5f9;
+      overflow-y: auto;
+      cursor: text;
+    }
+
+    .history-entry {
+      margin-bottom: 6px;
+    }
+
+    .term-prompt {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .term-path {
+      color: #a855f7;
+    }
+
+    .term-char {
+      color: #f8fafc;
+    }
+
+    .term-output {
+      color: #cbd5e1;
+      margin-top: 2px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .term-output.error {
+      color: #f87171;
+    }
+
+    .term-output.success-msg {
+      color: #34d399;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      border-left: 3px solid #10b981;
+    }
+
+    .terminal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #a7f3d0;
+      caret-color: #38bdf8;
+    }
+
+    .terminal-footer-hint {
+      background: #080c14;
+      padding: 6px 14px;
+      font-size: 0.72rem;
+      color: #64748b;
+      border-top: 1px solid #1f293d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+    }
+    .copy-btn:hover { background: #334155; }
+
+    /* Outro Slide (Slide 50) */
+    .slide-card.outro-card {
+      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #09101f 80%);
+      color: #ffffff;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 32px 40px;
+    }
+
+    .outro-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .outro-quote {
+      font-size: 1.05rem;
+      color: #93c5fd;
+      max-width: 760px;
+      line-height: 1.55;
+      font-style: italic;
+      margin-bottom: 24px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 820px;
+      margin-bottom: 20px;
+    }
+
+    .contact-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .contact-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: #38bdf8;
+    }
+
+    .contact-icon {
+      font-size: 1.6rem;
+    }
+
+    .contact-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .contact-val {
+      font-size: 0.9rem;
+      font-family: var(--font-mono);
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      height: 44px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 0.82rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .bottom-bar kbd {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-left-group">
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Buka Daftar 50 Slide (Tekan M)">
+        <span>☰</span>
+        <span>Daftar Slide</span>
+      </button>
+      <div class="title">
+        <span>TKJ SMK Wikrama • Bab 1 Sub-Bab 1.4: Manajemen Akun & Hak Istimewa</span>
+        <span class="session-badge" id="session-tag">COVER MODUL</span>
+      </div>
+    </div>
+    <div class="top-controls">
+      <span class="counter-text" id="slide-num">Slide 1 of 50</span>
+      <button class="nav-arrow-btn" onclick="prevSlide()">❮</button>
+      <button class="nav-arrow-btn" onclick="nextSlide()">❯</button>
+    </div>
+  </div>
+
+  <!-- Sidebar Overlay & Drawer -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <div class="slide-sidebar" id="slide-sidebar">
+    <div class="sidebar-header">
+      <span>🗂️ Navigasi Daftar 50 Slide</span>
+      <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
+    </div>
+    <div class="sidebar-search-box">
+      <input type="text" class="sidebar-search-input" id="sidebar-filter" placeholder="Cari materi slide (contoh: useradd, sudoers, shadow, UAC)..." oninput="filterThumbnails()" />
+    </div>
+    <div class="sidebar-scroll-list" id="thumb-list"></div>
+  </div>
+
+  <!-- Stage Presentation -->
+  <div class="stage" id="deck"></div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <span>Navigasi Slide: <kbd>←</kbd> dan <kbd>→</kbd> | Buka Menu: <kbd>M</kbd> | Terminal: Ketik lalu tekan <kbd>Enter</kbd></span>
+    <span>Teknik Komputer dan Jaringan — SMK Wikrama Bogor</span>
+  </div>
+
+  <script>
+    let currentDir = "~";
+    let cmdHistory = [];
+    let historyIdx = -1;
+
+    // Database 50 Slide Lengkap Sub-Bab 1.4
+    const slidesData = [
+      // SLIDE 1: COVER
+      {
+        isCover: true,
+        program: "Program Keahlian: Teknik Jaringan Komputer dan Telekomunikasi",
+        subprogram: "Konsentrasi Keahlian: Teknik Komputer dan Jaringan",
+        chapter: "Bab 1: Arsitektur OS (Linux & Windows) & CLI",
+        title: "Sub-Bab 1.4: Manajemen Akun, Grup, & Hak Istimewa",
+        subtitle: "Penguasaan Database Akun Linux (/etc/passwd & /etc/shadow), Delegasi Wewenang Superuser (Sudoers), Audit Kredensial, serta Komparasi dengan Windows UAC",
+        teacher: "Ardi Ariansyah, S.Kom., Gr.",
+        certs: "MTCNA, MTCRE, ACTR, JPT, DFA, L1 SOC, EHE",
+        meta1: "Alokasi: 3 Sesi Praktikum",
+        meta2: "Total: 50 Slide Interaktif",
+        terminalCmd: "id && sudo -l",
+        terminalOut: "uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo)\nUser siswa may run the following commands on wikrama-lab:\n    (ALL : ALL) ALL",
+        sesi: "COVER MODUL"
+      },
+      // SLIDE 2: ROADMAP
+      {
+        cat: "PETA KOMPETENSI",
+        title: "Roadmap Pembelajaran Sub-Bab 1.4",
+        bullets: [
+          "<strong>Sesi 1 (Slide 1–17):</strong> Arsitektur Database Akun Linux (/etc/passwd, /etc/shadow, /etc/group), Format UID/GID, dan Siklus Hidup Akun (useradd, usermod, userdel).",
+          "<strong>Sesi 2 (Slide 18–34):</strong> Manajemen Grup (groupadd, gpasswd), Tata Kelola Kata Sandi & Penuaan Akun (chage, passwd), serta Pemantauan Sesi Aktif (who, w, last).",
+          "<strong>Sesi 3 (Slide 35–50):</strong> Delegasi Hak Akses Superuser (sudo vs su), Konfigurasi Aman visudo (/etc/sudoers), Celah NOPASSWD, Komparasi Windows UAC, dan Hardening Akun."
+        ],
+        targetCmd: "whoami",
+        targetHint: "Periksa nama pengguna sesi aktif Anda dengan mengetik: whoami",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 3: KONSEP IDENTITAS SISTEM
+      {
+        cat: "IDENTITAS ENTITAS",
+        title: "Konsep Akun Pengguna pada Sistem Operasi",
+        bullets: [
+          "Linux dan Windows adalah sistem operasi multi-user dengan pemisahan privilese yang ketat.",
+          "Setiap tindakan di terminal terikat pada identitas akun pengguna tertentu (*Accounting & Attribution*).",
+          "Sistem tidak mengenali nama pengguna dalam komputasi internal, melainkan nomor numerik **UID**.",
+          "Akun pengguna membatasi hak baca, tulis, dan eksekusi pada berkas serta proses sistem."
+        ],
+        targetCmd: "id siswa",
+        targetHint: "Tampilkan UID dan GID milik user siswa dengan: id siswa",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 4: KLASIFIKASI AKUN
+      {
+        cat: "KLASIFIKASI AKUN",
+        title: "Tiga Kategori Pengguna di Linux",
+        bullets: [
+          "<strong>1. Superuser (Root - UID 0):</strong> Penguasa mutlak sistem tanpa batasan izin apapun.",
+          "<strong>2. System/Service Accounts (UID 1–999):</strong> Akun khusus untuk menjalankan daemon otomatis (misal: `www-data`, `mysql`, `sshd`) tanpa hak login interaktif.",
+          "<strong>3. Regular Users (UID 1000+):</strong> Akun pengguna manusia biasa dengan izin terbatas pada direktori kerja home-nya."
+        ],
+        targetCmd: "awk -F: '$3 == 0 {print $1}' /etc/passwd",
+        targetHint: "Cari akun yang memiliki UID 0 (root) dengan: awk -F: '$3 == 0 {print $1}' /etc/passwd",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 5: /etc/passwd
+      {
+        cat: "DATABASE AKUN",
+        title: "Anatomi Berkas /etc/passwd",
+        bullets: [
+          "Menyimpan informasi identitas publik seluruh akun pengguna lokal.",
+          "Dapat dibaca oleh semua akun (izin 644) agar proses sistem dapat memetakan UID ke nama user.",
+          "Tersusun dari **7 field** yang dipisahkan oleh tanda titik dua ( `:` ).",
+          "Karakter 'x' pada kolom kedua menandakan bahwa password terenkripsi disimpan di berkas terpisah (/etc/shadow)."
+        ],
+        targetCmd: "head -n 2 /etc/passwd",
+        targetHint: "Tampilkan 2 baris awal berkas passwd: head -n 2 /etc/passwd",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 6: 7 FIELD /etc/passwd
+      {
+        cat: "STRUKTUR FIELD",
+        title: "Membedah 7 Kolom Berkas /etc/passwd",
+        bullets: [
+          "<code>siswa:x:1000:1000:Siswa TKJ:/home/siswa:/bin/bash</code>",
+          "<strong>1. Username:</strong> Nama akun login (`siswa`).",
+          "<strong>2. Password Flag:</strong> Ditandai `x` (rujukan ke /etc/shadow).",
+          "<strong>3. UID:</strong> User ID numerik (`1000`).",
+          "<strong>4. GID:</strong> Group ID primer (`1000`).",
+          "<strong>5. GECOS:</strong> Informasi komentar/nama lengkap (`Siswa TKJ`).",
+          "<strong>6. Home Directory:</strong> Direktori kerja (`/home/siswa`).",
+          "<strong>7. Login Shell:</strong> Penerjemah perintah biner (`/bin/bash`)."
+        ],
+        targetCmd: "grep siswa /etc/passwd",
+        targetHint: "Tampilkan baris akun siswa di /etc/passwd: grep siswa /etc/passwd",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 7: /etc/shadow
+      {
+        cat: "KEAMANAN KREDENSIAL",
+        title: "Anatomi Berkas Rahasia: /etc/shadow",
+        bullets: [
+          "Menyimpan nilai hash kata sandi terenkripsi dan kebijakan masa berlaku password.",
+          "Izin akses dikunci sangat ketat (mode 640 atau 000 milik root:shadow).",
+          "Tersusun dari **9 field** berpemisah titik dua.",
+          "Mencegah serangan *offline password cracking* oleh pengguna unprivileged."
+        ],
+        targetCmd: "sudo head -n 2 /etc/shadow",
+        targetHint: "Baca berkas shadow menggunakan hak sudo: sudo head -n 2 /etc/shadow",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 8: DEKODE FIELD SHADOW
+      {
+        cat: "HASH KRIPTOGRAFI",
+        title: "Membaca Format Hash pada /etc/shadow",
+        bullets: [
+          "Format hash: <code>$id$salt$encrypted_hash</code>.",
+          "<strong>$6$:</strong> Algoritma SHA-512 (Standar modern Linux).",
+          "<strong>$y$ / $argon2id$:</strong> Kriptografi modern tahan serangan GPU/ASIC.",
+          "<strong>Salt:</strong> String acak untuk mencegah serangan *Rainbow Table*.",
+          "Jika diawali tanda `!` atau `*`, akun dalam kondisi terkunci (*locked/disabled*)."
+        ],
+        code: "# Format Hash Linux Modern\n$6$rounds=4096$randomsalt$hashedvalue...\n# $1$ = MD5 (Lawas/Rentan)\n# $5$ = SHA-256\n# $6$ = SHA-512",
+        targetCmd: "sudo grep root /etc/shadow",
+        targetHint: "Periksa format hash akun root dengan: sudo grep root /etc/shadow",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 9: MEMBUAT USER
+      {
+        cat: "ADMINISTRASI AKUN",
+        title: "Membuat Akun Baru: useradd vs adduser",
+        bullets: [
+          "<strong>useradd (Biner Inti):</strong> Perintah level rendah standar POSIX. Memerlukan flag eksplisit untuk membuat folder home.",
+          "<strong>adduser (Perl Script Friendly):</strong> Wrapper ramah pemula di Debian/Ubuntu yang interaktif menanyakan nama dan password.",
+          "Opsi vital `useradd`: <code>-m</code> (buat home folder), <code>-s</code> (tentukan shell), <code>-g</code> (grup primer).",
+          "Dalam skrip otomasi keamanan, <code>useradd</code> lebih sering diandalkan."
+        ],
+        targetCmd: "sudo useradd -m -s /bin/bash analis",
+        targetHint: "Buat akun analis dengan home dan bash: sudo useradd -m -s /bin/bash analis",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 10: SETEL KATA SANDI
+      {
+        cat: "ADMINISTRASI AKUN",
+        title: "Menetapkan Kata Sandi: passwd",
+        bullets: [
+          "Akun yang baru dibuat menggunakan `useradd` berada dalam status terkunci tanpa password.",
+          "Perintah <code>passwd [username]</code> digunakan superuser untuk menetapkan kata sandi baru.",
+          "Pengguna biasa dapat mengubah password miliknya sendiri dengan mengetik <code>passwd</code> tanpa argumen.",
+          "Biner `/usr/bin/passwd` memiliki bit SUID untuk memperbarui `/etc/shadow`."
+        ],
+        targetCmd: "sudo passwd analis",
+        targetHint: "Simulasikan penetapan password akun analis: sudo passwd analis",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 11: MODIFIKASI AKUN
+      {
+        cat: "MANIPULASI AKUN",
+        title: "Memodifikasi Atribut Akun: usermod",
+        bullets: [
+          "Perintah <strong>usermod (User Modify)</strong> merombak konfigurasi akun yang sudah ada.",
+          "<code>-s [shell]:</code> Mengganti shell login (misal mengarahkan ke `/usr/sbin/nologin`).",
+          "<code>-L (Lock):</code> Mengunci akun agar tidak bisa login (menambahkan tanda ! di shadow).",
+          "<code>-U (Unlock):</code> Membuka kembali akun yang terkunci.",
+          "<code>-aG [group]:</code> Memasukkan user ke grup sekunder baru (*Append Group*)."
+        ],
+        targetCmd: "sudo usermod -L analis",
+        targetHint: "Kunci akun analis sementara dengan: sudo usermod -L analis",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 12: MENGHAPUS AKUN
+      {
+        cat: "PEMBERSIHAN AKUN",
+        title: "Menghapus Akun: userdel",
+        bullets: [
+          "Perintah <strong>userdel</strong> mencabut akun dari database `/etc/passwd` dan `/etc/shadow`.",
+          "<strong>Awas Bahaya:</strong> Menjalankan `userdel [user]` tanpa flag akan **meninggalkan direktori home-nya**.",
+          "Folder yang tertinggal akan menjadi file yatim piatu (*Orphaned Files*) yang tidak bertuan.",
+          "Gunakan opsi <code>-r</code> (remove) untuk menghapus user beserta direktori home dan mailbox-nya."
+        ],
+        targetCmd: "sudo userdel -r analis",
+        targetHint: "Hapus akun analis beserta direktori home-nya: sudo userdel -r analis",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 13: AKUN NOLOGIN
+      {
+        cat: "HARDENING SERVICE",
+        title: "Akun Layanan & Shell /usr/sbin/nologin",
+        bullets: [
+          "Akun layanan seperti `www-data` atau `ftp` tidak boleh memiliki shell interaktif.",
+          "Jika peretas berhasil mengeksploitasi aplikasi, peretas tidak boleh mendapatkan sesi terminal bash.",
+          "Shell diarahkan ke <code>/usr/sbin/nologin</code> atau <code>/bin/false</code>.",
+          "Upaya login SSH atau su menggunakan akun tersebut akan langsung diputus otomatis oleh kernel."
+        ],
+        targetCmd: "grep www-data /etc/passwd",
+        targetHint: "Cek shell akun web server www-data: grep www-data /etc/passwd",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 14: /etc/skel
+      {
+        cat: "TEMPLAT PROFIL",
+        title: "Direktori Templat Pengguna Baru: /etc/skel",
+        bullets: [
+          "Berisi berkas konfigurasi default yang otomatis disalin saat user baru dibuat dengan opsi `-m`.",
+          "Menyimpan templat berkas tersembunyi seperti `.bashrc`, `.profile`, dan `.bash_logout`.",
+          "Administrator dapat mengustomisasi `/etc/skel` untuk menetapkan kebijakan keamanan seragam.",
+          "Jika peretas menyusupi `/etc/skel`, setiap pengguna baru otomatis terinfeksi pintu belakang (*backdoor*)."
+        ],
+        targetCmd: "ls -la /etc/skel",
+        targetHint: "Lihat isi templat direktori pengguna baru: ls -la /etc/skel",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 15: LAB 1
+      {
+        cat: "PRAKTIK LAB SESI 1",
+        title: "Lab 1: Pembuatan & Audit Akun Keamanan",
+        bullets: [
+          "Buat akun analis baru bernama <code>auditor</code> dengan direktori home mandiri.",
+          "Verifikasi keberadaan baris akun di berkas `/etc/passwd`.",
+          "Kunci akun tersebut menggunakan perintah `usermod -L`.",
+          "Periksa perubahan karakter pada berkas `/etc/shadow` untuk memastikan akun terkunci."
+        ],
+        targetCmd: "sudo useradd -m auditor && sudo usermod -L auditor",
+        targetHint: "Buat user auditor dan langsung kunci akunnya: sudo useradd -m auditor && sudo usermod -L auditor",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 16: KUIS SESI 1
+      {
+        cat: "EVALUASI SESI 1",
+        title: "Analisis Insiden: Celah Berkas Akun Terbuka",
+        bullets: [
+          "<strong>Skenario:</strong> Seorang admin magang secara tidak sengaja menjalankan <code>chmod 777 /etc/passwd</code>.",
+          "Penyerang biasa yang tidak memiliki hak sudo berhasil masuk ke server.",
+          "<strong>Pertanyaan:</strong> Langkah paling mematikan apa yang dapat dilakukan penyerang dengan hak tulis di `/etc/passwd`?",
+          "<strong>Analisis:</strong> Menambahkan baris akun baru dengan UID 0 untuk mendapatkan akses root instan!"
+        ],
+        targetCmd: "ls -l /etc/passwd",
+        targetHint: "Pastikan izin berkas passwd selalu 644 (-rw-r--r--): ls -l /etc/passwd",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+      // SLIDE 17: RINGKASAN SESI 1
+      {
+        cat: "RINGKASAN SESI 1",
+        title: "Rangkuman Kunci Basis Data Akun Linux",
+        bullets: [
+          "Linux mengidentifikasi pengguna berbasis angka numerik UID (Root = UID 0).",
+          "Berkas `/etc/passwd` menyimpan profil akun publik; `/etc/shadow` melindungi hash kata sandi.",
+          "Gunakan `useradd -m` untuk membuat akun berhome folder dan `userdel -r` untuk pembersihan tuntas.",
+          "Akun daemon wajib diproteksi dengan shell `/usr/sbin/nologin`."
+        ],
+        targetCmd: "clear",
+        targetHint: "Bersihkan layar terminal untuk masuk ke materi Sesi 2: clear",
+        sesi: "SESI 1: DATABASE AKUN & PENGGUNA"
+      },
+
+      // SESI 2: MANAJEMEN GRUP, POLICY PASSWORD, & AUDIT SESI
+      {
+        cat: "PENGANTAR SESI 2",
+        title: "Manajemen Grup, Kebijakan Password, & Audit Sesi",
+        bullets: [
+          "Grup memfasilitasi kerja kolaboratif dan pembagian wewenang tanpa berbagi akun.",
+          "Setiap pengguna memiliki 1 grup primer (*Primary Group*) dan bisa memiliki banyak grup sekunder (*Supplementary Groups*).",
+          "Informasi grup disimpan di berkas `/etc/group` dan `/etc/gshadow`.",
+          "Sesi ini juga membedah penuaan kata sandi (*Password Aging*) dan audit forensik sesi login aktif."
+        ],
+        targetCmd: "groups",
+        targetHint: "Lihat daftar seluruh grup yang diikuti user aktif: groups",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 19: /etc/group
+      {
+        cat: "DATABASE GRUP",
+        title: "Anatomi Berkas /etc/group",
+        bullets: [
+          "Menyimpan daftar seluruh grup lokal di sistem operasi Linux.",
+          "Tersusun dari **4 field** berpemisah titik dua:",
+          "<code>sudo:x:27:siswa,budi</code>",
+          "<strong>1. Group Name:</strong> Nama grup (`sudo`).",
+          "<strong>2. Group Password:</strong> Ditandai `x` (rujukan ke /etc/gshadow).",
+          "<strong>3. GID:</strong> Nomor identitas grup (`27`).",
+          "<strong>4. Member List:</strong> Daftar anggota sekunder dipisah koma."
+        ],
+        targetCmd: "grep sudo /etc/group",
+        targetHint: "Periksa anggota grup sudo di sistem: grep sudo /etc/group",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 20: MEMBUAT GRUP
+      {
+        cat: "ADMINISTRASI GRUP",
+        title: "Membuat & Mengelola Grup: groupadd",
+        bullets: [
+          "Perintah <code>groupadd [nama_grup]</code> digunakan superuser untuk menciptakan grup baru.",
+          "Opsi <code>-g [GID]:</code> Menentukan nomor GID kustom secara spesifik.",
+          "Grup proyek mempermudah pengaturan izin folder bersama dengan mode SGID (2000).",
+          "Perintah <code>groupdel</code> digunakan untuk menghapus grup (asalkan bukan grup primer dari user aktif)."
+        ],
+        targetCmd: "sudo groupadd soc_analyst",
+        targetHint: "Buat grup tim keamanan baru: sudo groupadd soc_analyst",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 21: MEMASUKKAN USER KE GRUP
+      {
+        cat: "MANIPULASI KEANGGOTAAN",
+        title: "Memasukkan Pengguna ke Grup: usermod & gpasswd",
+        bullets: [
+          "<strong>Metode 1 (usermod):</strong> <code>sudo usermod -aG [group] [user]</code>.",
+          "<strong>PENTING:</strong> Wajib menyertakan flag <code>-a</code> (Append). Jika hanya `-G`, seluruh keanggotaan grup lain akan terhapus!",
+          "<strong>Metode 2 (gpasswd):</strong> <code>sudo gpasswd -a [user] [group]</code> (Lebih aman dari risiko lupa flag `-a`).",
+          "Untuk mencabut user dari grup: <code>sudo gpasswd -d [user] [group]</code>."
+        ],
+        targetCmd: "sudo gpasswd -a siswa soc_analyst",
+        targetHint: "Tambahkan siswa ke grup soc_analyst: sudo gpasswd -a siswa soc_analyst",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 22: NEWGRP
+      {
+        cat: "SESI AKTIF",
+        title: "Aktivasi Grup Baru Tanpa Logout: newgrp",
+        bullets: [
+          "Perubahan keanggotaan grup biasanya membutuhkan proses *logout* dan *login* ulang agar token sesi diperbarui.",
+          "Perintah <code>newgrp [nama_grup]</code> memungkinkan user beralih ke grup primer baru secara instan di sesi shell aktif.",
+          "Sangat praktis saat bekerja di terminal remote SSH agar tidak perlu memutuskan koneksi.",
+          "Ketik `exit` untuk keluar dari sub-shell newgrp kembali ke grup semula."
+        ],
+        targetCmd: "newgrp soc_analyst",
+        targetHint: "Aktifkan sesi grup soc_analyst seketika: newgrp soc_analyst",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 23: PASSWORD AGING CHAGE
+      {
+        cat: "KEBIJAKAN KREDENSIAL",
+        title: "Kebijakan Penuaan Kata Sandi: Utilitas chage",
+        bullets: [
+          "Standar keamanan mensyaratkan kata sandi kedaluwarsa secara berkala (misal tiap 90 hari).",
+          "Perintah <strong>chage (Change Age)</strong> mengontrol siklus hidup password pengguna.",
+          "<code>-M [hari]:</code> Maksimal umur kata sandi sebelum wajib diganti.",
+          "<code>-m [hari]:</code> Minimal interval hari sebelum user boleh mengganti password lagi.",
+          "<code>-W [hari]:</code> Peringatan sebelum password kedaluwarsa.",
+          "<code>-d 0:</code> Memaksa user langsung mengganti password saat login berikutnya!"
+        ],
+        targetCmd: "chage -l siswa",
+        targetHint: "Tampilkan rincian penuaan password akun siswa: chage -l siswa",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 24: HARDENING PASSWORD CHAGE
+      {
+        cat: "KEBIJAKAN KREDENSIAL",
+        title: "Penerapan Kebijakan Password 90 Hari",
+        bullets: [
+          "Mencegah pencurian kredensial jangka panjang di server produksi.",
+          "Perintah: <code>sudo chage -M 90 -W 7 -m 1 siswa</code>.",
+          "Kebijakan global bawaan untuk akun baru dikonfigurasi di berkas <code>/etc/login.defs</code>.",
+          "Parameter: `PASS_MAX_DAYS`, `PASS_MIN_DAYS`, `PASS_WARN_AGE`."
+        ],
+        targetCmd: "grep PASS_MAX_DAYS /etc/login.defs",
+        targetHint: "Cek konfigurasi masa aktif password default sistem: grep PASS_MAX_DAYS /etc/login.defs",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 25: PAM MODULE
+      {
+        cat: "OTENTIKASI LANJUTAN",
+        title: "Pluggable Authentication Modules (PAM)",
+        bullets: [
+          "PAM adalah arsitektur otentikasi modular fleksibel di lingkungan Linux.",
+          "Mengontrol kompleksitas kata sandi melalui modul <code>pam_pwquality.so</code>.",
+          "Mengontrol penguncian akun otomatis akibat salah password via <code>pam_faillock.so</code>.",
+          "Memitigasi serangan SSH brute-force di tingkat sistem operasi lokal."
+        ],
+        targetCmd: "cat /etc/pam.d/common-auth",
+        targetHint: "Lihat konfigurasi otentikasi modul PAM: cat /etc/pam.d/common-auth",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 26: AUDIT SESI WHO & W
+      {
+        cat: "AUDIT SESI",
+        title: "Memantau Pengguna yang Sedang Login: who & w",
+        bullets: [
+          "Analis keamanan wajib memantau siapa saja yang sedang terhubung ke server.",
+          "<strong>who:</strong> Menampilkan daftar user aktif, nama terminal (pts), dan waktu login.",
+          "<strong>w:</strong> Lebih lengkap; menampilkan alamat IP asal login, waktu idle, dan proses apa yang sedang diketikkan user!",
+          "Membantu mendeteksi sesi penyusup (*Unauthorized Active Session*)."
+        ],
+        targetCmd: "w",
+        targetHint: "Tampilkan sesi login aktif beserta aktivitasnya dengan: w",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 27: FORENSIK LAST & WTMP
+      {
+        cat: "DIGITAL FORENSIK",
+        title: "Melacak Riwayat Login Masa Lalu: last & lastb",
+        bullets: [
+          "Data login masa lalu direkam kernel dalam berkas biner <code>/var/log/wtmp</code>.",
+          "Perintah <code>last</code> membongkar rekaman riwayat login sukses dan peristiwa reboot.",
+          "Berkas <code>/var/log/btmp</code> merekam upaya login yang gagal.",
+          "Perintah <code>lastb</code> digunakan untuk memeriksa indikasi serangan password spraying."
+        ],
+        targetCmd: "last -n 5",
+        targetHint: "Tampilkan 5 rekaman login terakhir ke sistem: last -n 5",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 28: KICKING USER SESSIONS
+      {
+        cat: "RESPON INSIDEN",
+        title: "Mengusir Sesi Pengguna Berbahaya: pkill",
+        bullets: [
+          "Jika analis mendeteksi adanya sesi terminal peretas yang sedang aktif di `pts/1`.",
+          "Analis dapat langsung memutuskan koneksi sesi penyerang seketika.",
+          "Perintah: <code>sudo pkill -KILL -u [username]</code> (Mematikan seluruh proses user).",
+          "Atau memutus terminal spesifik: <code>sudo pkill -KILL -t pts/1</code>."
+        ],
+        targetCmd: "who",
+        targetHint: "Periksa daftar terminal aktif sebelum melakukan isolasi: who",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 29: LAB 2
+      {
+        cat: "PRAKTIK LAB SESI 2",
+        title: "Lab 2: Kebijakan Password & Audit Grup",
+        bullets: [
+          "Buat grup proyek baru bernama <code>devsecops</code>.",
+          "Tambahkan user `siswa` ke dalam grup tersebut menggunakan perintah `gpasswd -a`.",
+          "Terapkan aturan penuaan password maksimal 60 hari pada akun `siswa` via `chage`.",
+          "Verifikasi seluruh rekaman sesi aktif menggunakan perintah `w`."
+        ],
+        targetCmd: "sudo chage -M 60 siswa && chage -l siswa",
+        targetHint: "Kunci masa aktif password siswa 60 hari: sudo chage -M 60 siswa && chage -l siswa",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 30: KASUS INTRUSI AKUN
+      {
+        cat: "STUDI KASUS INSIDEN",
+        title: "Kasus: Akun Terkunci Akibat Serangan Brute Force",
+        bullets: [
+          "Pengguna sah mengeluh tidak bisa login: <em>'Account locked due to 5 failed logins'</em>.",
+          "Modul `pam_faillock` mengunci akun setelah mendeteksi rentetan password salah dari hacker.",
+          "<strong>Investigasi:</strong> Analis memeriksa log via `lastb` untuk mencatat IP penyerang.",
+          "<strong>Remediasi:</strong> Buka kunci akun menggunakan perintah <code>sudo faillock --user [user] --reset</code>."
+        ],
+        targetCmd: "sudo faillock --user siswa",
+        targetHint: "Periksa status catatan kegagalan login akun siswa: sudo faillock --user siswa",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 31: KUIS SESI 2
+      {
+        cat: "EVALUASI SESI 2",
+        title: "Kuis Cepat: Manajemen Grup & Sesi",
+        bullets: [
+          "<strong>1.</strong> Berkas apakah di `/etc` yang menyimpan daftar keanggotaan grup sekunder?",
+          "<strong>2.</strong> Apa risiko fatal jika menggunakan `usermod -G` tanpa menyertakan opsi `-a`?",
+          "<strong>3.</strong> Perintah apakah yang digunakan untuk membaca rekaman riwayat login di `/var/log/wtmp`?"
+        ],
+        targetCmd: "echo \"/etc/group, grup lama terhapus, last\"",
+        targetHint: "Ketik jawaban kuis: echo \"/etc/group, grup lama terhapus, last\"",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 32: RINGKASAN SESI 2
+      {
+        cat: "RINGKASAN SESI 2",
+        title: "Rangkuman Kunci Manajemen Grup & Audit",
+        bullets: [
+          "Grup menyederhanakan tata kelola kolaborasi berkas dengan prinsip *Least Privilege*.",
+          "Selalu gunakan `usermod -aG` atau `gpasswd -a` agar tidak menghapus keanggotaan grup lama.",
+          "Utilitas `chage` memastikan kata sandi diperbarui berkala untuk membatasi dampak kebocoran kredensial.",
+          "Perintah `w` dan `last` menjadi instrumen esensial pemantauan dan investigasi forensik sesi."
+        ],
+        targetCmd: "clear",
+        targetHint: "Bersihkan layar terminal untuk bersiap ke materi Sesi 3: clear",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 33: TRANSISI SESI 3
+      {
+        cat: "JEMBATAN MATERI",
+        title: "Menuju Hak Istimewa Superuser (Sudoers)",
+        bullets: [
+          "Kita telah menguasai manajemen identitas user biasa dan grup kerja.",
+          "Namun bagaimana jika user biasa membutuhkan akses untuk merestart firewall atau menginstal software?",
+          "Memberikan password root secara langsung adalah pelanggaran fatal standar keamanan!",
+          "Solusinya: Mekanisme delegasi wewenang terkontrol menggunakan <strong>Sudoers</strong>."
+        ],
+        targetCmd: "sudo -V",
+        targetHint: "Periksa versi paket utilitas sudo yang terpasang: sudo -V",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+      // SLIDE 34: REVIEW PRIVILEGE
+      {
+        cat: "EVALUASI PRIVILEGE",
+        title: "Hierarki Hak Akses: Unprivileged vs Superuser",
+        bullets: [
+          "Tugas operasional harian WAJIB dijalankan menggunakan akun unprivileged (user biasa).",
+          "Hak superuser hanya dipinjam saat melakukan tugas administratif tertentu (*Privilege on Demand*).",
+          "Mencegah kesalahan ketik fatal merusak seluruh sistem (seperti `rm -rf`).",
+          "Merekam setiap pemanggilan perintah administratif ke dalam audit trail."
+        ],
+        targetCmd: "id -u",
+        targetHint: "Cek nomor UID sesi terminal aktif: id -u",
+        sesi: "SESI 2: MANAJEMEN GRUP & AUDIT SESI"
+      },
+
+      // SESI 3: SUDOERS, PRIVILEGE ESCALATION, & WINDOWS UAC
+      {
+        cat: "PENGANTAR SESI 3",
+        title: "Delegasi Hak Istimewa & Sudoers Security",
+        bullets: [
+          "Sudo (*SuperUser DO*) memungkinkan administrator mendelegasikan perintah tertentu ke user biasa.",
+          "Tidak perlu membocorkan kata sandi root ke staf teknisi.",
+          "Setiap tindakan sudo tercatat rapi di log forensik `/var/log/auth.log`.",
+          "Konfigurasi salah pada sudoers adalah jalan tol paling favorit peretas untuk meraih root (*Privilege Escalation*)."
+        ],
+        targetCmd: "sudo -l",
+        targetHint: "Periksa hak istimewa yang didelegasikan ke akun Anda: sudo -l",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 36: SU VS SUDO
+      {
+        cat: "KOMPARASI MEKANISME",
+        title: "Perbedaan Mendasar: Perintah su vs sudo",
+        bullets: [
+          "<strong>su (Switch User):</strong> Beralih sepenuhnya ke akun root. **Memerlukan password root** asli. Tidak ada batasan perintah.",
+          "<strong>sudo:</strong> Mengeksekusi perintah tunggal dengan hak root. **Memerlukan password user itu sendiri**.",
+          "Di Ubuntu/Debian modern, akun root secara bawaan dikunci (*disabled password*) demi memaksa penggunaan `sudo`.",
+          "Keunggulan `sudo`: Akuntabilitas audit jelas (siapa mengeksekusi apa dan kapan)."
+        ],
+        targetCmd: "sudo -l -U siswa",
+        targetHint: "Cek aturan sudo khusus untuk pengguna siswa: sudo -l -U siswa",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 37: /etc/sudoers
+      {
+        cat: "KONFIGURASI KRUSIAL",
+        title: "Jantung Kebijakan Superuser: /etc/sudoers",
+        bullets: [
+          "Berkas sentral yang mengatur siapa boleh menjalankan perintah apa atas nama siapa.",
+          "<strong>DILARANG MENGEDIT LANGSUNG</strong> berkas ini menggunakan text editor biasa (seperti nano/vim)!",
+          "Jika ada kesalahan satu koma saja, sudo akan rusak permanen dan tidak ada user yang bisa menjadi admin lagi.",
+          "Wajib selalu mengedit menggunakan perintah pengawal resmi: <code>sudo visudo</code>."
+        ],
+        targetCmd: "sudo cat /etc/sudoers",
+        targetHint: "Tampilkan isi aturan berkas sudoers: sudo cat /etc/sudoers",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 38: SINTAKS VISUDO
+      {
+        cat: "SINTAKS SUDOERS",
+        title: "Format Baku Baris Konfigurasi Sudoers",
+        bullets: [
+          "<code>user   host = (run_as_user : run_as_group)   commands</code>",
+          "Contoh 1: <code>root ALL=(ALL:ALL) ALL</code> (Root boleh menjalankan apapun di host manapun).",
+          "Contoh 2: <code>%sudo ALL=(ALL:ALL) ALL</code> (Tanda `%` menandakan aturan berlaku untuk seluruh anggota grup `sudo`).",
+          "Contoh 3: <code>budi srv01=(root) /usr/bin/systemctl restart nginx</code> (Hanya boleh merestart Nginx)."
+        ],
+        code: "# Struktur Aturan Sudoers\n# Siapa   Di Mana = (Sebagai Siapa)  Perintah Apa\n  andi    ALL    = (root)           /usr/bin/apt update",
+        targetCmd: "sudo grep '%sudo' /etc/sudoers",
+        targetHint: "Cek aturan grup sudo di sudoers: sudo grep '%sudo' /etc/sudoers",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 39: CELAH NOPASSWD
+      {
+        cat: "KERENTANAN FATAL",
+        title: "Bahaya Parameter NOPASSWD pada Sudoers",
+        bullets: [
+          "Administrator malas sering menyematkan opsi: <code>siswa ALL=(ALL) NOPASSWD: ALL</code>.",
+          "Artinya: Pengguna dapat mengeksekusi hak root tanpa perlu memasukkan kata sandi.",
+          "Jika laptop siswa ditinggal dalam kondisi terbuka atau disusupi script malware unprivileged.",
+          "Malware langsung mendapatkan hak root seketika tanpa halangan otentikasi apapun!"
+        ],
+        code: "# JALAN TOL BAGI MALWARE:\noperator ALL=(ALL) NOPASSWD: ALL\n# Hindari aturan malas ini di lingkungan produksi!",
+        targetCmd: "sudo -n true 2>/dev/null && echo 'Sudo Tanpa Password!'",
+        targetHint: "Uji apakah sesi sudo aktif tanpa prompt password: sudo -n true",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 40: ESKALASI GTFOBINS SUDO
+      {
+        cat: "VEKTOR PENYERANGAN",
+        title: "Eskalasi Root via Program Sudo Berbahaya",
+        bullets: [
+          "Jika admin hanya mendelegasikan satu perintah tetapi perintah tersebut bisa memanggil shell.",
+          "Contoh delegasi: <code>andi ALL=(ALL) /usr/bin/find</code> atau <code>/usr/bin/vim</code>.",
+          "Andi dapat menggunakan fitur internal program tersebut untuk melahirkan shell root baru!",
+          "Koleksi teknik eksploitasi sudoers terdokumentasi lengkap di <strong>GTFOBins</strong>."
+        ],
+        code: "# Melahirkan Root Shell dari Vim via Sudo:\n$ sudo vim -c ':!/bin/sh'\n# Langsung menjadi root (#) tanpa batas!",
+        targetCmd: "sudo find /etc/sudoers.d -type f",
+        targetHint: "Periksa direktori konfigurasi modular sudoers.d: sudo find /etc/sudoers.d -type f",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 41: KOMPARASI WINDOWS UAC
+      {
+        cat: "KOMPARASI WINDOWS",
+        title: "Mekanisme Windows UAC (User Account Control)",
+        bullets: [
+          "Windows menerapkan pemisahan hak serupa melalui mekanisme <strong>UAC</strong>.",
+          "Meskipun user tergabung di grup Administrators, proses aplikasi berjalan menggunakan *Filtered Token* standar.",
+          "Saat aplikasi membutuhkan hak admin, UAC memunculkan pop-up dialog (*Consent Prompt*).",
+          "Mencegah malware secara diam-diam mengubah registry sistem tanpa persetujuan pengguna."
+        ],
+        targetCmd: "id -Gn",
+        targetHint: "Lihat seluruh nama grup akun Anda: id -Gn",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 42: LEVEL UAC WINDOWS
+      {
+        cat: "KEBIJAKAN WINDOWS",
+        title: "Tingkat Penggeser Proteksi Windows UAC",
+        bullets: [
+          "<strong>1. Always Notify (Paling Aman):</strong> Selalu memunculkan dialog UAC dan meredupkan desktop (*Secure Desktop*).",
+          "<strong>2. Default Notify:</strong> Hanya memberi tahu jika aplikasi mencoba membuat perubahan di sistem.",
+          "<strong>3. Never Notify (Sangat Berbahaya):</strong> Menonaktifkan UAC total; malware dapat bebas menginfeksi sistem.",
+          "Teknik bypass UAC (UACMe) sering dimanfaatkan ransomware untuk mematikan Windows Defender."
+        ],
+        code: "# Registry Windows Pengendali UAC:\nHKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\nEnableLUA = 1 (UAC Wajib Aktif)",
+        targetCmd: "cat /etc/issue",
+        targetHint: "Tampilkan versi distribusi Linux lab: cat /etc/issue",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 43: AUDIT LOG SUDOERS
+      {
+        cat: "DIGITAL FORENSIK",
+        title: "Audit Bukti Eksekusi Sudo di /var/log/auth.log",
+        bullets: [
+          "Setiap kali perintah dijalankan dengan awalan `sudo`, sistem mencatat 4 parameter kunci:",
+          "1. Siapa nama user yang mengeksekusi (`USER=siswa`).",
+          "2. Terminal fisik/remote tempat perintah dipanggil (`TTY=pts/0`).",
+          "3. Direktori kerja saat perintah dijalankan (`PWD=/home/siswa`).",
+          "4. Perintah biner absolut yang diminta (`COMMAND=/usr/bin/apt update`)."
+        ],
+        targetCmd: "grep sudo /var/log/auth.log",
+        targetHint: "Periksa rekaman eksekusi perintah sudo: grep sudo /var/log/auth.log",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 44: HARDENING SUDOERS
+      {
+        cat: "PENGERASAN SISTEM",
+        title: "Prinsip Hardening Delegasi Wewenang",
+        bullets: [
+          "1. <strong>Terapkan Least Privilege:</strong> Jangan pernah memberi `ALL`; tentukan biner spesifik.",
+          "2. <strong>Gunakan Path Absolut:</strong> Selalu tulis `/usr/bin/systemctl`, jangan hanya `systemctl` (mencegah PATH Hijacking).",
+          "3. <strong>Hindari Biner Shell:</strong> Dilarang mendelegasikan editor teks (vim, nano), pager (less, more), atau interpreter (python, bash).",
+          "4. <strong>Aktifkan Timeout:</strong> Batasi masa aktif cache password sudo (`timestamp_timeout=5`)."
+        ],
+        targetCmd: "sudo -k",
+        targetHint: "Hapus cache otentikasi sudo aktif (memaksa input password lagi): sudo -k",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 45: PRAKTIK LAB SESI 3
+      {
+        cat: "PRAKTIK LAB SESI 3",
+        title: "Lab 3: Pemeriksaan Wewenang & Audit Sudo",
+        bullets: [
+          "Gunakan perintah <code>sudo -l</code> untuk memetakan wewenang administratif yang Anda miliki.",
+          "Jalankan perintah administratif (misal membaca berkas rahasia).",
+          "Periksa berkas log `/var/log/auth.log` untuk melihat bagaimana sistem mencatat jejak eksekusi Anda.",
+          "Reset cache tiket sudo menggunakan perintah `sudo -k`."
+        ],
+        targetCmd: "sudo -l",
+        targetHint: "Bongkar matriks delegasi hak akses Anda: sudo -l",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 46: TANTANGAN PROYEK
+      {
+        cat: "PROYEK KELAS",
+        title: "Tantangan Proyek: Delegasi Staf Helpdesk",
+        bullets: [
+          "Anda diminta mendelegasikan wewenang kepada staf teknisi <code>helpdesk</code>.",
+          "Kriteria wewenang ketat:",
+          "1. Teknisi HANYA boleh merestart layanan web server: `/usr/bin/systemctl restart nginx`.",
+          "2. Teknisi HANYA boleh melihat status layanan: `/usr/bin/systemctl status *`.",
+          "3. Dilarang keras memberikan wewenang untuk menghentikan server (`shutdown`/`reboot`).",
+          "4. Konfigurasi disimpan rapi di berkas modular `/etc/sudoers.d/helpdesk`."
+        ],
+        code: "# Baris Sudoers Solusi Proyek:\nhelpdesk ALL=(root) /usr/bin/systemctl restart nginx, /usr/bin/systemctl status *",
+        targetCmd: "sudo cat /etc/sudoers.d/helpdesk",
+        targetHint: "Buka isi aturan berkas modular helpdesk: sudo cat /etc/sudoers.d/helpdesk",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 47: EVALUASI PROYEK
+      {
+        cat: "VALIDASI PROYEK",
+        title: "Validasi Hasil Akhir Tantangan Sudoers",
+        bullets: [
+          "Uji coba menggunakan akun helpdesk: `sudo systemctl restart nginx` (Wajib sukses).",
+          "Uji coba perintah terlarang: `sudo systemctl stop nginx` atau `sudo reboot`.",
+          "Sistem wajib menolak perintah terlarang dengan pesan: <em>'Sorry, user helpdesk is not allowed to execute...'</em>.",
+          "Membuktikan bahwa delegasi *Least Privilege* bekerja sempurna!"
+        ],
+        targetCmd: "sudo -l -U helpdesk",
+        targetHint: "Validasi daftar izin khusus user helpdesk: sudo -l -U helpdesk",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 48: KUIS FINAL SUB-BAB 1.4
+      {
+        cat: "EVALUASI AKHIR",
+        title: "Cek Pemahaman Akhir Sub-Bab 1.4",
+        bullets: [
+          "<strong>1.</strong> Mengapa perintah `visudo` wajib digunakan dibanding nano saat mengedit sudoers?",
+          "<strong>2.</strong> Apa perbedaan fungsional antara `su` dan `sudo` dari sisi kata sandi yang diminta?",
+          "<strong>3.</strong> Komponen apakah pada Windows yang setara fungsinya dengan sudo dalam membatasi token hak akses?"
+        ],
+        targetCmd: "echo \"visudo validasi sintaks, sudo pakai pass user, Windows UAC\"",
+        targetHint: "Ketik jawaban evaluasi akhir: echo \"visudo validasi sintaks, sudo pakai pass user, Windows UAC\"",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 49: RANGKUMAN FINAL
+      {
+        cat: "RANGKUMAN FINAL",
+        title: "Rangkuman Menyeluruh Sub-Bab 1.4",
+        bullets: [
+          "Manajemen akun Linux bersandar pada isolasi UID serta proteksi berkas `/etc/passwd` dan `/etc/shadow`.",
+          "Grup memfasilitasi kolaborasi terpusat dan wajib dikelola cermat tanpa menghapus keanggotaan lama.",
+          "Kebijakan penuaan kata sandi (`chage`) membatasi celah penyalahgunaan kredensial curian.",
+          "Sudoers dan Windows UAC menegakkan prinsip *Least Privilege* dengan mendelegasikan wewenang seperlunya tanpa membuka password root."
+        ],
+        targetCmd: "echo \"Sub-Bab 1.4 Tuntas & Bab 1 Selesai!\"",
+        targetHint: "Rayakan ketuntasan seluruh modul Bab 1: echo \"Sub-Bab 1.4 Tuntas & Bab 1 Selesai!\"",
+        sesi: "SESI 3: SUDOERS & WINDOWS UAC"
+      },
+      // SLIDE 50: SLIDE PENUTUP & KONTAK RESMI
+      {
+        isOutro: true,
+        title: "Selamat! Bab 1 Arsitektur OS & CLI Tuntas",
+        quote: "“Pengendalian identitas dan wewenang superuser adalah mahkota tertinggi pertahanan siber. Siapa yang menguasai akun dan hak akses istimewa, dialah yang mengendalikan seluruh integritas benteng digital.”",
+        email: "tkj@smkwikrama.sch.id",
+        instagram: "@tkjwikrama74",
+        website: "www.smkwikrama.sch.id",
+        sesi: "PENUTUP & KONTAK"
+      }
+    ];
+
+    let currentSlide = 0;
+    const totalSlides = slidesData.length;
+    const deck = document.getElementById("deck");
+    const slideNum = document.getElementById("slide-num");
+    const sessionTag = document.getElementById("session-tag");
+    const thumbList = document.getElementById("thumb-list");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+    const slideSidebar = document.getElementById("slide-sidebar");
+
+    // Virtual Database Akun, Sudoers & Sesi Linux
+    const virtualUsersDB = {
+      "/etc/passwd": `root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+sshd:x:105:65534::/run/sshd:/usr/sbin/nologin
+siswa:x:1000:1000:Siswa TKJ:/home/siswa:/bin/bash
+helpdesk:x:1001:1001:Staff Helpdesk:/home/helpdesk:/bin/bash`,
+
+      "/etc/shadow": `root:$6$rounds=4096$v9sK...$hashedrootpassword:19820:0:99999:7:::
+daemon:*:19800:0:99999:7:::
+www-data:*:19800:0:99999:7:::
+siswa:$6$rounds=4096$kL2p...$hashedsiswapassword:19820:0:90:7:::
+helpdesk:$6$rounds=4096$mN3q...$hashedhelpdeskpass:19820:0:90:7:::`,
+
+      "/etc/group": `root:x:0:
+adm:x:4:siswa
+sudo:x:27:siswa
+www-data:x:33:
+siswa:x:1000:
+helpdesk:x:1001:
+soc_analyst:x:1002:siswa`,
+
+      "/etc/sudoers": `# /etc/sudoers - Konfigurasi Resmi Sudo
+Defaults	env_reset
+Defaults	mail_badpass
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# User privilege specification
+root	ALL=(ALL:ALL) ALL
+
+# Members of the admin group may gain root privileges
+%admin ALL=(ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo	ALL=(ALL:ALL) ALL
+
+# See sudoers.d for additional included files
+@includedir /etc/sudoers.d`,
+
+      "/etc/sudoers.d/helpdesk": `# Aturan Khusus Staf Helpdesk
+helpdesk ALL=(root) /usr/bin/systemctl restart nginx, /usr/bin/systemctl status *`,
+
+      "/var/log/auth.log": `Sep 21 08:30:12 wikrama-lab sudo[1040]:    siswa : TTY=pts/0 ; PWD=/home/siswa ; USER=root ; COMMAND=/usr/bin/head -n 2 /etc/shadow
+Sep 21 08:32:05 wikrama-lab sudo[1052]:    siswa : TTY=pts/0 ; PWD=/home/siswa ; USER=root ; COMMAND=/usr/sbin/useradd -m analis
+Sep 21 09:15:20 wikrama-lab sudo[1120]:    siswa : TTY=pts/0 ; PWD=/home/siswa ; USER=root ; COMMAND=/usr/sbin/chage -M 60 siswa
+Sep 21 09:40:11 wikrama-lab sudo[1244]: helpdesk : TTY=pts/1 ; PWD=/home/helpdesk ; USER=root ; COMMAND=/usr/bin/systemctl restart nginx`,
+
+      "/etc/login.defs": `PASS_MAX_DAYS	90
+PASS_MIN_DAYS	0
+PASS_WARN_AGE	7
+UID_MIN		 1000
+UID_MAX		60000
+GID_MIN		 1000
+GID_MAX		60000`,
+
+      "/etc/pam.d/common-auth": `auth	[success=1 default=ignore]	pam_unix.so nullok
+auth	requisite			pam_deny.so
+auth	required			pam_permit.so`
+    };
+
+    // Render Thumbnail Drawer
+    function renderThumbnails() {
+      thumbList.innerHTML = "";
+      slidesData.forEach((slide, idx) => {
+        const thumb = document.createElement("div");
+        thumb.className = "thumb-card" + (idx === currentSlide ? " active" : "");
+        thumb.id = `thumb-${idx}`;
+        thumb.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+
+        const tagText = slide.isCover ? "COVER" : (slide.isOutro ? "PENUTUP" : (slide.cat || "MATERI"));
+        const titleText = slide.title || `Slide #${idx + 1}`;
+
+        thumb.innerHTML = `
+          <div class="thumb-top-row">
+            <span class="thumb-num">#${String(idx + 1).padStart(2, '0')}</span>
+            <span class="thumb-tag">${tagText}</span>
+          </div>
+          <div class="thumb-title">${titleText}</div>
+        `;
+        thumbList.appendChild(thumb);
+      });
+    }
+
+    function filterThumbnails() {
+      const q = document.getElementById("sidebar-filter").value.toLowerCase();
+      slidesData.forEach((slide, idx) => {
+        const el = document.getElementById(`thumb-${idx}`);
+        const textToSearch = `${idx + 1} ${slide.title || ""} ${slide.cat || ""} ${slide.subtitle || ""}`.toLowerCase();
+        if (textToSearch.includes(q)) {
+          el.style.display = "flex";
+        } else {
+          el.style.display = "none";
+        }
+      });
+    }
+
+    function toggleSidebar() {
+      const isOpen = slideSidebar.classList.contains("open");
+      if (isOpen) {
+        slideSidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("open");
+      } else {
+        slideSidebar.classList.add("open");
+        sidebarOverlay.classList.add("open");
+        const activeThumb = document.getElementById(`thumb-${currentSlide}`);
+        if (activeThumb) {
+          activeThumb.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+        document.getElementById("sidebar-filter").focus();
+      }
+    }
+
+    function renderDeck() {
+      deck.innerHTML = "";
+      slidesData.forEach((slide, idx) => {
+        const card = document.createElement("div");
+        card.className = "slide-card" + (idx === currentSlide ? " active" : "") 
+          + (slide.isCover ? " cover-card" : "")
+          + (slide.isOutro ? " outro-card" : "");
+
+        if (slide.isCover) {
+          card.innerHTML = `
+            <div class="cover-top-header">
+              <div class="cover-program">${slide.program}</div>
+              <div class="cover-subprogram">${slide.subprogram}</div>
+              <div class="cover-chapter-badge">${slide.chapter}</div>
+            </div>
+
+            <div class="cover-main-hero">
+              <h1 class="cover-title">${slide.title}</h1>
+              <p class="cover-subtitle">${slide.subtitle}</p>
+            </div>
+            
+            <div class="terminal-container" style="max-width: 680px; width: 100%; height: 200px; min-height: 200px;">
+              <div class="terminal-header-bar">
+                <div class="terminal-dots">
+                  <span class="dot dot-red"></span>
+                  <span class="dot dot-yellow"></span>
+                  <span class="dot dot-green"></span>
+                </div>
+                <div class="terminal-tab-title">bash — siswa@wikrama-lab:~</div>
+                <span class="challenge-status status-success">Account & Sudoers Engine Ready</span>
+              </div>
+              <div class="terminal-screen" style="font-size: 0.8rem;">
+                <div><span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">~</span><span class="term-char">$</span> ${slide.terminalCmd}</div>
+                <div class="term-output" style="color:#a7f3d0;">${slide.terminalOut}</div>
+                <div style="margin-top: 8px; color: #94a3b8;">💡 <em>Klik tombol "☰ Daftar Slide" di kiri atas untuk melompat ke 50 materi slide lainnya!</em></div>
+              </div>
+            </div>
+
+            <div class="cover-bottom-bar">
+              <div class="teacher-card">
+                <div class="teacher-avatar">👨‍🏫</div>
+                <div>
+                  <div class="teacher-name">Guru Pengampu: ${slide.teacher}</div>
+                  <div class="teacher-certs">${slide.certs}</div>
+                </div>
+              </div>
+              <div class="meta-pills">
+                <span class="meta-pill-item">📅 ${slide.meta1}</span>
+                <span class="meta-pill-item">📊 ${slide.meta2}</span>
+              </div>
+            </div>
+          `;
+        } else if (slide.isOutro) {
+          card.innerHTML = `
+            <h1 class="outro-title">${slide.title}</h1>
+            <p class="outro-quote">${slide.quote}</p>
+            
+            <div class="contact-grid">
+              <div class="contact-card">
+                <div class="contact-icon">✉️</div>
+                <div class="contact-label">Email Kejuruan</div>
+                <div class="contact-val">${slide.email}</div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-icon">📸</div>
+                <div class="contact-label">Instagram TKJ</div>
+                <div class="contact-val">${slide.instagram}</div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-icon">🌐</div>
+                <div class="contact-label">Portal Sekolah</div>
+                <div class="contact-val">${slide.website}</div>
+              </div>
+            </div>
+
+            <div class="meta-pill-item" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); padding: 8px 18px; border-radius: 8px; color: #cbd5e1; font-size: 0.85rem; margin-top: 10px;">
+              <span>🛡️ Laboratorium Jaringan Komputer & Keamanan Siber — SMK Wikrama Kota Bogor</span>
+            </div>
+          `;
+        } else {
+          let bulletsHtml = slide.bullets.map(b => `<li>${b}</li>`).join("");
+
+          card.innerHTML = `
+            <div class="slide-header">
+              <div class="slide-category">${slide.cat}</div>
+              <h2 class="slide-title">${slide.title}</h2>
+            </div>
+            <div class="slide-body">
+              <div class="text-content">
+                <ul>${bulletsHtml}</ul>
+                <div style="margin-top: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 0.95rem;">
+                  <strong style="color: #1e40af;">🎯 Tantangan Praktik Slide Ini:</strong><br>
+                  <span style="color: #1e3a8a;">${slide.targetHint || "Ketik perintah di terminal interaktif sebelah kanan."}</span>
+                </div>
+              </div>
+
+              <!-- Terminal Ubuntu Simulasi Interaktif -->
+              <div class="terminal-container">
+                <div class="terminal-header-bar">
+                  <div class="terminal-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </div>
+                  <div class="terminal-tab-title">bash — siswa@wikrama-lab:${currentDir}</div>
+                  <span class="challenge-status status-pending" id="status-badge-${idx}">Tantangan Belum Dicoba</span>
+                </div>
+                
+                <div class="terminal-screen" id="term-screen-${idx}" onclick="focusTerminalInput(${idx})">
+                  <div class="history-entry">
+                    <span style="color: #64748b;"># Ubuntu Accounts & Sudoers Interactive Lab</span><br>
+                    <span style="color: #64748b;"># Jalankan perintah administrasi Linux sesuai materi dan perhatikan responnya.</span>
+                  </div>
+                  <div id="cmd-history-output-${idx}"></div>
+                  
+                  <div class="terminal-input-row">
+                    <span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">${currentDir}</span><span class="term-char">$</span>
+                    <input type="text" class="term-input" id="term-input-${idx}" autocomplete="off" spellcheck="false" 
+                      onkeydown="handleTerminalInput(event, ${idx}, '${slide.targetCmd || ""}')" />
+                  </div>
+                </div>
+
+                <div class="terminal-footer-hint">
+                  <span>Target: <code style="color: #38bdf8;">${slide.targetCmd || "Bebas Eksplorasi"}</code></span>
+                  ${slide.targetCmd ? `<button class="copy-btn" onclick="autoFillCmd(${idx}, '${slide.targetCmd}')">Salin ke Input</button>` : ""}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        deck.appendChild(card);
+      });
+      renderThumbnails();
+      updateMeta();
+    }
+
+    function updateMeta() {
+      slideNum.innerText = `Slide ${currentSlide + 1} of ${totalSlides}`;
+      sessionTag.innerText = slidesData[currentSlide].sesi;
+      
+      const cards = document.querySelectorAll(".slide-card");
+      cards.forEach((c, i) => c.classList.toggle("active", i === currentSlide));
+
+      const thumbs = document.querySelectorAll(".thumb-card");
+      thumbs.forEach((t, i) => t.classList.toggle("active", i === currentSlide));
+
+      setTimeout(() => {
+        focusTerminalInput(currentSlide);
+      }, 100);
+    }
+
+    function focusTerminalInput(slideIdx) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      if (inp) inp.focus();
+    }
+
+    function autoFillCmd(slideIdx, cmdText) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      if (inp) {
+        inp.value = cmdText;
+        inp.focus();
+      }
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateMeta();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateMeta();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateMeta();
+      }
+    }
+
+    // Engine Eksekusi Terminal Akun & Sudoers
+    function handleTerminalInput(e, slideIdx, targetCommand) {
+      const inp = document.getElementById(`term-input-${slideIdx}`);
+      const historyDiv = document.getElementById(`cmd-history-output-${slideIdx}`);
+      const statusBadge = document.getElementById(`status-badge-${slideIdx}`);
+
+      if (e.key === "Enter") {
+        const rawCmd = inp.value.trim();
+        if (!rawCmd) return;
+
+        cmdHistory.push(rawCmd);
+        historyIdx = cmdHistory.length;
+
+        const entryHtml = document.createElement("div");
+        entryHtml.className = "history-entry";
+        entryHtml.innerHTML = `<div><span class="term-prompt">siswa@wikrama-lab</span>:<span class="term-path">${currentDir}</span><span class="term-char">$</span> ${escapeHtml(rawCmd)}</div>`;
+
+        const [outputHtml, isSuccess] = executeMockAccountBash(rawCmd);
+        entryHtml.innerHTML += outputHtml;
+        historyDiv.appendChild(entryHtml);
+
+        const cleanRaw = rawCmd.replace(/\s+/g, " ").trim();
+        const cleanTarget = targetCommand.replace(/\s+/g, " ").trim();
+
+        if (cleanTarget && (cleanRaw === cleanTarget || cleanRaw.includes(cleanTarget))) {
+          statusBadge.className = "challenge-status status-success";
+          statusBadge.innerText = "✓ TANTANGAN BERHASIL!";
+          const successAlert = document.createElement("div");
+          successAlert.className = "term-output success-msg";
+          successAlert.innerText = "🎉 Sempurna! Perintah administrasi akun & sudoers tepat sesuai modul.";
+          historyDiv.appendChild(successAlert);
+        }
+
+        inp.value = "";
+        const screen = document.getElementById(`term-screen-${slideIdx}`);
+        screen.scrollTop = screen.scrollHeight;
+      } else if (e.key === "ArrowUp") {
+        if (cmdHistory.length > 0 && historyIdx > 0) {
+          historyIdx--;
+          inp.value = cmdHistory[historyIdx];
+        }
+      } else if (e.key === "ArrowDown") {
+        if (historyIdx < cmdHistory.length - 1) {
+          historyIdx++;
+          inp.value = cmdHistory[historyIdx];
+        } else {
+          historyIdx = cmdHistory.length;
+          inp.value = "";
+        }
+      }
+    }
+
+    function executeMockAccountBash(cmd) {
+      const parts = cmd.split(" ");
+      const base = parts[0].toLowerCase();
+
+      // Penanganan Pipeline & Perintah Khusus
+      if (cmd.includes("awk -F:") && cmd.includes("$3 == 0")) {
+        return [`<div class="term-output">root</div>`, true];
+      }
+      if (cmd.includes("grep root /etc/shadow") || cmd.includes("grep root /etc/passwd")) {
+        return [`<div class="term-output">root:x:0:0:root:/root:/bin/bash</div>`, true];
+      }
+      if (cmd.includes("grep siswa /etc/passwd")) {
+        return [`<div class="term-output">siswa:x:1000:1000:Siswa TKJ:/home/siswa:/bin/bash</div>`, true];
+      }
+      if (cmd.includes("grep sudo /etc/group") || cmd.includes("grep '%sudo' /etc/sudoers")) {
+        return [`<div class="term-output">%sudo	ALL=(ALL:ALL) ALL</div>`, true];
+      }
+      if (cmd.includes("grep PASS_MAX_DAYS")) {
+        return [`<div class="term-output">PASS_MAX_DAYS	90</div>`, true];
+      }
+      if (cmd.includes("grep sudo /var/log/auth.log")) {
+        return [`<div class="term-output">Sep 21 08:30:12 wikrama-lab sudo[1040]:    siswa : TTY=pts/0 ; PWD=/home/siswa ; USER=root ; COMMAND=/usr/bin/head -n 2 /etc/shadow
+Sep 21 09:15:20 wikrama-lab sudo[1120]:    siswa : TTY=pts/0 ; PWD=/home/siswa ; USER=root ; COMMAND=/usr/sbin/chage -M 60 siswa</div>`, true];
+      }
+      if (cmd.includes("grep www-data /etc/passwd")) {
+        return [`<div class="term-output">www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin</div>`, true];
+      }
+
+      switch (base) {
+        case "whoami":
+          return [`<div class="term-output">siswa</div>`, true];
+
+        case "id":
+          if (cmd.includes("siswa")) {
+            return [`<div class="term-output">uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo),1002(soc_analyst)</div>`, true];
+          }
+          if (cmd.includes("-u")) return [`<div class="term-output">1000</div>`, true];
+          if (cmd.includes("-Gn")) return [`<div class="term-output">siswa sudo soc_analyst</div>`, true];
+          return [`<div class="term-output">uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo)</div>`, true];
+
+        case "groups":
+          return [`<div class="term-output">siswa sudo soc_analyst</div>`, true];
+
+        case "clear":
+          setTimeout(() => {
+            const hist = document.getElementById(`cmd-history-output-${currentSlide}`);
+            if (hist) hist.innerHTML = "";
+          }, 50);
+          return ["", true];
+
+        case "who":
+          return [`<div class="term-output">siswa    pts/0        2026-09-21 08:00 (192.168.1.50)
+helpdesk pts/1        2026-09-21 09:30 (192.168.1.88)</div>`, true];
+
+        case "w":
+          return [`<div class="term-output"> 10:15:20 up  2:15,  2 users,  load average: 0.10, 0.12, 0.09
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+siswa    pts/0    192.168.1.50     08:00    1.00s  0.15s  0.02s w
+helpdesk pts/1    192.168.1.88     09:30   12.00s  0.08s  0.08s -bash</div>`, true];
+
+        case "last":
+          return [`<div class="term-output">siswa    pts/0        192.168.1.50     Mon Sep 21 08:00   still logged in
+helpdesk pts/1        192.168.1.88     Mon Sep 21 09:30   still logged in
+reboot   system boot  6.8.0-45-generic Mon Sep 21 08:00   still running
+root     pts/0        192.168.1.50     Sun Sep 20 18:22 - 19:10  (00:48)
+siswa    pts/0        192.168.1.50     Sun Sep 20 14:10 - 17:00  (02:50)
+
+wtmp begins Sun Sep 20 14:00:00 2026</div>`, true];
+
+        case "head":
+          if (cmd.includes("/etc/passwd")) {
+            return [`<div class="term-output">root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</div>`, true];
+          }
+          if (cmd.includes("/etc/shadow")) {
+            return [`<div class="term-output">root:$6$rounds=4096$v9sK...$hashedrootpassword:19820:0:99999:7:::\ndaemon:*:19800:0:99999:7:::</div>`, true];
+          }
+          return [`<div class="term-output">root:x:0:0:root:/root:/bin/bash</div>`, true];
+
+        case "chage":
+          if (cmd.includes("-l")) {
+            return [`<div class="term-output">Last password change					: Sep 21, 2026
+Password expires					: Dec 20, 2026
+Password inactive					: never
+Account expires						: never
+Minimum number of days between password change		: 0
+Maximum number of days between password change		: 90
+Number of days of warning before password expires	: 7</div>`, true];
+          }
+          return ["", true];
+
+        case "sudo":
+          if (cmd.includes("-l")) {
+            if (cmd.includes("helpdesk")) {
+              return [`<div class="term-output">User helpdesk may run the following commands on wikrama-lab:
+    (root) /usr/bin/systemctl restart nginx, (root) /usr/bin/systemctl status *</div>`, true];
+            }
+            return [`<div class="term-output">Matching Defaults entries for siswa on wikrama-lab:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\\:/usr/local/bin\\:/usr/sbin\\:/usr/bin\\:/sbin\\:/bin
+
+User siswa may run the following commands on wikrama-lab:
+    (ALL : ALL) ALL</div>`, true];
+          }
+          if (cmd.includes("-V")) {
+            return [`<div class="term-output">Sudo version 1.9.15p5\nSudoers policy grammar version 50</div>`, true];
+          }
+          if (cmd.includes("-k")) {
+            return [`<div class="term-output">[sudo] credentials cache invalidated.</div>`, true];
+          }
+          if (cmd.includes("faillock")) {
+            return [`<div class="term-output">siswa:
+When                Type  Source                                           Valid
+2026-09-21 07:45:10 RHOST 192.168.1.105                                         V</div>`, true];
+          }
+          if (cmd.includes("passwd") || cmd.includes("useradd") || cmd.includes("usermod") || cmd.includes("userdel") || cmd.includes("groupadd") || cmd.includes("gpasswd") || cmd.includes("chage")) {
+            return [`<div class="term-output" style="color:#34d399;">Operasi administrasi berhasil dieksekusi via sudo.</div>`, true];
+          }
+          if (cmd.includes("cat /etc/shadow")) {
+            return [`<div class="term-output">${escapeHtml(virtualUsersDB["/etc/shadow"])}</div>`, true];
+          }
+          if (cmd.includes("cat /etc/sudoers")) {
+            return [`<div class="term-output">${escapeHtml(virtualUsersDB["/etc/sudoers"])}</div>`, true];
+          }
+          if (cmd.includes("cat /etc/sudoers.d/helpdesk")) {
+            return [`<div class="term-output">${escapeHtml(virtualUsersDB["/etc/sudoers.d/helpdesk"])}</div>`, true];
+          }
+          if (cmd.includes("find /etc/sudoers.d")) {
+            return [`<div class="term-output">/etc/sudoers.d/README\n/etc/sudoers.d/helpdesk</div>`, true];
+          }
+          return [`<div class="term-output" style="color:#34d399;">Sudo command executed.</div>`, true];
+
+        case "cat":
+          const f = parts[1] || "";
+          if (virtualUsersDB[f]) {
+            return [`<div class="term-output">${escapeHtml(virtualUsersDB[f])}</div>`, true];
+          }
+          if (f === "/etc/issue") {
+            return [`<div class="term-output">Ubuntu 24.04 LTS \\n \\l</div>`, true];
+          }
+          return [`<div class="term-output error">cat: ${escapeHtml(f)}: No such file or directory</div>`, false];
+
+        case "ls":
+          if (cmd.includes("-l /etc/passwd")) {
+            return [`<div class="term-output">-rw-r--r-- 1 root root 1840 Sep 21 08:30 /etc/passwd</div>`, true];
+          }
+          if (cmd.includes("-la /etc/skel")) {
+            return [`<div class="term-output">drwxr-xr-x  2 root root 4096 Apr  8 08:00 .
+drwxr-xr-x 95 root root 4096 Sep 21 08:00 ..
+-rw-r--r--  1 root root  220 Apr  8 08:00 .bash_logout
+-rw-r--r--  1 root root 3771 Apr  8 08:00 .bashrc
+-rw-r--r--  1 root root  807 Apr  8 08:00 .profile</div>`, true];
+          }
+          return [`<div class="term-output">documents   downloads   status.txt</div>`, true];
+
+        case "newgrp":
+          return [`<div class="term-output" style="color:#38bdf8;">Berhasil beralih ke sub-shell grup ${parts[1] || "soc_analyst"}.</div>`, true];
+
+        case "echo":
+          const textMatch = cmd.match(/echo\s+["']?([^"'>]+)["']?/);
+          return [`<div class="term-output">${escapeHtml(textMatch ? textMatch[1] : parts.slice(1).join(" "))}</div>`, true];
+
+        default:
+          return [`<div class="term-output error">bash: ${escapeHtml(base)}: command not found</div>`, false];
+      }
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document.addEventListener("keydown", (e) => {
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (activeEl.classList.contains("term-input") || activeEl.id === "sidebar-filter");
+
+      if (e.key === "m" || e.key === "M") {
+        if (!isTyping) {
+          e.preventDefault();
+          toggleSidebar();
+          return;
+        }
+      }
+
+      if (e.key === "Escape") {
+        if (slideSidebar.classList.contains("open")) {
+          toggleSidebar();
+          return;
+        }
+      }
+
+      if (!isTyping) {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          prevSlide();
+        }
+      }
+    });
+
+    renderDeck();
+  </script>
+</body>
+</html>

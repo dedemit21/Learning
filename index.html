@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Dashboard untuk menelusuri semua file repository Learning: materi, dokumentasi, dan struktur folder.">
+  <meta name="description" content="Dashboard materi pembelajaran interaktif Windows, Ubuntu, arsitektur sistem operasi, dan cloud computing.">
   <meta name="theme-color" content="#f5f5f0">
   <title>Learning — Dashboard Materi</title>
   <style>
@@ -43,6 +43,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 18px;
       min-height: 76px;
       border-bottom: 1px solid var(--line);
     }
@@ -69,9 +70,30 @@
       font-size: 1rem;
     }
 
-    .top-note {
-      color: var(--muted);
+    .site-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .nav-button {
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: #536159;
+      cursor: pointer;
+      font: inherit;
       font-size: .88rem;
+      font-weight: 700;
+    }
+
+    .nav-button:hover { background: #e9eee8; }
+    .nav-button[aria-pressed="true"] { background: var(--green); color: #fff; }
+    .nav-button:focus-visible, .directory-back:focus-visible {
+      outline: 3px solid rgb(23 107 74 / 28%);
+      outline-offset: 3px;
     }
 
     .hero {
@@ -314,6 +336,47 @@
       text-align: center;
     }
 
+    .directory-heading {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 0 0 20px;
+    }
+
+    .directory-back {
+      flex: 0 0 auto;
+      min-height: 42px;
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--card);
+      color: var(--green);
+      cursor: pointer;
+      font: inherit;
+      font-size: .87rem;
+      font-weight: 700;
+    }
+
+    .directory-heading h2 {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: -.035em;
+    }
+
+    .directory-heading p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: .91rem;
+    }
+
+    .folder-card {
+      width: 100%;
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+    }
+
     .footer {
       display: flex;
       justify-content: space-between;
@@ -332,10 +395,12 @@
 
     @media (max-width: 560px) {
       .page { width: min(100% - 28px, 1120px); }
-      .topbar { min-height: 64px; }
-      .top-note { font-size: .76rem; }
+      .topbar { min-height: 64px; flex-wrap: wrap; padding: 12px 0; }
+      .site-nav { width: 100%; }
+      .nav-button { flex: 1; padding-inline: 8px; }
       .hero { margin-top: 22px; border-radius: 18px; }
       .section-heading { align-items: start; flex-direction: column; }
+      .directory-heading { align-items: start; flex-direction: column; }
       .grid { grid-template-columns: 1fr; }
       .card { min-height: 210px; }
       .footer { flex-direction: column; gap: 4px; }
@@ -353,44 +418,47 @@
         <span class="brand-mark" aria-hidden="true">L</span>
         <span>Learning</span>
       </a>
-      <span class="top-note">Dokument pembelajaran sepanjang hayat</span>
+      <nav class="site-nav" aria-label="Menu utama">
+        <button class="nav-button" type="button" data-section="home" aria-pressed="true">Beranda</button>
+        <button class="nav-button" type="button" data-section="dosen" aria-pressed="false">Dosen</button>
+        <button class="nav-button" type="button" data-section="csec" aria-pressed="false">CSec</button>
+      </nav>
     </header>
 
     <section class="hero" aria-labelledby="welcome-title">
       <p class="eyebrow">Ruang belajar digital</p>
       <h1 id="welcome-title">Belajar sistem operasi, satu langkah setiap saat.</h1>
-      <p class="hero-copy">Kumpulan materi dan simulasi interaktif untuk menjelajahi Windows, Ubuntu, serta dasar-dasar arsitektur sistem operasi.</p>
+      <p class="hero-copy">Kumpulan materi interaktif tentang Windows, Ubuntu, arsitektur sistem operasi, dan cloud computing.</p>
       <div class="stats" aria-label="Ringkasan materi">
-        <span class="stat"><strong>18</strong> file repository</span>
-        <span class="stat"><strong>9</strong> materi HTML</span>
+        <span class="stat"><strong>9</strong> materi utama</span>
+        <span class="stat"><strong>4</strong> materi Dosen</span>
       </div>
     </section>
 
     <main>
-      <div class="section-heading">
-        <div>
-          <h2>Jelajahi isi repository</h2>
-          <p>Temukan materi belajar, dokumentasi, dan file struktur folder.</p>
+      <div id="home-view">
+        <div class="section-heading">
+          <div>
+            <h2>Jelajahi materi</h2>
+            <p>Pilih materi untuk membuka halaman belajar interaktif.</p>
+          </div>
+          <p id="result-count" aria-live="polite">Menampilkan 9 materi</p>
         </div>
-        <p id="result-count" aria-live="polite">Menampilkan 18 file</p>
-      </div>
 
-      <div class="controls">
-        <label class="search-wrap">
-          <span class="search-icon" aria-hidden="true">⌕</span>
-          <input class="search" id="search" type="search" placeholder="Cari materi..." autocomplete="off" aria-label="Cari materi">
-        </label>
-        <div class="filters" role="group" aria-label="Filter kategori">
-          <button class="filter" type="button" data-filter="all" aria-pressed="true">Semua</button>
-          <button class="filter" type="button" data-filter="windows" aria-pressed="false">Windows</button>
-          <button class="filter" type="button" data-filter="ubuntu" aria-pressed="false">Ubuntu</button>
-          <button class="filter" type="button" data-filter="arsitektur" aria-pressed="false">Arsitektur OS</button>
-          <button class="filter" type="button" data-filter="dokumen" aria-pressed="false">Dokumentasi</button>
-          <button class="filter" type="button" data-filter="struktur" aria-pressed="false">Struktur folder</button>
+        <div class="controls">
+          <label class="search-wrap">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input class="search" id="search" type="search" placeholder="Cari materi..." autocomplete="off" aria-label="Cari materi">
+          </label>
+          <div class="filters" role="group" aria-label="Filter kategori">
+            <button class="filter" type="button" data-filter="all" aria-pressed="true">Semua</button>
+            <button class="filter" type="button" data-filter="windows" aria-pressed="false">Windows</button>
+            <button class="filter" type="button" data-filter="ubuntu" aria-pressed="false">Ubuntu</button>
+            <button class="filter" type="button" data-filter="arsitektur" aria-pressed="false">Arsitektur OS</button>
+          </div>
         </div>
-      </div>
 
-      <section class="grid" id="materials" aria-label="Daftar materi">
+        <section class="grid" id="materials" aria-label="Daftar materi">
         <a class="card" href="./Windows%2011.html" data-category="windows" data-search="windows 11 desktop cmd powershell simulator">
           <div class="card-top"><span class="card-icon" aria-hidden="true">🪟</span><span class="tag">Windows</span></div>
           <h3>Windows 11 Web Desktop</h3>
@@ -454,70 +522,20 @@
           <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
         </a>
 
-        <a class="card" href="./README.md" data-category="dokumen" data-search="readme dokumentasi learning pembelajaran sepanjang hayat bahan ajar">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📖</span><span class="tag">Dokumentasi</span></div>
-          <h3>README.md</h3>
-          <p>Pengantar repository Learning dan tujuan pengumpulan bahan ajar.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
+          <p class="empty" id="empty-state" hidden>Tidak ada materi yang cocok. Coba kata kunci atau kategori lain.</p>
+        </section>
+      </div>
 
-        <a class="card" href="./index.html" data-category="dokumen" data-search="index html dashboard halaman utama learning">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">🏠</span><span class="tag">Dokumentasi</span></div>
-          <h3>index.html</h3>
-          <p>Dashboard ini, sebagai halaman utama repository Learning.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="card" href="./Dosen/.gitkeep" data-category="struktur" data-search="dosen .gitkeep file penanda folder kosong">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
-          <h3>Dosen/.gitkeep</h3>
-          <p>File penanda agar folder Dosen yang belum berisi materi tetap tersimpan di Git.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="card" href="./Dosen/AJK/.gitkeep" data-category="struktur" data-search="dosen ajk .gitkeep file penanda folder kosong">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
-          <h3>Dosen/AJK/.gitkeep</h3>
-          <p>File penanda untuk mempertahankan folder AJK di repository.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="card" href="./Dosen/APJ/.gitkeep" data-category="struktur" data-search="dosen apj .gitkeep file penanda folder kosong">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
-          <h3>Dosen/APJ/.gitkeep</h3>
-          <p>File penanda untuk mempertahankan folder APJ di repository.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="card" href="./Dosen/CCO/.gitkeep" data-category="struktur" data-search="dosen cco .gitkeep file penanda folder kosong">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
-          <h3>Dosen/CCO/.gitkeep</h3>
-          <p>File penanda untuk mempertahankan folder CCO di repository.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="card" href="./Dosen/JRK/.gitkeep" data-category="struktur" data-search="dosen jrk .gitkeep file penanda folder kosong">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
-          <h3>Dosen/JRK/.gitkeep</h3>
-          <p>File penanda untuk mempertahankan folder JRK di repository.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="card" href="./Dosen/SO/.gitkeep" data-category="struktur" data-search="dosen so .gitkeep file penanda folder kosong">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
-          <h3>Dosen/SO/.gitkeep</h3>
-          <p>File penanda untuk mempertahankan folder SO di repository.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="card" href="./CSec/.gitkeep" data-category="struktur" data-search="csec .gitkeep file penanda folder kosong">
-          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
-          <h3>CSec/.gitkeep</h3>
-          <p>File penanda agar folder CSec tetap tersimpan di repository.</p>
-          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <p class="empty" id="empty-state" hidden>Tidak ada materi yang cocok. Coba kata kunci atau kategori lain.</p>
+      <section id="directory-view" hidden aria-labelledby="directory-title">
+        <div class="directory-heading">
+          <button class="directory-back" id="directory-back" type="button">← Kembali</button>
+          <div>
+            <h2 id="directory-title"></h2>
+            <p id="directory-description"></p>
+          </div>
+        </div>
+        <div class="grid" id="directory-items"></div>
+        <p class="empty" id="directory-empty" hidden>Belum ada materi di folder ini.</p>
       </section>
     </main>
 
@@ -530,10 +548,148 @@
   <script>
     const searchInput = document.getElementById("search");
     const filterButtons = document.querySelectorAll(".filter");
-    const cards = document.querySelectorAll(".card");
+    const cards = document.querySelectorAll("#materials .card");
     const emptyState = document.getElementById("empty-state");
     const resultCount = document.getElementById("result-count");
+    const homeView = document.getElementById("home-view");
+    const directoryView = document.getElementById("directory-view");
+    const directoryTitle = document.getElementById("directory-title");
+    const directoryDescription = document.getElementById("directory-description");
+    const directoryItems = document.getElementById("directory-items");
+    const directoryEmpty = document.getElementById("directory-empty");
+    const directoryBack = document.getElementById("directory-back");
+    const navigationButtons = document.querySelectorAll(".nav-button");
+    const folderContents = {
+      "Dosen/CCO": [
+        {
+          title: "1. Pendahuluan Cloud Computing",
+          path: "Dosen/CCO/1. Pendahuluan Cloud Computing.html",
+          description: "Pengantar konsep dan dasar-dasar cloud computing."
+        },
+        {
+          title: "2. Model Layanan Cloud Computing",
+          path: "Dosen/CCO/2. Model Layanan Cloud Computing.html",
+          description: "Mengenal model layanan cloud: IaaS, PaaS, dan SaaS."
+        },
+        {
+          title: "3. Model Deployment Cloud Computing",
+          path: "Dosen/CCO/3. Model Deployment Cloud Computing.html",
+          description: "Mempelajari model deployment dalam cloud computing."
+        },
+        {
+          title: "4. Virtualisasi",
+          path: "Dosen/CCO/4. Virtualisasi.html",
+          description: "Materi virtualisasi dan hypervisor."
+        }
+      ],
+      "CSec": []
+    };
     let activeFilter = "all";
+    let currentFolder = "";
+
+    function setActiveNavigation(section) {
+      navigationButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.section === section));
+      });
+    }
+
+    function setDirectory(title, description, entries, section, emptyMessage) {
+      homeView.hidden = true;
+      directoryView.hidden = false;
+      directoryTitle.textContent = title;
+      directoryDescription.textContent = description;
+      directoryItems.textContent = "";
+      directoryEmpty.textContent = emptyMessage || "Belum ada materi di folder ini.";
+      directoryEmpty.hidden = entries.length > 0;
+      currentFolder = title;
+      setActiveNavigation(section);
+
+      entries.forEach((entry) => {
+        const card = document.createElement(entry.path ? "a" : "button");
+        card.className = `card${entry.path ? "" : " folder-card"}`;
+        if (entry.path) {
+          card.href = `./${entry.path.split("/").map(encodeURIComponent).join("/")}`;
+        } else {
+          card.type = "button";
+          card.addEventListener("click", entry.onClick);
+        }
+
+        const cardTop = document.createElement("span");
+        cardTop.className = "card-top";
+        const icon = document.createElement("span");
+        icon.className = "card-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = entry.path ? "📘" : "📂";
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = entry.path ? "Materi" : "Subfolder";
+        cardTop.append(icon, tag);
+
+        const heading = document.createElement("h3");
+        heading.textContent = entry.title;
+        const descriptionText = document.createElement("p");
+        descriptionText.textContent = entry.description;
+        const action = document.createElement("span");
+        action.className = "card-action";
+        action.append(document.createTextNode(entry.path ? "Buka materi" : "Lihat isi folder"));
+        const arrow = document.createElement("span");
+        arrow.className = "arrow";
+        arrow.setAttribute("aria-hidden", "true");
+        arrow.textContent = "→";
+        action.append(arrow);
+        card.append(cardTop, heading, descriptionText, action);
+        directoryItems.append(card);
+      });
+    }
+
+    function showHome() {
+      homeView.hidden = false;
+      directoryView.hidden = true;
+      currentFolder = "";
+      setActiveNavigation("home");
+    }
+
+    function showDosenFolders() {
+      const entries = ["AJK", "APJ", "CCO", "JRK", "SO"].map((folder) => ({
+        title: folder,
+        description: folderContents[`Dosen/${folder}`]?.length
+          ? `${folderContents[`Dosen/${folder}`].length} materi tersedia.`
+          : "Buka folder untuk melihat materi yang tersedia.",
+        onClick: () => showFolder(`Dosen/${folder}`)
+      }));
+      setDirectory(
+        "Materi Dosen",
+        "Pilih subfolder untuk melihat dan membuka materinya.",
+        entries,
+        "dosen",
+        ""
+      );
+    }
+
+    function showFolder(path) {
+      const entries = folderContents[path] || [];
+      const section = path.startsWith("Dosen/") ? "dosen" : "csec";
+      const description = entries.length
+        ? `${entries.length} materi tersedia di folder ${path}.`
+        : "Belum ada materi di folder ini.";
+      setDirectory(path, description, entries, section);
+    }
+
+    navigationButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (button.dataset.section === "home") showHome();
+        if (button.dataset.section === "dosen") showDosenFolders();
+        if (button.dataset.section === "csec") showFolder("CSec");
+      });
+    });
+
+    directoryBack.addEventListener("click", () => {
+      if (currentFolder.startsWith("Dosen/")) {
+        showDosenFolders();
+      } else {
+        showHome();
+      }
+    });
 
     function updateMaterials() {
       const query = searchInput.value.trim().toLocaleLowerCase("id");

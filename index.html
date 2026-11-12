@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dashboard bahan ajar interaktif tentang Windows, Ubuntu, dan arsitektur sistem operasi.">
+  <meta name="theme-color" content="#f5f5f0">
+  <title>Learning — Dashboard Materi</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17231d;
+      --muted: #64716a;
+      --paper: #f5f5f0;
+      --card: #fff;
+      --line: #e4e8e1;
+      --green: #176b4a;
+      --green-dark: #10533a;
+      --mint: #e7f2eb;
+      --shadow: 0 12px 32px rgb(23 35 29 / 6%);
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    a { color: inherit; }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 76px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      font-size: 1.05rem;
+      font-weight: 750;
+      letter-spacing: -.03em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 11px;
+      background: var(--green);
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .top-note {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin: 36px 0 30px;
+      padding: clamp(30px, 6vw, 64px);
+      border-radius: 24px;
+      background:
+        radial-gradient(ellipse at 86% 20%, rgb(191 225 196 / 30%), transparent 34%),
+        linear-gradient(125deg, #123f30, #176b4a 65%, #25805a);
+      color: #fff;
+    }
+
+    .hero::after {
+      position: absolute;
+      right: -54px;
+      bottom: -180px;
+      width: 390px;
+      height: 390px;
+      border: 1px solid rgb(255 255 255 / 14%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 34px rgb(255 255 255 / 5%), 0 0 0 68px rgb(255 255 255 / 4%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: #c4e5cf;
+      font-size: .76rem;
+      font-weight: 750;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 650px;
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      letter-spacing: -.055em;
+      line-height: 1.08;
+    }
+
+    .hero-copy {
+      max-width: 560px;
+      margin: 18px 0 0;
+      color: #e1eee5;
+      font-size: 1.04rem;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      color: #e1eee5;
+      font-size: .9rem;
+    }
+
+    .stat strong {
+      color: #fff;
+      font-size: 1.2rem;
+    }
+
+    main { padding-bottom: 52px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 0 0 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: -.035em;
+    }
+
+    .section-heading p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: .91rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      color: #738078;
+      font-size: 1rem;
+      pointer-events: none;
+      transform: translateY(-50%);
+    }
+
+    .search {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 14px 10px 42px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: var(--card);
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .search:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(23 107 74 / 12%); }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: end;
+      gap: 7px;
+    }
+
+    .filter {
+      min-height: 42px;
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: #536159;
+      cursor: pointer;
+      font: inherit;
+      font-size: .86rem;
+      font-weight: 650;
+      transition: background .15s ease, color .15s ease, border-color .15s ease;
+    }
+
+    .filter:hover { border-color: #9db8a6; }
+    .filter[aria-pressed="true"] { border-color: var(--green); background: var(--green); color: #fff; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      display: flex;
+      min-height: 232px;
+      flex-direction: column;
+      padding: 21px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--card);
+      box-shadow: 0 2px 6px rgb(23 35 29 / 2%);
+      text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .card:hover, .card:focus-visible {
+      transform: translateY(-3px);
+      border-color: #b7cfbd;
+      box-shadow: var(--shadow);
+    }
+
+    .card:focus-visible, .filter:focus-visible {
+      outline: 3px solid rgb(23 107 74 / 28%);
+      outline-offset: 3px;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .card-icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--mint);
+      font-size: 1.25rem;
+    }
+
+    .tag {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #f0f3ef;
+      color: #59665e;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.08rem;
+      letter-spacing: -.025em;
+      line-height: 1.35;
+    }
+
+    .card p {
+      margin: 8px 0 20px;
+      color: var(--muted);
+      font-size: .89rem;
+    }
+
+    .card-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      color: var(--green);
+      font-size: .86rem;
+      font-weight: 750;
+    }
+
+    .arrow { font-size: 1.1rem; transition: transform .15s ease; }
+    .card:hover .arrow { transform: translateX(3px); }
+
+    .empty {
+      grid-column: 1 / -1;
+      padding: 36px 20px;
+      border: 1px dashed #cbd4cc;
+      border-radius: 16px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 0 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    @media (max-width: 850px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls { grid-template-columns: 1fr; }
+      .filters { justify-content: start; }
+    }
+
+    @media (max-width: 560px) {
+      .page { width: min(100% - 28px, 1120px); }
+      .topbar { min-height: 64px; }
+      .top-note { font-size: .76rem; }
+      .hero { margin-top: 22px; border-radius: 18px; }
+      .section-heading { align-items: start; flex-direction: column; }
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: 210px; }
+      .footer { flex-direction: column; gap: 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Learning, halaman utama">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span>Learning</span>
+      </a>
+      <span class="top-note">Dokument pembelajaran sepanjang hayat</span>
+    </header>
+
+    <section class="hero" aria-labelledby="welcome-title">
+      <p class="eyebrow">Ruang belajar digital</p>
+      <h1 id="welcome-title">Belajar sistem operasi, satu langkah setiap saat.</h1>
+      <p class="hero-copy">Kumpulan materi dan simulasi interaktif untuk menjelajahi Windows, Ubuntu, serta dasar-dasar arsitektur sistem operasi.</p>
+      <div class="stats" aria-label="Ringkasan materi">
+        <span class="stat"><strong>9</strong> materi tersedia</span>
+        <span class="stat"><strong>3</strong> topik pembelajaran</span>
+      </div>
+    </section>
+
+    <main>
+      <div class="section-heading">
+        <div>
+          <h2>Jelajahi materi</h2>
+          <p>Pilih materi untuk membuka halaman belajar interaktif.</p>
+        </div>
+        <p id="result-count" aria-live="polite">Menampilkan 9 materi</p>
+      </div>
+
+      <div class="controls">
+        <label class="search-wrap">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input class="search" id="search" type="search" placeholder="Cari materi..." autocomplete="off" aria-label="Cari materi">
+        </label>
+        <div class="filters" role="group" aria-label="Filter kategori">
+          <button class="filter" type="button" data-filter="all" aria-pressed="true">Semua</button>
+          <button class="filter" type="button" data-filter="windows" aria-pressed="false">Windows</button>
+          <button class="filter" type="button" data-filter="ubuntu" aria-pressed="false">Ubuntu</button>
+          <button class="filter" type="button" data-filter="arsitektur" aria-pressed="false">Arsitektur OS</button>
+        </div>
+      </div>
+
+      <section class="grid" id="materials" aria-label="Daftar materi">
+        <a class="card" href="./Windows%2011.html" data-category="windows" data-search="windows 11 desktop cmd powershell simulator">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">🪟</span><span class="tag">Windows</span></div>
+          <h3>Windows 11 Web Desktop</h3>
+          <p>Jelajahi lingkungan desktop Windows 11 dengan simulasi CMD dan PowerShell.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Instalasi%20Windows%2011.html" data-category="windows" data-search="instalasi windows 11 simulator clean install reinstall">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">💿</span><span class="tag">Windows</span></div>
+          <h3>Simulator Instalasi Windows 11</h3>
+          <p>Pelajari alur instalasi Windows, mulai dari pengaturan awal hingga desktop.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Instalasi%20Ubuntu%2022.04.html" data-category="ubuntu" data-search="instalasi ubuntu server 22.04 lts linux cli simulator">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">🐧</span><span class="tag">Ubuntu</span></div>
+          <h3>Instalasi Ubuntu Server 22.04</h3>
+          <p>Simulasi installer Ubuntu Server dan pengenalan antarmuka perintah Linux.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./ubuntu_24_04_lts_web_desktop_os.html" data-category="ubuntu" data-search="ubuntu 24.04 lts web desktop os simulasi">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">🖥️</span><span class="tag">Ubuntu</span></div>
+          <h3>Ubuntu 24.04 Web Desktop</h3>
+          <p>Kenali desktop Ubuntu melalui simulasi OS berbasis web.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./ubuntu_24_04_lts_comprehensive_desktop.html" data-category="ubuntu" data-search="ubuntu 24.04 lts comprehensive desktop simulasi aplikasi">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">🧭</span><span class="tag">Ubuntu</span></div>
+          <h3>Ubuntu 24.04 Desktop Simulation</h3>
+          <p>Simulasi desktop Ubuntu dengan aplikasi dan pengaturan sistem.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Arsitektur%20OS%201.1.html" data-category="arsitektur" data-search="arsitektur os kernel proses bab 1.1">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">⚙️</span><span class="tag">Arsitektur OS</span></div>
+          <h3>Kernel &amp; Proses</h3>
+          <p>Bab 1.1 — pengantar arsitektur kernel dan konsep proses.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Arsitektur%20OS%201.2.html" data-category="arsitektur" data-search="arsitektur os cli command line interface tingkat lanjut bab 1.2">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">⌨️</span><span class="tag">Arsitektur OS</span></div>
+          <h3>CLI Tingkat Lanjut</h3>
+          <p>Bab 1.2 — pendalaman penggunaan command-line interface.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Arsitektur%20OS%201.3.html" data-category="arsitektur" data-search="arsitektur os hirarki direktori fhs hak akses bab 1.3">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📁</span><span class="tag">Arsitektur OS</span></div>
+          <h3>Hirarki Direktori &amp; Hak Akses</h3>
+          <p>Bab 1.3 — memahami Filesystem Hierarchy Standard (FHS) dan izin akses.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Arsitektur%20OS%201.4.html" data-category="arsitektur" data-search="arsitektur os manajemen akun hak istimewa bab 1.4">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">👤</span><span class="tag">Arsitektur OS</span></div>
+          <h3>Manajemen Akun &amp; Hak Istimewa</h3>
+          <p>Bab 1.4 — pengenalan pengelolaan akun dan hak istimewa pengguna.</p>
+          <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <p class="empty" id="empty-state" hidden>Tidak ada materi yang cocok. Coba kata kunci atau kategori lain.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Learning — dokument pembelajaran sepanjang hayat.</span>
+      <span>Belajar kapan saja, dari mana saja.</span>
+    </footer>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById("search");
+    const filterButtons = document.querySelectorAll(".filter");
+    const cards = document.querySelectorAll(".card");
+    const emptyState = document.getElementById("empty-state");
+    const resultCount = document.getElementById("result-count");
+    let activeFilter = "all";
+
+    function updateMaterials() {
+      const query = searchInput.value.trim().toLocaleLowerCase("id");
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const categoryMatches = activeFilter === "all" || card.dataset.category === activeFilter;
+        const searchMatches = `${card.dataset.search} ${card.textContent}`.toLocaleLowerCase("id").includes(query);
+        const visible = categoryMatches && searchMatches;
+        card.hidden = !visible;
+        if (visible) visibleCount += 1;
+      });
+
+      emptyState.hidden = visibleCount > 0;
+      resultCount.textContent = `Menampilkan ${visibleCount} materi`;
+    }
+
+    searchInput.addEventListener("input", updateMaterials);
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        filterButtons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        updateMaterials();
+      });
+    });
+  </script>
+</body>
+</html>

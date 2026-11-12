@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Dashboard bahan ajar interaktif tentang Windows, Ubuntu, dan arsitektur sistem operasi.">
+  <meta name="description" content="Dashboard untuk menelusuri semua file repository Learning: materi, dokumentasi, dan struktur folder.">
   <meta name="theme-color" content="#f5f5f0">
   <title>Learning — Dashboard Materi</title>
   <style>
@@ -361,18 +361,18 @@
       <h1 id="welcome-title">Belajar sistem operasi, satu langkah setiap saat.</h1>
       <p class="hero-copy">Kumpulan materi dan simulasi interaktif untuk menjelajahi Windows, Ubuntu, serta dasar-dasar arsitektur sistem operasi.</p>
       <div class="stats" aria-label="Ringkasan materi">
-        <span class="stat"><strong>9</strong> materi tersedia</span>
-        <span class="stat"><strong>3</strong> topik pembelajaran</span>
+        <span class="stat"><strong>18</strong> file repository</span>
+        <span class="stat"><strong>9</strong> materi HTML</span>
       </div>
     </section>
 
     <main>
       <div class="section-heading">
         <div>
-          <h2>Jelajahi materi</h2>
-          <p>Pilih materi untuk membuka halaman belajar interaktif.</p>
+          <h2>Jelajahi isi repository</h2>
+          <p>Temukan materi belajar, dokumentasi, dan file struktur folder.</p>
         </div>
-        <p id="result-count" aria-live="polite">Menampilkan 9 materi</p>
+        <p id="result-count" aria-live="polite">Menampilkan 18 file</p>
       </div>
 
       <div class="controls">
@@ -385,6 +385,8 @@
           <button class="filter" type="button" data-filter="windows" aria-pressed="false">Windows</button>
           <button class="filter" type="button" data-filter="ubuntu" aria-pressed="false">Ubuntu</button>
           <button class="filter" type="button" data-filter="arsitektur" aria-pressed="false">Arsitektur OS</button>
+          <button class="filter" type="button" data-filter="dokumen" aria-pressed="false">Dokumentasi</button>
+          <button class="filter" type="button" data-filter="struktur" aria-pressed="false">Struktur folder</button>
         </div>
       </div>
 
@@ -450,6 +452,69 @@
           <h3>Manajemen Akun &amp; Hak Istimewa</h3>
           <p>Bab 1.4 — pengenalan pengelolaan akun dan hak istimewa pengguna.</p>
           <span class="card-action">Buka materi <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./README.md" data-category="dokumen" data-search="readme dokumentasi learning pembelajaran sepanjang hayat bahan ajar">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📖</span><span class="tag">Dokumentasi</span></div>
+          <h3>README.md</h3>
+          <p>Pengantar repository Learning dan tujuan pengumpulan bahan ajar.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./index.html" data-category="dokumen" data-search="index html dashboard halaman utama learning">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">🏠</span><span class="tag">Dokumentasi</span></div>
+          <h3>index.html</h3>
+          <p>Dashboard ini, sebagai halaman utama repository Learning.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Dosen/.gitkeep" data-category="struktur" data-search="dosen .gitkeep file penanda folder kosong">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
+          <h3>Dosen/.gitkeep</h3>
+          <p>File penanda agar folder Dosen yang belum berisi materi tetap tersimpan di Git.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Dosen/AJK/.gitkeep" data-category="struktur" data-search="dosen ajk .gitkeep file penanda folder kosong">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
+          <h3>Dosen/AJK/.gitkeep</h3>
+          <p>File penanda untuk mempertahankan folder AJK di repository.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Dosen/APJ/.gitkeep" data-category="struktur" data-search="dosen apj .gitkeep file penanda folder kosong">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
+          <h3>Dosen/APJ/.gitkeep</h3>
+          <p>File penanda untuk mempertahankan folder APJ di repository.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Dosen/CCO/.gitkeep" data-category="struktur" data-search="dosen cco .gitkeep file penanda folder kosong">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
+          <h3>Dosen/CCO/.gitkeep</h3>
+          <p>File penanda untuk mempertahankan folder CCO di repository.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Dosen/JRK/.gitkeep" data-category="struktur" data-search="dosen jrk .gitkeep file penanda folder kosong">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
+          <h3>Dosen/JRK/.gitkeep</h3>
+          <p>File penanda untuk mempertahankan folder JRK di repository.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./Dosen/SO/.gitkeep" data-category="struktur" data-search="dosen so .gitkeep file penanda folder kosong">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
+          <h3>Dosen/SO/.gitkeep</h3>
+          <p>File penanda untuk mempertahankan folder SO di repository.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="card" href="./CSec/.gitkeep" data-category="struktur" data-search="csec .gitkeep file penanda folder kosong">
+          <div class="card-top"><span class="card-icon" aria-hidden="true">📂</span><span class="tag">Struktur folder</span></div>
+          <h3>CSec/.gitkeep</h3>
+          <p>File penanda agar folder CSec tetap tersimpan di repository.</p>
+          <span class="card-action">Buka file <span class="arrow" aria-hidden="true">→</span></span>
         </a>
 
         <p class="empty" id="empty-state" hidden>Tidak ada materi yang cocok. Coba kata kunci atau kategori lain.</p>

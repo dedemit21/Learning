@@ -1,0 +1,2689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Ajar: Cloud Computing - Virtualisasi & Hypervisor</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.7); }
+    
+    .slide-enter {
+      animation: fadeInSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(12px) scale(0.995); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .grid-pattern {
+      background-size: 24px 24px;
+      background-image: radial-gradient(circle, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-2.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button id="btn-toggle-menu" class="p-2 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition" title="Daftar Isi">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 text-xs font-semibold bg-brand-500/20 text-brand-400 border border-brand-500/30 rounded">Cloud Computing (3 SKS)</span>
+          <span class="text-xs text-slate-400 hidden sm:inline">Dosen: Dede Mulyana, S.T.</span>
+        </div>
+        <h1 id="topbar-slide-title" class="text-sm font-bold text-slate-100 truncate max-w-xs md:max-w-md">Pendahuluan Mata Kuliah</h1>
+      </div>
+    </div>
+
+    <!-- Center / Progress Indicator -->
+    <div class="hidden md:flex items-center gap-3">
+      <span id="slide-counter-badge" class="text-xs font-mono px-2 py-1 bg-slate-800 border border-slate-700 rounded text-brand-300">Slide 1 / 32</span>
+      <div class="w-40 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
+        <div id="top-progress-fill" class="bg-gradient-to-r from-brand-600 to-indigo-500 h-full transition-all duration-300" style="width: 3%;"></div>
+      </div>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="flex items-center gap-2">
+      <button id="btn-sound-toggle" class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition" title="Audio Efek Nyala/Mati">
+        <i data-lucide="volume-2" class="w-5 h-5" id="sound-icon"></i>
+      </button>
+      <button id="btn-fullscreen" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition hidden sm:inline-flex" title="Layar Penuh">
+        <i data-lucide="maximize" class="w-5 h-5"></i>
+      </button>
+      <a href="#slide-menu" onclick="app.jumpToSlide(31)" class="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition flex items-center gap-1.5 shadow-sm">
+        <i data-lucide="award" class="w-4 h-4"></i>
+        <span>Evaluasi (20 Soal)</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="flex-1 flex overflow-hidden relative">
+    
+    <!-- Sidebar Drawer (Daftar Isi 32 Halaman) -->
+    <aside id="sidebar-drawer" class="fixed inset-y-0 left-0 z-50 w-80 bg-slate-900 border-r border-slate-800 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col pt-14 shadow-2xl">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-brand-400"></i>
+          <h2 class="font-bold text-white text-sm">Daftar Materi Kuliah</h2>
+        </div>
+        <button id="btn-close-drawer" class="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-3 bg-slate-950/60 border-b border-slate-800 text-xs">
+        <div class="text-slate-400 font-medium">Progress Belajar:</div>
+        <div class="flex items-center justify-between mt-1 mb-1.5">
+          <span id="drawer-progress-text" class="text-brand-400 font-mono font-bold">3%</span>
+          <span class="text-slate-500">32 Modul Lengkap</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div id="drawer-progress-bar" class="bg-brand-500 h-full w-[3%] transition-all duration-300"></div>
+        </div>
+      </div>
+
+      <div id="table-of-contents-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="p-3 border-t border-slate-800 bg-slate-900/90 text-xs text-slate-400 text-center">
+        Dosen Pengampu: <strong class="text-slate-200">Dede Mulyana, S.T.</strong>
+      </div>
+    </aside>
+
+    <!-- Overlay when drawer opens -->
+    <div id="drawer-backdrop" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-xs"></div>
+
+    <!-- Slide Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center justify-start grid-pattern">
+      <div class="w-full max-w-5xl mx-auto flex-1 flex flex-col">
+        
+        <!-- Slide Card Container -->
+        <div id="slide-container" class="bg-slate-900/95 border border-slate-800/90 rounded-2xl shadow-2xl p-6 md:p-10 flex-1 flex flex-col justify-between slide-enter backdrop-blur-sm">
+          <!-- Dynamic Content Inserted Here -->
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Bottom Navigation Control Deck -->
+  <footer class="bg-slate-900 border-t border-slate-800 px-4 py-3 z-30">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <button id="btn-prev-slide" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        <span>Sebelumnya</span>
+      </button>
+
+      <div class="flex items-center gap-2 text-xs text-slate-400">
+        <span class="hidden sm:inline">Gunakan panah keyboard</span>
+        <kbd class="px-2 py-1 bg-slate-800 rounded border border-slate-700 font-mono text-[10px]">◀</kbd>
+        <kbd class="px-2 py-1 bg-slate-800 rounded border border-slate-700 font-mono text-[10px]">▶</kbd>
+      </div>
+
+      <button id="btn-next-slide" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm transition shadow-lg shadow-brand-600/30">
+        <span>Selanjutnya</span>
+        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-16 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Application Logic & Data -->
+  <script>
+    // --- SYNTHESIZED SOUND EFFECTS (Web Audio API - No External Files) ---
+    const SoundFx = {
+      enabled: true,
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      },
+      play(type) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          if (type === 'click') {
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.05);
+            osc.start(now);
+            osc.stop(now + 0.05);
+          } else if (type === 'success') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+            osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+          } else if (type === 'error') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.linearRampToValueAtTime(140, now + 0.18);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
+          }
+        } catch (e) {
+          console.warn("Sound error", e);
+        }
+      }
+    };
+
+    // --- APPLICATION DATA: 32 SLIDES ---
+    const slidesData = [
+      // 1. Cover / Title
+      {
+        id: 1,
+        category: "Pengenalan",
+        title: "Virtualisasi: Pondasi Komputasi Awan",
+        content: `
+          <div class="text-center py-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-500/10 border border-brand-500/30 rounded-full text-brand-400 text-xs font-semibold mb-6">
+              <i data-lucide="cloud" class="w-4 h-4"></i> Cloud Computing • 3 SKS
+            </div>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+              Virtualisasi Modern:<br><span class="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">Hypervisor, VM & Containerization</span>
+            </h1>
+            <p class="text-slate-400 max-w-2xl mx-auto text-base md:text-lg mb-8">
+              Media ajar interaktif teori, arsitektur, simulasi lab CLI, game arsitektur, serta evaluasi pemahaman mendalam.
+            </p>
+            <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-5 max-w-md mx-auto flex items-center gap-4 text-left shadow-lg">
+              <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md flex-shrink-0">
+                DM
+              </div>
+              <div>
+                <div class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Dosen Pengampu</div>
+                <div class="text-lg font-bold text-white">Dede Mulyana, S.T.</div>
+                <div class="text-xs text-slate-400">Teknik Informatika / Ilmu Komputer</div>
+              </div>
+            </div>
+            <div class="mt-8 flex justify-center gap-3">
+              <button onclick="app.nextSlide()" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition shadow-lg shadow-brand-500/25 flex items-center gap-2">
+                <span>Mulai Perkuliahan</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `
+      },
+
+      // 2. Kontrak Kuliah & Capaian Pembelajaran
+      {
+        id: 2,
+        category: "Pengenalan",
+        title: "Capaian Pembelajaran (CPMK) & Sasaran",
+        content: `
+          <div class="space-y-6">
+            <div class="border-b border-slate-800 pb-3">
+              <span class="text-xs text-brand-400 font-bold uppercase tracking-wider">Rencana Pembelajaran Semester</span>
+              <h2 class="text-2xl font-bold text-white">Tujuan Instruksional Pembelajaran</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4">
+              <div class="p-5 bg-slate-800/50 border border-slate-700/60 rounded-xl hover:border-brand-500/50 transition">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center mb-3">
+                  <i data-lucide="cpu" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-white text-base mb-2">CPMK 1: Konsep Hypervisor</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">Mahasiswa mampu menguraikan mekanisme abstraksi perangkat keras, trap-and-emulate, serta membedakan Hypervisor Type 1 dan Type 2 secara teoritis dan teknis.</p>
+              </div>
+              <div class="p-5 bg-slate-800/50 border border-slate-700/60 rounded-xl hover:border-brand-500/50 transition">
+                <div class="w-10 h-10 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
+                  <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-white text-base mb-2">CPMK 2: VM vs Container</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">Mahasiswa mampu menganalisis disparitas struktural kernel-sharing pada Container versus hardware emulation pada Virtual Machine dari aspek isolasi, overhead, dan densitas.</p>
+              </div>
+              <div class="p-5 bg-slate-800/50 border border-slate-700/60 rounded-xl hover:border-brand-500/50 transition">
+                <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
+                  <i data-lucide="terminal" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-white text-base mb-2">CPMK 3: Implementasi Praktik</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">Mahasiswa mampu mengoperasikan manajemen virtual machine (KVM/VirtualBox CLI) dan orkestrasi container awal (Docker Engine CLI) pada sistem operasi host.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3">
+              <i data-lucide="alert-circle" class="w-6 h-6 text-amber-400 flex-shrink-0"></i>
+              <div class="text-xs text-amber-200">
+                <strong>Metode Pembelajaran:</strong> Kuliah interaktif 3 SKS mengombinasikan telaah teori fundamental, simulasi arsitektur mini-game, hands-on terminal command, serta uji kompetensi 20 butir soal di akhir sesi.
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 3. Masalah Tradisional Tanpa Virtualisasi
+      {
+        id: 3,
+        category: "Konsep Dasar",
+        title: "Dilema Bare-Metal Tradisional: 'One Server, One App'",
+        content: `
+          <div class="grid md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-4">
+              <h2 class="text-2xl font-bold text-white">Sebelum Era Virtualisasi</h2>
+              <p class="text-slate-300 text-sm leading-relaxed">
+                Di masa komputasi klasik (sebelum tahun 2000-an), setiap aplikasi enterprise membutuhkan 1 buah server fisik dedicated (*bare-metal*). Model ini memicu krisis efisiensi di pusat data (*Data Center*):
+              </p>
+              <ul class="space-y-2 text-sm text-slate-300">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 mt-1 flex-shrink-0"></i>
+                  <span><strong>Underutilized Hardware:</strong> Server rata-rata hanya menggunakan 5% - 15% kapasitas CPU dan RAM.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 mt-1 flex-shrink-0"></i>
+                  <span><strong>Server Sprawl:</strong> Ribuan rak server memadati ruang, menuntut daya listrik (power) dan pendingin (cooling) raksasa.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 mt-1 flex-shrink-0"></i>
+                  <span><strong>High Downtime & Recovery:</strong> Jika motherboard/disk terbakar, waktu *recovery* memakan waktu berhari-hari.</span>
+                </li>
+              </ul>
+            </div>
+            <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 text-center">
+              <div class="text-xs text-slate-400 mb-3 font-semibold">Ilustrasi Utilisasi Server Tradisional</div>
+              <div class="h-44 w-full bg-slate-900 rounded-lg p-4 flex flex-col justify-end relative border border-slate-800">
+                <div class="w-full bg-rose-500/80 rounded-t-lg transition-all" style="height: 12%;">
+                  <span class="text-[11px] font-bold text-white block pt-1">Beban Nyata: 12%</span>
+                </div>
+                <div class="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
+                  <span class="text-rose-400/40 text-4xl font-extrabold">88% TERBUANG</span>
+                  <span class="text-slate-500 text-xs">(Idle Capacity, Pemborosan Daya Listrik)</span>
+                </div>
+              </div>
+              <p class="text-xs text-slate-400 mt-3">Virtualisasi hadir sebagai solusi membagi 1 server fisik menjadi puluhan mesin virtual mandiri.</p>
+            </div>
+          </div>
+        `
+      },
+
+      // 4. Definisi Virtualisasi
+      {
+        id: 4,
+        category: "Konsep Dasar",
+        title: "Definisi & Esensi Virtualisasi",
+        content: `
+          <div class="space-y-5">
+            <h2 class="text-2xl font-bold text-white">Apa itu Virtualisasi?</h2>
+            <blockquote class="p-4 bg-brand-500/10 border-l-4 border-brand-500 rounded-r-xl text-slate-200 text-base italic">
+              "Virtualisasi adalah proses abstraksi representasi logis dari sumber daya komputasi fisik (CPU, Memori, Penyimpanan, dan Jaringan) sehingga dapat dijalankan beberapa lingkungan komputasi independen secara simultan pada satu mesin fisik."
+            </blockquote>
+            <div class="grid md:grid-cols-3 gap-4 pt-2">
+              <div class="p-4 bg-slate-800/40 border border-slate-700/80 rounded-xl">
+                <div class="text-brand-400 font-bold mb-1 flex items-center gap-2">
+                  <i data-lucide="shield-check" class="w-4 h-4"></i> Partisi (Partitioning)
+                </div>
+                <p class="text-xs text-slate-300">Menjalankan beberapa OS dalam 1 mesin fisik tunggal; membagi sumber daya hardware secara dinamis dan aman.</p>
+              </div>
+              <div class="p-4 bg-slate-800/40 border border-slate-700/80 rounded-xl">
+                <div class="text-brand-400 font-bold mb-1 flex items-center gap-2">
+                  <i data-lucide="lock" class="w-4 h-4"></i> Isolasi (Isolation)
+                </div>
+                <p class="text-xs text-slate-300">Kegagalan sistem (misal Kernel Panic / Virus) di satu mesin virtual tidak akan memengaruhi mesin virtual tetangga.</p>
+              </div>
+              <div class="p-4 bg-slate-800/40 border border-slate-700/80 rounded-xl">
+                <div class="text-brand-400 font-bold mb-1 flex items-center gap-2">
+                  <i data-lucide="folder-archive" class="w-4 h-4"></i> Enkapsulasi (Encapsulation)
+                </div>
+                <p class="text-xs text-slate-300">Seluruh status mesin virtual (OS, app, konfigurasi) disimpan dalam bentuk berkas tunggal (contoh: .vmdk, .qcow2, .vdi).</p>
+              </div>
+            </div>
+            <div class="p-3 bg-slate-800/60 rounded-lg text-xs text-slate-400 flex items-center justify-between">
+              <span>Prinsip utama Popek-Goldberg (1974): Virtualisasi yang efisien mensyaratkan <em>Equivalence</em>, <em>Resource Control</em>, dan <em>Efficiency</em>.</span>
+              <span class="text-brand-400 font-mono">Popek-Goldberg Thm</span>
+            </div>
+          </div>
+        `
+      },
+
+      // 5. Taksonomi Virtualisasi
+      {
+        id: 5,
+        category: "Konsep Dasar",
+        title: "Taksonomi & Level Virtualisasi dalam Cloud",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Tingkatan Virtualisasi Sistem</h2>
+            <p class="text-sm text-slate-300">Virtualisasi dapat diimplementasikan pada berbagai lapisan hierarki sistem komputer:</p>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="flex items-center gap-2 text-indigo-400 font-bold text-sm mb-2">
+                  <span class="w-6 h-6 rounded bg-indigo-500/20 flex items-center justify-center text-xs">1</span>
+                  Hardware-Level Virtualization (Hardware Emulation)
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                  Mengabstraksi perangkat keras secara penuh. OS tamu (Guest OS) mengira mereka berjalan langsung di atas komponen fisik CPU/RAM/NIC nyata.
+                </p>
+                <div class="text-[11px] font-mono text-slate-300 bg-slate-900 p-2 rounded">
+                  Contoh: VMware ESXi, KVM, Microsoft Hyper-V, Xen
+                </div>
+              </div>
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-2">
+                  <span class="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center text-xs">2</span>
+                  OS-Level Virtualization (Containerization)
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                  Kernel host OS membagi user space menjadi banyak ruang terisolasi mandiri. Tidak ada emulasi hardware fisik.
+                </p>
+                <div class="text-[11px] font-mono text-slate-300 bg-slate-900 p-2 rounded">
+                  Contoh: Docker, containerd, LXC/LXD, Podman
+                </div>
+              </div>
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="flex items-center gap-2 text-amber-400 font-bold text-sm mb-2">
+                  <span class="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center text-xs">3</span>
+                  Application / Process-Level Virtualization
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                  Menjalankan aplikasi di atas runtime interpreter virtual mesin khusus yang independen terhadap platform OS.
+                </p>
+                <div class="text-[11px] font-mono text-slate-300 bg-slate-900 p-2 rounded">
+                  Contoh: Java Virtual Machine (JVM), .NET CLR
+                </div>
+              </div>
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="flex items-center gap-2 text-cyan-400 font-bold text-sm mb-2">
+                  <span class="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center text-xs">4</span>
+                  Storage & Network Virtualization
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                  Penyatuan media disk (SAN/Ceph) dan pemisahan lapisan kontrol jaringan dari perangkat fisik (SDN / VXLAN / Open vSwitch).
+                </p>
+                <div class="text-[11px] font-mono text-slate-300 bg-slate-900 p-2 rounded">
+                  Contoh: Software-Defined Networking (SDN), Ceph, VMware vSAN
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 6. Mengenal Hypervisor (VMM)
+      {
+        id: 6,
+        category: "Konsep Hypervisor",
+        title: "Pengenalan Hypervisor (Virtual Machine Monitor)",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Apa itu Hypervisor?</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              <strong>Hypervisor</strong> (dikenal juga sebagai <em>Virtual Machine Monitor / VMM</em>) adalah perangkat lunak, firmware, atau perangkat keras tingkat rendah yang menciptakan dan menjalankan Mesin Virtual (*Virtual Machines* / VM).
+            </p>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider mb-2">Peran Inti Hypervisor:</h3>
+              <div class="grid md:grid-cols-3 gap-3 text-xs">
+                <div class="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                  <div class="font-bold text-white mb-1">1. Abstraksi Hardware</div>
+                  <p class="text-slate-400">Menyajikan virtual CPU (vCPU), virtual RAM, virtual NIC ke setiap sistem operasi tamu (Guest OS).</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                  <div class="font-bold text-white mb-1">2. Penjadwalan (Scheduling)</div>
+                  <p class="text-slate-400">Mengatur eksekusi instruksi CPU dari berbagai VM agar dapat bergantian di core fisik CPU secara adil.</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                  <div class="font-bold text-white mb-1">3. Manajemen Memori</div>
+                  <p class="text-slate-400">Mencegah satu VM membaca atau menimpa alokasi memori fisik milik VM lain (Memory Protection).</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-4 bg-brand-500/10 border border-brand-500/30 rounded-xl text-xs text-brand-200">
+              <strong>Trivia Sejarah:</strong> Istilah "Hypervisor" diciptakan oleh IBM pada era 1960-an untuk mainframe CP-40/System/360-67, sebagai tingkatan di atas "Supervisor" (sebutan kernel sistem operasi kala itu).
+            </div>
+          </div>
+        `
+      },
+
+      // 7. Hypervisor Type 1 (Bare-Metal)
+      {
+        id: 7,
+        category: "Konsep Hypervisor",
+        title: "Hypervisor Tipe 1: Bare-Metal Architecture",
+        content: `
+          <div class="grid md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-4">
+              <div class="inline-block px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                Arsitektur Enterprise & Cloud Provider
+              </div>
+              <h2 class="text-2xl font-bold text-white">Type 1: Native / Bare-Metal</h2>
+              <p class="text-sm text-slate-300 leading-relaxed">
+                Hypervisor Type 1 diinstal <strong>langsung di atas perangkat keras server fisik</strong> tanpa perantara sistem operasi konvensional (Windows/Ubuntu umum). Hypervisor itu sendiri bertindak sebagai OS mikro.
+              </p>
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center gap-2 text-emerald-300">
+                  <i data-lucide="check" class="w-4 h-4"></i> Performa mendekati Bare-Metal murni (overhead sangat rendah < 2%).
+                </div>
+                <div class="flex items-center gap-2 text-emerald-300">
+                  <i data-lucide="check" class="w-4 h-4"></i> Keamanan sangat tinggi: Attack surface minimal karena tidak ada bloatware OS host.
+                </div>
+                <div class="flex items-center gap-2 text-slate-400">
+                  <i data-lucide="server" class="w-4 h-4"></i> Digunakan oleh AWS (Nitro), GCP, Azure, Data Center Perbankan.
+                </div>
+              </div>
+              <div class="text-xs font-mono text-slate-400 bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                Produk Populer: VMware ESXi, Linux KVM/Proxmox VE, Microsoft Hyper-V Server, Citrix XenServer.
+              </div>
+            </div>
+
+            <!-- Arsitektur Visual Stack -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col gap-2">
+              <div class="text-xs font-bold text-slate-400 text-center mb-1">Stack Arsitektur Type 1</div>
+              
+              <div class="grid grid-cols-2 gap-2">
+                <div class="p-2.5 bg-indigo-950/60 border border-indigo-700/60 rounded text-center">
+                  <span class="text-xs font-bold text-indigo-300">VM 1 (Web Server)</span>
+                  <div class="text-[10px] text-slate-400 mt-1">App + Guest OS (Ubuntu)</div>
+                </div>
+                <div class="p-2.5 bg-indigo-950/60 border border-indigo-700/60 rounded text-center">
+                  <span class="text-xs font-bold text-indigo-300">VM 2 (Database)</span>
+                  <div class="text-[10px] text-slate-400 mt-1">App + Guest OS (Windows)</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-emerald-600/30 border border-emerald-500 rounded text-center text-xs font-bold text-emerald-300 flex items-center justify-center gap-2">
+                <i data-lucide="layers" class="w-4 h-4"></i>
+                HYPERVISOR TYPE 1 (Bare-Metal / ESXi / KVM)
+              </div>
+
+              <div class="p-3 bg-slate-800 border border-slate-700 rounded text-center text-xs font-bold text-slate-300 flex items-center justify-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4"></i>
+                PHYSICAL HARDWARE (CPU, RAM, NIC, SSD)
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 8. Hypervisor Type 2 (Hosted)
+      {
+        id: 8,
+        category: "Konsep Hypervisor",
+        title: "Hypervisor Tipe 2: Hosted Architecture",
+        content: `
+          <div class="grid md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-4">
+              <div class="inline-block px-2.5 py-0.5 rounded text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                Arsitektur Desktop & Client Development
+              </div>
+              <h2 class="text-2xl font-bold text-white">Type 2: Hosted Hypervisor</h2>
+              <p class="text-sm text-slate-300 leading-relaxed">
+                Hypervisor Type 2 berjalan sebagai <strong>aplikasi perangkat lunak biasa di atas Sistem Operasi Host</strong> (misal Windows 11, macOS, atau Linux desktop).
+              </p>
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center gap-2 text-slate-300">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Sangat mudah diinstal untuk pengujian, belajar mahasiswa, dan software testing.
+                </div>
+                <div class="flex items-center gap-2 text-amber-400">
+                  <i data-lucide="alert-triangle" class="w-4 h-4"></i> Double Overhead: Setiap instruksi melewati Guest OS -> Hypervisor -> Host OS -> Hardware.
+                </div>
+                <div class="flex items-center gap-2 text-rose-400">
+                  <i data-lucide="x" class="w-4 h-4"></i> Tidak direkomendasikan untuk Production Cloud berkapasitas tinggi.
+                </div>
+              </div>
+              <div class="text-xs font-mono text-slate-400 bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                Produk Populer: Oracle VM VirtualBox, VMware Workstation / Fusion, Parallels Desktop.
+              </div>
+            </div>
+
+            <!-- Arsitektur Visual Stack -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col gap-2">
+              <div class="text-xs font-bold text-slate-400 text-center mb-1">Stack Arsitektur Type 2</div>
+              
+              <div class="grid grid-cols-2 gap-2">
+                <div class="p-2 bg-indigo-950/60 border border-indigo-700/60 rounded text-center">
+                  <span class="text-xs font-bold text-indigo-300">VM 1 (Linux Lab)</span>
+                  <div class="text-[10px] text-slate-400 mt-1">App + Guest OS</div>
+                </div>
+                <div class="p-2 bg-indigo-950/60 border border-indigo-700/60 rounded text-center">
+                  <span class="text-xs font-bold text-indigo-300">VM 2 (Test OS)</span>
+                  <div class="text-[10px] text-slate-400 mt-1">App + Guest OS</div>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-amber-600/30 border border-amber-500 rounded text-center text-xs font-bold text-amber-300 flex items-center justify-center gap-2">
+                <i data-lucide="box" class="w-4 h-4"></i>
+                HYPERVISOR TYPE 2 (VirtualBox / Workstation)
+              </div>
+
+              <div class="p-2.5 bg-slate-800 border border-slate-700 rounded text-center text-xs font-bold text-slate-300 flex items-center justify-center gap-2">
+                <i data-lucide="monitor" class="w-4 h-4"></i>
+                HOST OPERATING SYSTEM (Windows 11 / macOS / Ubuntu)
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded text-center text-xs font-bold text-slate-400 flex items-center justify-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4"></i>
+                PHYSICAL HARDWARE (Laptop / PC)
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 9. Komparasi Head-to-Head Hypervisor Type 1 vs Type 2
+      {
+        id: 9,
+        category: "Konsep Hypervisor",
+        title: "Perbandingan Komprehensif: Type 1 vs Type 2",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Matriks Evaluasi Hypervisor</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-800 text-slate-200 border-b border-slate-700">
+                    <th class="p-3 font-semibold">Parameter Analisis</th>
+                    <th class="p-3 font-semibold text-emerald-400">Type 1 (Bare-Metal)</th>
+                    <th class="p-3 font-semibold text-amber-400">Type 2 (Hosted)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300">
+                  <tr>
+                    <td class="p-3 font-medium text-white">Letak Lapisan (Layer)</td>
+                    <td class="p-3">Langsung di atas hardware (Ring -1 / root)</td>
+                    <td class="p-3">Di atas Host OS (Ring 3 user space app)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-white">Latensi & Overhead</td>
+                    <td class="p-3 text-emerald-300 font-semibold">Sangat Rendah (Near Native, ~1-3%)</td>
+                    <td class="p-3 text-amber-300 font-semibold">Cukup Tinggi (10% - 25% overhead)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-white">Tingkat Keamanan</td>
+                    <td class="p-3">Tinggi (Tidak rentan crash Host OS)</td>
+                    <td class="p-3">Tergantung integritas OS Host</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-white">Kebutuhan Driver</td>
+                    <td class="p-3">Membutuhkan HCL (Hardware Compatibility List) khusus</td>
+                    <td class="p-3">Memanfaatkan driver OS Host yang sudah terpasang</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-white">Skalabilitas Cloud</td>
+                    <td class="p-3">Tinggi (Mendukung live migration puluhan VM)</td>
+                    <td class="p-3">Rendah (Terbatas untuk desktop testing)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-white">Contoh Populer</td>
+                    <td class="p-3 font-mono text-emerald-400">VMware ESXi, Proxmox VE, KVM</td>
+                    <td class="p-3 font-mono text-amber-400">VirtualBox, VMware Workstation</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="p-3 bg-slate-800/40 border border-slate-700 rounded-lg text-xs text-slate-400">
+              <strong class="text-white">Kesimpulan Dosen:</strong> Dalam konteks arsitektur Cloud Computing publik seperti AWS EC2, GCP Compute Engine, dan Microsoft Azure VM, arsitektur yang digunakan 100% adalah Hypervisor Type 1 / Hardware-Assisted KVM.
+            </div>
+          </div>
+        `
+      },
+
+      // 10. Hardware-Assisted Virtualization (Intel VT-x & AMD-V)
+      {
+        id: 10,
+        category: "Konsep Hypervisor",
+        title: "Dukungan Hardware: Intel VT-x & AMD-V",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Evolusi Hardware-Assisted Virtualization</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Pada arsitektur CPU x86 klasik, terdapat 4 ring privilege perlindungan (Ring 0 untuk OS Kernel, Ring 3 untuk User Apps). Masalah timbul ketika Guest OS yang harusnya di Ring 0 dijalankan di atas Hypervisor:
+            </p>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="p-4 bg-slate-800/60 border border-slate-700 rounded-xl space-y-2">
+                <div class="text-xs font-bold text-rose-400 uppercase tracking-wider">Metode Lama (Sebelum 2005)</div>
+                <h3 class="text-base font-bold text-white">Binary Translation</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Hypervisor harus memeriksa dan menerjemahkan setiap instruksi CPU sensitif (seperti CLI, STI, POPF) milik Guest OS secara runtime dengan teknik perangkat lunak yang lambat dan rumit.
+                </p>
+              </div>
+              <div class="p-4 bg-emerald-950/30 border border-emerald-600/50 rounded-xl space-y-2">
+                <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Standar Modern (Hardware Assisted)</div>
+                <h3 class="text-base font-bold text-white">Intel VT-x & AMD-V</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  CPU fisik menambahkan mode operasi baru: <strong>VMX Root Mode</strong> (untuk Hypervisor) dan <strong>VMX Non-Root Mode</strong> (untuk Guest OS). CPU langsung mengeksekusi instruksi Guest OS tanpa penerjemahan software.
+                </p>
+              </div>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                <span>Fitur penting lainnya: <strong>SLAT (Second Level Address Translation)</strong> / EPT (Extended Page Tables) untuk akselerasi manajemen memori virtual secara hardware.</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 11. Arsitektur Virtual Machine Mendalam
+      {
+        id: 11,
+        category: "Virtual Machine",
+        title: "Anatomi Virtual Machine (VM)",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Komponen Utama Virtual Machine</h2>
+            <p class="text-sm text-slate-300">
+              Virtual Machine adalah emulasi perangkat keras lengkap secara perangkat lunak (*software abstraction of physical computer*).
+            </p>
+            <div class="grid md:grid-cols-3 gap-3">
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="text-brand-400 font-bold text-sm mb-1">1. Full Guest OS</div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Setiap VM memiliki salinan lengkap sistem operasinya sendiri (Kernel, Systemd/Init, Daemon, Libs, Tools). Membutuhkan storage disk gigabytes (5 - 30 GB).
+                </p>
+              </div>
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="text-indigo-400 font-bold text-sm mb-1">2. Virtual Hardware Devices</div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Virtual BIOS/UEFI, virtual disk controller (SCSI/NVMe), virtual NIC (e1000/virtio), dan emulasi PCI buses yang dikendalikan hypervisor.
+                </p>
+              </div>
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="text-purple-400 font-bold text-sm mb-1">3. Dedicated Memory Block</div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  RAM dialokasikan secara statis atau dinamis balon (*memory ballooning*). Begitu dialokasikan, Guest OS mengelola paging table-nya sendiri.
+                </p>
+              </div>
+            </div>
+            <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
+              <span class="text-slate-300">Format disk citra VM populer:</span>
+              <div class="flex gap-2 font-mono">
+                <span class="px-2 py-0.5 bg-slate-800 rounded text-brand-300">.qcow2 (KVM)</span>
+                <span class="px-2 py-0.5 bg-slate-800 rounded text-emerald-300">.vmdk (VMware)</span>
+                <span class="px-2 py-0.5 bg-slate-800 rounded text-cyan-300">.vhd / .vhdx (Hyper-V)</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 12. Kelebihan dan Kelemahan VM
+      {
+        id: 12,
+        category: "Virtual Machine",
+        title: "Karakteristik VM: Kelebihan & Batasan",
+        content: `
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-5 bg-emerald-950/20 border border-emerald-800/50 rounded-xl space-y-3">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-base">
+                <i data-lucide="thumbs-up" class="w-5 h-5"></i> Keunggulan Virtual Machine
+              </div>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>Isolasi Keamanan Total:</strong> Batas kernel sepenuhnya terpisah. Eksploitasi kernel di VM A tidak menembus host ataupun VM B.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>Heterogenitas OS:</strong> Dapat menjalankan Windows Server, FreeBSD, dan Ubuntu Linux secara bersamaan pada server yang sama.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>Full State Snapshots:</strong> Mudah mencadangkan keadaan RAM + Disk secara realtime (live snapshot).</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="p-5 bg-rose-950/20 border border-rose-800/50 rounded-xl space-y-3">
+              <div class="flex items-center gap-2 text-rose-400 font-bold text-base">
+                <i data-lucide="thumbs-down" class="w-5 h-5"></i> Kelemahan Virtual Machine
+              </div>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5"></i>
+                  <span><strong>Waktu Booting Lambat:</strong> Memerlukan inisialisasi BIOS, bootloader GRUB, dan kernel bootstrap (memakan waktu 30-90 detik).</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5"></i>
+                  <span><strong>Resource Heavy (Bloated):</strong> Tiap VM butuh RAM minimum 1-2 GB hanya untuk menghidupkan Guest OS dasar.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5"></i>
+                  <span><strong>Ukuran File Citra Besar:</strong> Puluhan Gigabytes per mesin, mempersulit portabilitas deploy cepat microservice.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+
+      // 13. Kebangkitan Containerization
+      {
+        id: 13,
+        category: "Containerization",
+        title: "Revolusi Containerization & Microservices",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Mengapa Dunia Beralih ke Container?</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Seiring adopsi metodologi DevOps, Agile, dan arsitektur <em>Microservices</em>, developer membutuhkan lingkungan yang dapat dimulai dalam hitungan milidetik dan berukuran puluhan megabyte saja.
+            </p>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+                <div class="text-amber-400 font-bold text-sm mb-1">Masalah Klasik: "Works on My Machine"</div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Aplikasi berjalan lancar di laptop developer, namun gagal di server produksi karena perbedaan versi library, konfigurasi environment variable, atau dependensi OS host.
+                </p>
+              </div>
+              <div class="p-4 bg-emerald-950/30 border border-emerald-600/50 rounded-xl">
+                <div class="text-emerald-400 font-bold text-sm mb-1">Solusi: Paket Terpadu Container</div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Container mengemas kode aplikasi beserta dependensi, binari, dan konfigurasinya menjadi satu citra (*image*) terpadu yang dijamin berperilaku identik di laptop, server on-premise, maupun cloud publik.
+                </p>
+              </div>
+            </div>
+            <div class="p-3 bg-brand-500/10 border border-brand-500/30 rounded-xl text-xs text-brand-300 flex items-center gap-2">
+              <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+              <span>Kemunculan Docker pada tahun 2013 mendemokratisasi teknologi container Linux yang sebelumnya sulit dikonfigurasi secara manual.</span>
+            </div>
+          </div>
+        `
+      },
+
+      // 14. Pondasi Linux Kernel Container: Namespaces & Cgroups
+      {
+        id: 14,
+        category: "Containerization",
+        title: "Dua Pilar Container: Linux Namespaces & Cgroups",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Bagaimana Container Bekerja Tanpa Hypervisor?</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Container sebenarnya adalah <strong>proses biasa di Linux</strong> yang diisolasi menggunakan dua fitur bawaan Linux Kernel:
+            </p>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="p-4 bg-slate-900 border border-slate-700 rounded-xl space-y-2">
+                <div class="flex items-center gap-2 text-indigo-400 font-bold text-sm">
+                  <i data-lucide="eye-off" class="w-4 h-4"></i> Linux Namespaces (Isolasi Pandangan)
+                </div>
+                <p class="text-xs text-slate-400">
+                  Membatasi apa yang bisa <strong>dilihat</strong> oleh proses container:
+                </p>
+                <ul class="text-xs text-slate-300 space-y-1 font-mono">
+                  <li>• <strong>PID:</strong> Container melihat dirinya sebagai Process ID 1.</li>
+                  <li>• <strong>NET:</strong> Memiliki IP address dan routing table sendiri.</li>
+                  <li>• <strong>MNT:</strong> Titik mount filesystem terisolasi (rootfs).</li>
+                  <li>• <strong>UTS / IPC / USER:</strong> Isolasi hostname dan user UID/GID.</li>
+                </ul>
+              </div>
+
+              <div class="p-4 bg-slate-900 border border-slate-700 rounded-xl space-y-2">
+                <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                  <i data-lucide="gauge" class="w-4 h-4"></i> Control Groups (Cgroups)
+                </div>
+                <p class="text-xs text-slate-400">
+                  Membatasi seberapa banyak sumber daya yang bisa <strong>dipakai</strong> oleh proses:
+                </p>
+                <ul class="text-xs text-slate-300 space-y-1 font-mono">
+                  <li>• <strong>Memory Limit:</strong> Misal max 512MB RAM (OOM Killer jika tembus).</li>
+                  <li>• <strong>CPU Quota:</strong> Pembatasan CPU shares (contoh: 0.5 vCPU).</li>
+                  <li>• <strong>Block I/O:</strong> Pembatasan kecepatan baca/tulis disk.</li>
+                  <li>• <strong>Network Bandwidth:</strong> Pengendalian traffic egress.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="text-xs text-slate-400 text-center italic">
+              "Namespaces menyembunyikan proses lain, Cgroups mencegah proses rakus memonopoli CPU & RAM."
+            </div>
+          </div>
+        `
+      },
+
+      // 15. Anatomi Container: Shared Kernel Architecture
+      {
+        id: 15,
+        category: "Containerization",
+        title: "Arsitektur Container: Konsep Shared Kernel",
+        content: `
+          <div class="grid md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-4">
+              <h2 class="text-2xl font-bold text-white">Berbagi Kernel Tunggal</h2>
+              <p class="text-sm text-slate-300 leading-relaxed">
+                Berbeda drastis dengan VM yang mem-boot kernel mandiri, seluruh container di atas host <strong>berbagi 1 Linux Kernel yang sama</strong> dengan OS Host.
+              </p>
+              <div class="space-y-2 text-xs">
+                <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                  <span class="text-brand-400 font-bold block mb-1">Implikasi Efisiensi:</span>
+                  Tidak ada overhead memory untuk buffer kernel ganda, memory boot, atau virtual device drivers.
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                  <span class="text-amber-400 font-bold block mb-1">Batasan Kompatibilitas:</span>
+                  Container Linux tidak bisa berjalan langsung di atas kernel murni Windows tanpa lapisan WSL2 (Windows Subsystem for Linux 2).
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col gap-2">
+              <div class="text-xs font-bold text-slate-400 text-center mb-1">Stack Arsitektur Container</div>
+              
+              <div class="grid grid-cols-3 gap-2">
+                <div class="p-2 bg-emerald-950/50 border border-emerald-600/50 rounded text-center">
+                  <span class="text-[11px] font-bold text-emerald-300">Container 1</span>
+                  <div class="text-[9px] text-slate-400">NodeJS + Libs</div>
+                </div>
+                <div class="p-2 bg-emerald-950/50 border border-emerald-600/50 rounded text-center">
+                  <span class="text-[11px] font-bold text-emerald-300">Container 2</span>
+                  <div class="text-[9px] text-slate-400">Python + Libs</div>
+                </div>
+                <div class="p-2 bg-emerald-950/50 border border-emerald-600/50 rounded text-center">
+                  <span class="text-[11px] font-bold text-emerald-300">Container 3</span>
+                  <div class="text-[9px] text-slate-400">Nginx + Libs</div>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-blue-600/30 border border-blue-500 rounded text-center text-xs font-bold text-blue-300 flex items-center justify-center gap-2">
+                <i data-lucide="container" class="w-4 h-4"></i>
+                CONTAINER RUNTIME ENGINE (Docker / containerd / CRI-O)
+              </div>
+
+              <div class="p-2.5 bg-slate-800 border border-slate-700 rounded text-center text-xs font-bold text-slate-200 flex items-center justify-center gap-2">
+                <i data-lucide="terminal-square" class="w-4 h-4"></i>
+                SHARED HOST OS KERNEL (Linux 5.x / 6.x)
+              </div>
+
+              <div class="p-2.5 bg-slate-900 border border-slate-800 rounded text-center text-xs font-bold text-slate-400 flex items-center justify-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4"></i>
+                PHYSICAL HARDWARE (CPU / RAM / Disk)
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 16. Komparasi Detail: VM vs Container (Tabel Metrik)
+      {
+        id: 16,
+        category: "VM vs Container",
+        title: "Komparasi Metrik Teknis: VM vs Container",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Pertarungan Arsitektur: Virtual Machine vs Container</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-800 text-slate-200 border-b border-slate-700">
+                    <th class="p-2.5">Karakteristik Teknis</th>
+                    <th class="p-2.5 text-indigo-400">Virtual Machine (VM)</th>
+                    <th class="p-2.5 text-emerald-400">Container (Docker)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300">
+                  <tr>
+                    <td class="p-2.5 font-medium text-white">Tingkat Abstraksi</td>
+                    <td class="p-2.5">Hardware Level (Emulasi CPU, RAM, BIOS)</td>
+                    <td class="p-2.5">Operating System Level (User Space)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-medium text-white">Sistem Operasi Tamu</td>
+                    <td class="p-2.5 text-indigo-300">Tiap VM memiliki Guest OS mandiri</td>
+                    <td class="p-2.5 text-emerald-300">Berbagi Host OS Kernel bersama</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-medium text-white">Waktu Booting (Startup)</td>
+                    <td class="p-2.5">Menit atau puluhan detik (30 - 120s)</td>
+                    <td class="p-2.5 text-emerald-400 font-bold">Milidetik hingga detik (< 1 detik)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-medium text-white">Ukuran Image / Disk</td>
+                    <td class="p-2.5">Gigabytes (biasanya 5GB - 50GB)</td>
+                    <td class="p-2.5 text-emerald-400 font-bold">Megabytes (Alpine ~5MB, Ubuntu ~70MB)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-medium text-white">Overhead Memori (RAM)</td>
+                    <td class="p-2.5">Tinggi (1GB+ dialokasikan per VM)</td>
+                    <td class="p-2.5 text-emerald-400 font-bold">Sangat Rendah (hanya konsumsi proses app)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-medium text-white">Densitas per Server</td>
+                    <td class="p-2.5">10 - 50 VM per server fisik</td>
+                    <td class="p-2.5 text-emerald-400 font-bold">Ratusan hingga ribuan container</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2.5 font-medium text-white">Batas Isolasi & Keamanan</td>
+                    <td class="p-2.5 text-indigo-400 font-bold">Sangat Ketat (Hardware Boundary)</td>
+                    <td class="p-2.5 text-amber-400">Proses Boundary (Rentan kernel exploit)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `
+      },
+
+      // 17. Trade-off: Kapan Memilih VM dan Kapan Memilih Container?
+      {
+        id: 17,
+        category: "VM vs Container",
+        title: "Panduan Keputusan Arsitektur: Kapan Pakai VM vs Container?",
+        content: `
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-5 bg-indigo-950/20 border border-indigo-800/60 rounded-xl space-y-3">
+              <div class="flex items-center gap-2 text-indigo-400 font-bold text-base">
+                <i data-lucide="server" class="w-5 h-5"></i> Gunakan Virtual Machine Jika:
+              </div>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-indigo-400 mt-0.5"></i>
+                  <span><strong>Aplikasi Monolith Legacy:</strong> Software lawas yang sulit dipisah dependensinya atau memerlukan versi OS khusus.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-indigo-400 mt-0.5"></i>
+                  <span><strong>Multi-Tenancy Ekstrem:</strong> Memisahkan beban kerja perbankan antar institusi dengan audit kepatuhan PCI-DSS ketat.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-indigo-400 mt-0.5"></i>
+                  <span><strong>Kebutuhan Kernel Berbeda:</strong> Perlu menjalankan Windows Server dan Linux pada infrastruktur fisik yang sama.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="p-5 bg-emerald-950/20 border border-emerald-800/60 rounded-xl space-y-3">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-base">
+                <i data-lucide="boxes" class="w-5 h-5"></i> Gunakan Container Jika:
+              </div>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>Arsitektur Cloud-Native & Microservices:</strong> Pecahan REST API, auth service, frontend yang butuh auto-scale instan.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>CI/CD Pipeline Cepat:</strong> Build, test, dan deploy otomatis dalam hitungan puluhan detik.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>Efisiensi Biaya Cloud:</strong> Memaksimalkan utilitas server dengan densitas kontainer tinggi (menekan tagihan cloud).</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+
+      // 18. Arsitektur Simbiosis: Container di dalam VM
+      {
+        id: 18,
+        category: "Pola Arsitektur Modern",
+        title: "Pola Simbiosis: Container Inside Virtual Machine",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Standar Industri Cloud Provider Modern</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Di industri nyata (AWS EKS, Google Kubernetes Engine GKE, Azure AKS), pertanyaannya bukan <em>"VM ATAU Container?"</em>, melainkan <strong>kombinasi keduanya secara harmonis</strong>!
+            </p>
+            <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3">
+              <div class="flex items-center gap-2 text-brand-400 font-bold text-sm">
+                <i data-lucide="layers" class="w-5 h-5"></i> Lapisan Simbiosis Kubernetes Node
+              </div>
+              <div class="space-y-2 text-xs">
+                <div class="p-3 bg-slate-900 rounded border border-slate-700 flex items-center justify-between">
+                  <span class="text-indigo-300 font-semibold">1. Hypervisor Type 1 (AWS Nitro / KVM)</span>
+                  <span class="text-slate-400">Menyediakan isolasi multi-tenant antar pelanggan cloud yang aman.</span>
+                </div>
+                <div class="p-3 bg-slate-900 rounded border border-slate-700 flex items-center justify-between">
+                  <span class="text-brand-300 font-semibold">2. Virtual Machine (EC2 Instance)</span>
+                  <span class="text-slate-400">Berfungsi sebagai "Worker Node" Kubernetes berkapasitas tertentu.</span>
+                </div>
+                <div class="p-3 bg-slate-900 rounded border border-slate-700 flex items-center justify-between">
+                  <span class="text-emerald-300 font-semibold">3. Ratusan Pod / Container</span>
+                  <span class="text-slate-400">Dijalankan di dalam VM untuk skalabilitas milidetik dan portabilitas.</span>
+                </div>
+              </div>
+            </div>
+            <div class="p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-xs text-indigo-300">
+              Pola ini menggabungkan <strong>keamanan isolasi baja milik VM</strong> dengan <strong>kelincahan dan kecepatan milik Container</strong>.
+            </div>
+          </div>
+        `
+      },
+
+      // 19. GAME 1 INTRO: Architecture Builder
+      {
+        id: 19,
+        category: "Game Interaktif 1",
+        title: "Tantangan Interaktif 1: Hypervisor Architecture Builder",
+        content: `
+          <div class="text-center py-4 space-y-4">
+            <div class="w-16 h-16 bg-brand-500/20 text-brand-400 rounded-2xl mx-auto flex items-center justify-center border border-brand-500/30">
+              <i data-lucide="gamepad-2" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white">Mini Game 1: Susun Layer Arsitektur</h2>
+            <p class="text-slate-300 max-w-xl mx-auto text-sm leading-relaxed">
+              Buktikan pemahaman Anda! Susun potongan layer arsitektur dari urutan terbawah (Hardware) hingga teratas (Applications) untuk 3 skenario: <strong>Hypervisor Type 1</strong>, <strong>Hypervisor Type 2</strong>, dan <strong>Container</strong>.
+            </p>
+            <div class="inline-flex gap-4 p-4 bg-slate-900 rounded-xl border border-slate-800 text-xs text-left">
+              <div>
+                <strong class="text-brand-400 block mb-1">Mekanisme Game:</strong>
+                Klik komponen di kotak pilihan untuk memasukkannya ke dalam slot urutan tumpukan (*stack*). Jika salah urutan, sistem akan memberi feedback audio dan penalti reset!
+              </div>
+            </div>
+            <div class="pt-2">
+              <button onclick="app.jumpToSlide(20)" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition shadow-lg shadow-brand-500/30">
+                Mulai Game 1 Sekarang
+              </button>
+            </div>
+          </div>
+        `
+      },
+
+      // 20. GAME 1 WORKSPACE: Interactive Drag & Drop Builder
+      {
+        id: 20,
+        category: "Game Interaktif 1",
+        title: "Arena Game 1: Stack Architecture Builder",
+        content: `
+          <div id="game1-container" class="space-y-4">
+            <!-- Mode Switcher -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <div class="text-xs font-bold text-slate-300 flex items-center gap-2">
+                <i data-lucide="target" class="w-4 h-4 text-brand-400"></i>
+                Pilih Target Arsitektur:
+              </div>
+              <div class="flex gap-2">
+                <button onclick="game1.setMode('type1')" id="g1-btn-type1" class="px-3 py-1 rounded-lg text-xs font-bold bg-brand-600 text-white transition">Type 1 Bare-Metal</button>
+                <button onclick="game1.setMode('type2')" id="g1-btn-type2" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">Type 2 Hosted</button>
+                <button onclick="game1.setMode('container')" id="g1-btn-container" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">Container Engine</button>
+              </div>
+            </div>
+
+            <!-- Game Boards Grid -->
+            <div class="grid md:grid-cols-2 gap-6">
+              <!-- Target Stack (Dropzone Slots) -->
+              <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                  <div class="text-xs font-bold text-slate-400 mb-2 flex justify-between items-center">
+                    <span>Tumpukan Target (Atas ke Bawah)</span>
+                    <span id="g1-status-badge" class="text-xs text-amber-400 font-mono">Belum Selesai</span>
+                  </div>
+                  <div id="g1-slots-container" class="space-y-2">
+                    <!-- Dynamic Slots -->
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+                  <span class="text-slate-400">Skor Game 1: <strong id="g1-score" class="text-brand-400 font-mono font-bold">0 Poin</strong></span>
+                  <button onclick="game1.resetCurrent()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-medium transition">Reset Stack</button>
+                </div>
+              </div>
+
+              <!-- Component Choices Pool -->
+              <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 flex flex-col">
+                <div class="text-xs font-bold text-slate-400 mb-2">Komponen Tersedia (Klik untuk Menempatkan):</div>
+                <div id="g1-pool-container" class="grid grid-cols-1 gap-2 flex-1">
+                  <!-- Dynamic Pool Buttons -->
+                </div>
+                <div id="g1-feedback-box" class="mt-3 p-2.5 rounded-lg text-xs bg-slate-900 border border-slate-800 text-slate-300 min-h-[44px] flex items-center">
+                  Klik komponen yang tepat sesuai tingkatan dari atas ke bawah!
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 21. GAME 2 INTRO: Cloud Resource Allocator
+      {
+        id: 21,
+        category: "Game Interaktif 2",
+        title: "Tantangan Interaktif 2: Packing Challenge (VM vs Container)",
+        content: `
+          <div class="text-center py-4 space-y-4">
+            <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl mx-auto flex items-center justify-center border border-emerald-500/30">
+              <i data-lucide="sliders" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white">Mini Game 2: Cloud Resource Allocator</h2>
+            <p class="text-slate-300 max-w-xl mx-auto text-sm leading-relaxed">
+              Anda bertindak sebagai <strong>Cloud Infrastructure Architect</strong> di perusahaan e-commerce. Anda memiliki server dengan total <strong>16 GB RAM</strong> dan <strong>8 vCPU</strong>. Tugas Anda adalah mendeploy microservice pesanan sebanyak mungkin sebelum server mengalami <em>Out Of Memory (OOM Crash)</em>!
+            </p>
+            <div class="grid md:grid-cols-2 gap-4 max-w-lg mx-auto text-left text-xs">
+              <div class="p-3 bg-slate-900 border border-indigo-700/50 rounded-xl">
+                <span class="text-indigo-400 font-bold block mb-1">Jika Deploy via VM:</span>
+                Tiap instans membawa Guest OS sendiri (mengkonsumsi 2048 MB RAM + 1 vCPU overhead di luar aplikasi!).
+              </div>
+              <div class="p-3 bg-slate-900 border border-emerald-700/50 rounded-xl">
+                <span class="text-emerald-400 font-bold block mb-1">Jika Deploy via Container:</span>
+                Tiap instans hanya mengkonsumsi RAM aplikasi murni (hanya 256 MB RAM + 0.2 vCPU, shared kernel!).
+              </div>
+            </div>
+            <div class="pt-2">
+              <button onclick="app.jumpToSlide(22)" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition shadow-lg shadow-emerald-500/30">
+                Buka Simulator Resource Game 2
+              </button>
+            </div>
+          </div>
+        `
+      },
+
+      // 22. GAME 2 WORKSPACE: Simulator Resource Allocator
+      {
+        id: 22,
+        category: "Game Interaktif 2",
+        title: "Arena Game 2: Cloud Capacity Allocator",
+        content: `
+          <div id="game2-container" class="space-y-4">
+            <!-- Server Hardware Status Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs">
+              <div>
+                <div class="text-slate-400">Total Server RAM</div>
+                <div class="text-base font-bold text-white font-mono">16,384 MB</div>
+              </div>
+              <div>
+                <div class="text-slate-400">RAM Terpakai</div>
+                <div id="g2-used-ram" class="text-base font-bold text-amber-400 font-mono">0 MB (0%)</div>
+              </div>
+              <div>
+                <div class="text-slate-400">Total vCPU Capacity</div>
+                <div class="text-base font-bold text-white font-mono">8.0 Cores</div>
+              </div>
+              <div>
+                <div class="text-slate-400">vCPU Terpakai</div>
+                <div id="g2-used-cpu" class="text-base font-bold text-cyan-400 font-mono">0.0 Cores (0%)</div>
+              </div>
+            </div>
+
+            <!-- Resource Progress Bars -->
+            <div class="space-y-2 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold flex items-center gap-1.5"><i data-lucide="hard-drive" class="w-3.5 h-3.5 text-amber-400"></i> Penggunaan RAM Fisik</span>
+                  <span id="g2-ram-percent" class="font-mono text-amber-400">0%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div id="g2-ram-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold flex items-center gap-1.5"><i data-lucide="cpu" class="w-3.5 h-3.5 text-cyan-400"></i> Penggunaan CPU Cores</span>
+                  <span id="g2-cpu-percent" class="font-mono text-cyan-400">0%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div id="g2-cpu-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Controls & Deployment List -->
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- Left: Spawn Buttons -->
+              <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                <div class="text-xs font-bold text-slate-300">Deploy Beban Kerja Microservice:</div>
+                <div class="grid grid-cols-2 gap-2">
+                  <button onclick="game2.deployWorkload('vm')" class="p-3 bg-indigo-950/60 hover:bg-indigo-900 border border-indigo-700/80 rounded-xl text-left transition group">
+                    <div class="font-bold text-indigo-300 text-xs group-hover:text-white flex items-center gap-1">
+                      <i data-lucide="server" class="w-3.5 h-3.5"></i> +1 VM Instance
+                    </div>
+                    <div class="text-[10px] text-slate-400 mt-1">Guest OS + App<br>(2304 MB RAM / 1.0 vCPU)</div>
+                  </button>
+
+                  <button onclick="game2.deployWorkload('container')" class="p-3 bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-700/80 rounded-xl text-left transition group">
+                    <div class="font-bold text-emerald-300 text-xs group-hover:text-white flex items-center gap-1">
+                      <i data-lucide="container" class="w-3.5 h-3.5"></i> +1 Container
+                    </div>
+                    <div class="text-[10px] text-slate-400 mt-1">Shared Kernel + App<br>(256 MB RAM / 0.2 vCPU)</div>
+                  </button>
+                </div>
+
+                <div class="flex gap-2 pt-1">
+                  <button onclick="game2.deployBatch(5, 'container')" class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded text-xs font-medium transition">
+                    +5 Containers
+                  </button>
+                  <button onclick="game2.resetServer()" class="py-1.5 px-3 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded text-xs font-medium transition">
+                    Evict / Reset
+                  </button>
+                </div>
+
+                <div id="g2-status-alert" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300">
+                  Status: Server beroperasi normal. Coba bandingkan berapa banyak instans yang dapat ditampung!
+                </div>
+              </div>
+
+              <!-- Right: Active Instances Canvas -->
+              <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                  <div class="flex justify-between items-center text-xs font-bold mb-2">
+                    <span class="text-slate-300">Instans Ter-deploy</span>
+                    <span id="g2-instance-count" class="text-brand-400 font-mono">0 Instans</span>
+                  </div>
+                  <div id="g2-instance-grid" class="flex flex-wrap gap-1.5 max-h-44 overflow-y-auto p-1 bg-slate-900 rounded-lg border border-slate-800/80 min-h-[140px] content-start">
+                    <!-- Badges -->
+                  </div>
+                </div>
+                <div class="text-[11px] text-slate-400 mt-2">
+                  Observasi: Dengan ukuran RAM yang sama, Container memberikan densitas <strong>hingga 8-10x lipat</strong> dibanding VM penuh.
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 23. Praktik Virtualisasi CLI: Lab VirtualBox
+      {
+        id: 23,
+        category: "Praktik & Lab CLI",
+        title: "Praktik 1: Manajemen VM via VBoxManage CLI",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Administrasi VirtualBox Tanpa GUI</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Di server data center, administrator mengelola hypervisor melalui Command Line Interface (CLI). Pada VirtualBox, utilitas utamanya adalah <code class="text-brand-300 font-mono font-bold">VBoxManage</code>.
+            </p>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 space-y-3">
+              <div>
+                <span class="text-slate-500"># 1. Membuat Virtual Machine baru berbasis Ubuntu 64-bit</span>
+                <div class="text-emerald-400 font-bold">$ VBoxManage createvm --name "CloudServer-01" --ostype "Ubuntu_64" --register</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 2. Mengatur alokasi RAM 4096MB dan 2 vCPU</span>
+                <div class="text-emerald-400 font-bold">$ VBoxManage modifyvm "CloudServer-01" --memory 4096 --cpus 2 --nic1 bridged</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 3. Membuat hard disk virtual (VDI) dinamis berukuran 20GB</span>
+                <div class="text-emerald-400 font-bold">$ VBoxManage createmedium disk --filename CloudDisk.vdi --size 20480 --format VDI</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 4. Menyalakan VM dalam mode 'headless' (tanpa tampilan monitor GUI)</span>
+                <div class="text-emerald-400 font-bold">$ VBoxManage startvm "CloudServer-01" --type headless</div>
+              </div>
+            </div>
+            <div class="p-3 bg-brand-500/10 border border-brand-500/30 rounded-lg text-xs text-brand-300">
+              Mode <code>--type headless</code> sangat esensial pada server production agar tidak memboroskan resource GPU dan RAM host untuk render window.
+            </div>
+          </div>
+        `
+      },
+
+      // 24. Praktik Virtualisasi CLI: KVM virsh
+      {
+        id: 24,
+        category: "Praktik & Lab CLI",
+        title: "Praktik 2: Manajemen KVM Enterprise dengan virsh",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Linux Kernel-based Virtual Machine (KVM)</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              KVM mengubah Linux Kernel menjadi Type 1 Hypervisor. Manajemen KVM dilakukan menggunakan paket <code class="text-brand-300 font-mono font-bold">libvirt</code> dan perintah interaktif <code class="text-brand-300 font-mono font-bold">virsh</code>.
+            </p>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 space-y-3">
+              <div>
+                <span class="text-slate-500"># 1. Menampilkan daftar semua VM (Running maupun Inactive)</span>
+                <div class="text-emerald-400 font-bold">$ virsh list --all</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 2. Menjalankan domain VM bernama 'db-prod'</span>
+                <div class="text-emerald-400 font-bold">$ virsh start db-prod</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 3. Membuka sesi serial console ke dalam VM</span>
+                <div class="text-emerald-400 font-bold">$ virsh console db-prod</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 4. Membuat snapshot instan memori & disk</span>
+                <div class="text-emerald-400 font-bold">$ virsh snapshot-create-as db-prod --name "Snap-Before-Patch"</div>
+              </div>
+            </div>
+            <div class="text-xs text-slate-400 bg-slate-900 p-3 rounded-lg border border-slate-800">
+              KVM didukung secara native oleh raksasa cloud OpenStack, Red Hat Enterprise Linux, dan Google Compute Engine (GCE).
+            </div>
+          </div>
+        `
+      },
+
+      // 25. Praktik Container CLI: Docker Lifecycle
+      {
+        id: 25,
+        category: "Praktik & Lab CLI",
+        title: "Praktik 3: Siklus Hidup Container (Docker CLI)",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Mengendalikan Container dengan Docker CLI</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Perintah dasar Docker mencakup penarikan image dari Docker Hub, pembatasan cgroup sumber daya, dan port forwarding jaringan.
+            </p>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 space-y-3">
+              <div>
+                <span class="text-slate-500"># 1. Menjalankan web server Nginx di latar belakang (detached), port 80</span>
+                <div class="text-emerald-400 font-bold">$ docker run -d -p 8080:80 --name my-webserver nginx:alpine</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 2. Menjalankan container dengan limit Cgroup (RAM maks 256M, 0.5 vCPU)</span>
+                <div class="text-emerald-400 font-bold">$ docker run -d --memory="256m" --cpus="0.5" --name backend-api myapp:v1</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 3. Memantau konsumsi CPU, Memori, dan Network I/O realtime</span>
+                <div class="text-emerald-400 font-bold">$ docker stats</div>
+              </div>
+              <div>
+                <span class="text-slate-500"># 4. Masuk ke dalam terminal container</span>
+                <div class="text-emerald-400 font-bold">$ docker exec -it my-webserver sh</div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // 26. Hands-on Terminal Simulator
+      {
+        id: 26,
+        category: "Praktik & Lab CLI",
+        title: "Hands-on: Interactive Cloud Terminal Simulator",
+        content: `
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-lg font-bold text-white">Simulator Terminal Virtualisasi</h2>
+                <div class="text-xs text-slate-400">Ketik perintah KVM atau Docker (contoh: <code class="text-brand-300">help</code>, <code class="text-brand-300">docker ps</code>, <code class="text-brand-300">virsh list</code>)</div>
+              </div>
+              <button onclick="terminalSim.clear()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded text-slate-300 transition">Clear Console</button>
+            </div>
+
+            <!-- Fake Bash Window -->
+            <div class="bg-slate-950 rounded-xl border border-slate-800 p-4 font-mono text-xs flex flex-col h-72 shadow-inner">
+              <div class="flex items-center gap-1.5 pb-2 border-b border-slate-800 mb-2">
+                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                <span class="text-[10px] text-slate-500 ml-2">cloud-admin@server-node-01:~</span>
+              </div>
+              
+              <div id="sim-output" class="flex-1 overflow-y-auto space-y-1 text-slate-300">
+                <div class="text-brand-400">Selamat datang di Cloud Virtualization Interactive Sandbox!</div>
+                <div class="text-slate-500">Ketik "help" untuk melihat daftar perintah yang didukung.</div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2 border-t border-slate-800 mt-2">
+                <span class="text-emerald-400 font-bold">$</span>
+                <input id="sim-input" type="text" placeholder="Ketik perintah di sini..." class="flex-1 bg-transparent border-none outline-none text-white font-mono text-xs" onkeydown="terminalSim.handleKey(event)">
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="text-slate-400">Saran Cepat:</span>
+              <button onclick="terminalSim.runCmd('docker run nginx')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-brand-300 rounded text-[11px]">docker run nginx</button>
+              <button onclick="terminalSim.runCmd('docker ps')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-brand-300 rounded text-[11px]">docker ps</button>
+              <button onclick="terminalSim.runCmd('virsh list')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded text-[11px]">virsh list</button>
+              <button onclick="terminalSim.runCmd('free -m')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded text-[11px]">free -m</button>
+            </div>
+          </div>
+        `
+      },
+
+      // 27. Keamanan Virtualisasi (Vulnerabilities & Hardening)
+      {
+        id: 27,
+        category: "Keamanan Virtualisasi",
+        title: "Aspek Keamanan: VM Escape vs Container Breakout",
+        content: `
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <h2 class="text-2xl font-bold text-white">Vektor Serangan Virtualisasi</h2>
+              <p class="text-sm text-slate-300 leading-relaxed">
+                Meskipun dirancang untuk isolasi, kerentanan pada kode Hypervisor atau Kernel dapat memicu kebocoran sistem tingkat bahaya kritis:
+              </p>
+              <div class="space-y-3 text-xs">
+                <div class="p-3 bg-slate-900 border border-rose-900/50 rounded-xl">
+                  <div class="text-rose-400 font-bold mb-1 flex items-center gap-1.5">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> VM Escape (Hypervisor Escape)
+                  </div>
+                  <p class="text-slate-300">
+                    Kondisi saat kode berbahaya di dalam Guest OS berhasil menembus batasan hypervisor dan mengeksekusi kode langsung di OS Host atau hypervisor level. (Contoh terkenal: Kerentanan VENOM di floppy driver QEMU).
+                  </p>
+                </div>
+                <div class="p-3 bg-slate-900 border border-amber-900/50 rounded-xl">
+                  <div class="text-amber-400 font-bold mb-1 flex items-center gap-1.5">
+                    <i data-lucide="unlock" class="w-4 h-4"></i> Container Breakout
+                  </div>
+                  <p class="text-slate-300">
+                    Terjadi karena container berjalan dengan mode <code>--privileged</code> atau kernel host memiliki bug eksploitasi privilege escalation (contoh: Dirty COW), memungkinkan penyerang mengambil alih root host.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3">
+              <div class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                Best Practices Hardening
+              </div>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>Rootless Containers:</strong> Jalankan daemon container tanpa user root host (Podman / Docker Rootless).</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>Seccomp & AppArmor/SELinux:</strong> Batasi syscall kernel berbahaya yang bisa dipanggil container.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5"></i>
+                  <span><strong>MicroVMs (Kata Containers / Firecracker):</strong> Gabungkan container dengan hypervisor mikro secepat 5ms untuk isolasi hardware per-pod.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+
+      // 28. Inovasi Cloud Modern: MicroVMs (AWS Firecracker & Kata)
+      {
+        id: 28,
+        category: "Tren Terkini",
+        title: "Tren Masa Depan: MicroVM (AWS Firecracker)",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Evolusi Lanjutan: Lahirnya MicroVM</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Bagaimana jika kita bisa memiliki <strong>keamanan baja Hypervisor VM</strong> sekaligus <strong>kecepatan startup 5 milidetik Container</strong>? Itulah yang diwujudkan oleh teknologi <strong>MicroVM</strong> (seperti <em>AWS Firecracker</em> pada AWS Lambda dan Fargate).
+            </p>
+            <div class="grid md:grid-cols-3 gap-3">
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-center">
+                <div class="text-2xl font-bold text-emerald-400 font-mono mb-1">< 5 ms</div>
+                <div class="text-xs font-bold text-white mb-1">Boot Time Kilat</div>
+                <p class="text-[11px] text-slate-400">Menghidupkan VM terisolasi secepat container proses Linux biasa.</p>
+              </div>
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-center">
+                <div class="text-2xl font-bold text-indigo-400 font-mono mb-1">< 5 MB</div>
+                <div class="text-xs font-bold text-white mb-1">Memory Footprint Minimal</div>
+                <p class="text-[11px] text-slate-400">Menghilangkan seluruh driver hardware purba (Floppy, ACPI legacy, IDE bus).</p>
+              </div>
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-center">
+                <div class="text-2xl font-bold text-purple-400 font-mono mb-1">KVM-Based</div>
+                <div class="text-xs font-bold text-white mb-1">Isolasi Hardware Hakiki</div>
+                <p class="text-[11px] text-slate-400">Setiap fungsi serverless berjalan di kernel terpisah secara fisik aman.</p>
+              </div>
+            </div>
+            <div class="p-3 bg-slate-800/40 rounded-xl text-xs text-slate-400">
+              MicroVM membuktikan bahwa batas antara VM konvensional yang berat dan container yang ringan kini semakin menyatu dalam inovasi Cloud-Native modern.
+            </div>
+          </div>
+        `
+      },
+
+      // 29. Rangkuman Materi Pembelajaran
+      {
+        id: 29,
+        category: "Rangkuman",
+        title: "Rangkuman Komprehensif Kuliah Virtualisasi",
+        content: `
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-white">Poin-Poin Kunci yang Harus Diingat</h2>
+            <div class="grid md:grid-cols-2 gap-4 text-xs">
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+                <div class="text-brand-400 font-bold text-sm">Hypervisor & Virtual Machine</div>
+                <ul class="space-y-1.5 text-slate-300">
+                  <li>• <strong>Type 1 (Bare-Metal):</strong> Berjalan langsung di hardware, efisiensi tinggi, standar pusat data cloud provider (ESXi, KVM).</li>
+                  <li>• <strong>Type 2 (Hosted):</strong> Berjalan di atas OS host, mudah untuk belajar di desktop (VirtualBox).</li>
+                  <li>• <strong>VM:</strong> Menyediakan abstraksi hardware menyeluruh dengan Guest OS lengkap dan isolasi tingkat tinggi.</li>
+                </ul>
+              </div>
+
+              <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
+                <div class="text-emerald-400 font-bold text-sm">Containerization (Docker Engine)</div>
+                <ul class="space-y-1.5 text-slate-300">
+                  <li>• <strong>Shared Kernel:</strong> Memanfaatkan 1 kernel Linux host bersama seluruh container tanpa emulasi hardware.</li>
+                  <li>• <strong>Pondasi:</strong> <em>Namespaces</em> (isolasi lingkungan) dan <em>Cgroups</em> (pembatasan pemakaian resource).</li>
+                  <li>• <strong>Karakteristik:</strong> Booting sub-detik, image ringan (MB), sangat ideal untuk microservices dan CI/CD.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="p-4 bg-brand-500/10 border border-brand-500/30 rounded-xl text-xs text-center text-brand-200">
+              Setelah memahami teori, simulasi arsitektur, dan hands-on terminal, langkah selanjutnya adalah <strong>Uji Kompetensi Evaluasi Akhir (20 Soal)</strong> untuk mengukur pemahaman Anda.
+            </div>
+          </div>
+        `
+      },
+
+      // 30. Petunjuk Evaluasi Akhir
+      {
+        id: 30,
+        category: "Evaluasi",
+        title: "Petunjuk Pengerjaan Evaluasi Akhir (20 Soal)",
+        content: `
+          <div class="max-w-2xl mx-auto text-center py-4 space-y-5">
+            <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl mx-auto flex items-center justify-center border border-emerald-500/30">
+              <i data-lucide="clipboard-check" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white">Evaluasi Mandiri Mahasiswa</h2>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Uji kompetensi terdiri dari <strong>20 butir soal pilihan ganda</strong> yang mencakup seluruh konsep Hypervisor Type 1 & 2, arsitektur kernel, virtualisasi vs container, aspek keamanan, serta CLI toolings.
+            </p>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-left text-xs space-y-2 text-slate-300">
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                <span>Tiap jawaban benar bernilai <strong>5 poin</strong> (Total nilai maksimal: <strong>100</strong>).</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                <span>Batas nilai kelulusan kompetensi (Passing Grade): <strong>70 poin</strong>.</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                <span>Di akhir pengerjaan, Anda dapat meninjau kunci jawaban, analisis pembahasan lengkap, dan mencetak lembar nilai.</span>
+              </div>
+            </div>
+            <div class="pt-2">
+              <button onclick="app.jumpToSlide(31)" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition shadow-xl shadow-emerald-500/25 flex items-center gap-2 mx-auto">
+                <span>Buka Lembar Evaluasi (20 Soal)</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `
+      },
+
+      // 31. SOAL EVALUASI 20 NOMOR
+      {
+        id: 31,
+        category: "Evaluasi",
+        title: "Uji Evaluasi: 20 Soal Pilihan Ganda",
+        content: `
+          <div id="quiz-app-container" class="space-y-6">
+            <!-- Header Status Kuis -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <div>
+                <div class="text-xs text-slate-400">Kemajuan Menjawab:</div>
+                <div class="text-sm font-bold text-white font-mono">
+                  <span id="quiz-answered-count">0</span> dari 20 Soal Terjawab
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="quizManager.resetQuiz()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg text-slate-300 transition">Reset Jawaban</button>
+                <button onclick="quizManager.submitAll()" id="btn-submit-quiz" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white transition shadow-sm">
+                  Kirim & Nilai Sekarang
+                </button>
+              </div>
+            </div>
+
+            <!-- List 20 Soal Container -->
+            <div id="quiz-questions-wrapper" class="space-y-4 max-h-[58vh] overflow-y-auto pr-2">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        `
+      },
+
+      // 32. HASIL EVALUASI & SERTIFIKAT
+      {
+        id: 32,
+        category: "Evaluasi",
+        title: "Laporan Hasil Evaluasi & Sertifikat Kelulusan",
+        content: `
+          <div id="quiz-result-view" class="space-y-6">
+            <!-- Belum dikerjakan warning -->
+            <div id="result-placeholder" class="text-center py-12">
+              <i data-lucide="file-question" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+              <h3 class="text-lg font-bold text-slate-400">Hasil Evaluasi Belum Tersedia</h3>
+              <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">Silakan kembali ke Slide 31 dan klik tombol "Kirim & Nilai Sekarang" setelah menjawab 20 butir soal.</p>
+              <button onclick="app.jumpToSlide(31)" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-xs font-semibold rounded-lg text-white transition">Menuju Soal Evaluasi</button>
+            </div>
+
+            <!-- Kartu Hasil Lengkap (Hidden by default) -->
+            <div id="result-card" class="hidden space-y-6">
+              <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-700/80 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                  <div>
+                    <span class="text-xs font-bold text-brand-400 uppercase tracking-wider">Hasil Uji Kompetensi Cloud Computing</span>
+                    <h2 class="text-2xl font-extrabold text-white">Transkrip Nilai Mandiri</h2>
+                    <div class="text-xs text-slate-400">Dosen Pengampu: Dede Mulyana, S.T.</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xs text-slate-400">Skor Akhir</div>
+                    <div id="final-score-val" class="text-4xl font-extrabold text-emerald-400 font-mono">0 / 100</div>
+                  </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4 my-6">
+                  <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/60">
+                    <div class="text-xs text-slate-400">Status Kelulusan</div>
+                    <div id="final-status-text" class="text-lg font-bold text-emerald-400">LULUS KOMPETENSI</div>
+                  </div>
+                  <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/60">
+                    <div class="text-xs text-slate-400">Jawaban Benar / Salah</div>
+                    <div id="final-stats-text" class="text-lg font-bold text-white font-mono">0 Benar • 0 Salah</div>
+                  </div>
+                  <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/60">
+                    <div class="text-xs text-slate-400">Predikat Akademik</div>
+                    <div id="final-grade-text" class="text-lg font-bold text-brand-400">A (Istimewa)</div>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 justify-end pt-2">
+                  <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition flex items-center gap-1.5">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Simpan PDF
+                  </button>
+                  <button onclick="quizManager.showReviewModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1.5">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Lihat Pembahasan Lengkap
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // --- EVALUATION QUESTIONS BANK (20 QUESTIONS) ---
+    const quizQuestions = [
+      {
+        id: 1,
+        question: "Hypervisor yang diinstal langsung di atas perangkat keras server fisik tanpa sistem operasi perantara disebut sebagai...",
+        options: ["Type 1 (Bare-Metal)", "Type 2 (Hosted)", "Type 3 (Emulated)", "Container Engine"],
+        answer: 0,
+        explanation: "Hypervisor Type 1 berjalan langsung di atas physical hardware tanpa membutuhkan host OS konvensional."
+      },
+      {
+        id: 2,
+        question: "Manakah dari teknologi berikut yang merupakan contoh Hypervisor Type 2 (Hosted)?",
+        options: ["VMware ESXi", "Oracle VM VirtualBox", "Linux KVM Bare-Metal", "Citrix XenServer"],
+        answer: 1,
+        explanation: "VirtualBox berjalan sebagai software aplikasi biasa di atas sistem operasi host seperti Windows, Mac, atau Linux desktop."
+      },
+      {
+        id: 3,
+        question: "Fitur Linux Kernel yang bertugas membatasi dan mengisolasi pandangan proses terhadap PID, Network, dan Mount filesystem adalah...",
+        options: ["Control Groups (Cgroups)", "Linux Namespaces", "Hyperthreading", "Seccomp BPF"],
+        answer: 1,
+        explanation: "Namespaces membatasi apa yang dapat 'dilihat' oleh sebuah proses container (isolasi ruang kerja)."
+      },
+      {
+        id: 4,
+        question: "Komponen Linux Kernel yang membatasi jumlah maksimum penggunaan RAM dan jatah CPU pada Container disebut...",
+        options: ["Cgroups (Control Groups)", "Swap Memory", "Hyper-V Scheduler", "VFS (Virtual File System)"],
+        answer: 0,
+        explanation: "Cgroups berfungsi mengatur dan membatasi kuota sumber daya fisik (RAM, CPU, I/O) yang boleh digunakan proses."
+      },
+      {
+        id: 5,
+        question: "Perbedaan arsitektural paling mendasar antara Virtual Machine (VM) dan Container adalah...",
+        options: [
+          "VM tidak membutuhkan CPU, Container butuh CPU",
+          "VM menjalankan Guest OS mandiri, Container berbagi Kernel dengan Host",
+          "Container hanya bisa dijalankan di atas Windows",
+          "VM selalu lebih cepat waktu boot-nya daripada Container"
+        ],
+        answer: 1,
+        explanation: "VM mengemulasi hardware dan membawa kernel OS sendiri, sedangkan container memanfaatkan shared kernel OS host."
+      },
+      {
+        id: 6,
+        question: "Instruksi akselerasi hardware pada CPU modern Intel untuk mendukung virtualisasi efisien dinamakan...",
+        options: ["Intel VT-x", "AMD-V", "CUDA Core", "Intel QuickPath"],
+        answer: 0,
+        explanation: "Intel VT-x (Virtualization Technology) adalah set ekstensi prosesor Intel x86 untuk akselerasi virtualisasi hardware."
+      },
+      {
+        id: 7,
+        question: "Pada Virtual Machine, kondisi ketika kode berbahaya di dalam Guest OS berhasil menembus batasan hypervisor dan mengeksekusi kode di host disebut...",
+        options: ["Container Breakout", "VM Escape", "SQL Injection", "Kernel Panic"],
+        answer: 1,
+        explanation: "VM Escape adalah jenis serangan kritis di mana penyerang keluar dari batas isolasi mesin virtual menuju hypervisor/host."
+      },
+      {
+        id: 8,
+        question: "Format file citra disk virtual bawaan yang sangat umum digunakan pada lingkungan KVM (Kernel-based Virtual Machine) adalah...",
+        options: [".qcow2", ".vmdk", ".iso", ".vdi"],
+        answer: 0,
+        explanation: ".qcow2 (QEMU Copy-On-Write v2) adalah format disk virtual utama untuk KVM."
+      },
+      {
+        id: 9,
+        question: "Perintah CLI VirtualBox yang digunakan untuk menyalakan mesin virtual tanpa antarmuka grafis (headless) adalah...",
+        options: [
+          "VBoxManage startvm <name> --type headless",
+          "virtualbox --gui-off <name>",
+          "vbox-cli boot <name> -silent",
+          "systemctl enable vbox"
+        ],
+        answer: 0,
+        explanation: "Opsi '--type headless' pada VBoxManage menjalankan mesin virtual di latar belakang tanpa membuka jendela GUI."
+      },
+      {
+        id: 10,
+        question: "Dalam ekosistem KVM Linux, utilitas command line utama untuk mengelola siklus hidup domain VM adalah...",
+        options: ["virsh", "docker", "kubectl", "systemd-nspawn"],
+        answer: 0,
+        explanation: "virsh adalah antarmuka manajemen berbasis CLI standar untuk libvirt/KVM."
+      },
+      {
+        id: 11,
+        question: "Mengapa ukuran citra (image size) Container jauh lebih kecil (Megabytes) dibandingkan dengan citra VM (Gigabytes)?",
+        options: [
+          "Karena image container tidak menyertakan kernel sistem operasi utuh",
+          "Karena container tidak memiliki kode aplikasi",
+          "Karena container selalu dikompresi dengan ZIP berkecepatan tinggi",
+          "Karena container tidak membutuhkan memori RAM"
+        ],
+        answer: 0,
+        explanation: "Container hanya berisi binari aplikasi dan userland libraries, tidak mengemas kernel OS yang memakan gigabytes."
+      },
+      {
+        id: 12,
+        question: "Kelemahan utama arsitektur Hypervisor Type 2 jika digunakan pada server cloud production adalah...",
+        options: [
+          "Double latency overhead karena melewati perantara Host OS sebelum ke hardware",
+          "Tidak bisa diinstal di komputer desktop",
+          "Hanya bisa menjalankan sistem operasi Linux",
+          "Membutuhkan perangkat keras server khusus dari vendor tertentu"
+        ],
+        answer: 0,
+        explanation: "Type 2 mengalami overhead ganda karena setiap syscall diterjemahkan oleh Hypervisor lalu diproses lagi oleh Host OS."
+      },
+      {
+        id: 13,
+        question: "Teknologi 'MicroVM' modern yang dikembangkan AWS untuk menjalankan beban kerja serverless (Lambda/Fargate) dengan startup milidetik bernama...",
+        options: ["AWS Firecracker", "AWS Xen Classic", "VMware ESXi Mini", "QEMU Heavy"],
+        answer: 0,
+        explanation: "Firecracker adalah Virtual Machine Monitor minimalis berbasis KVM yang dibuat oleh Amazon Web Services."
+      },
+      {
+        id: 14,
+        question: "Perintah Docker CLI untuk membatasi konsumsi memori maksimum sebuah container menjadi 512 Megabyte adalah...",
+        options: [
+          "docker run --memory=\"512m\" <image>",
+          "docker run --ram-cap=512 <image>",
+          "docker limit --mem 512 <image>",
+          "docker cgroup mem=512 <image>"
+        ],
+        answer: 0,
+        explanation: "Flag '--memory' atau '-m' digunakan oleh Docker Engine untuk menerapkan batas alokasi cgroup memori."
+      },
+      {
+        id: 15,
+        question: "Keunggulan utama Virtual Machine dibandingkan Container murni dalam hal keamanan multi-tenancy adalah...",
+        options: [
+          "Isolasi berbasis hardware boundaries yang jauh lebih kokoh karena tidak berbagi kernel",
+          "VM tidak memerlukan password login",
+          "VM kebal terhadap segala bentuk serangan jaringan DDoS",
+          "VM tidak pernah menggunakan port jaringan"
+        ],
+        answer: 0,
+        explanation: "Isolasi hardware boundary VM memastikan kerentanan kernel pada satu VM tidak berdampak langsung ke VM tetangga."
+      },
+      {
+        id: 16,
+        question: "Apa fungsi dari Second Level Address Translation (SLAT) seperti Intel EPT dalam virtualisasi?",
+        options: [
+          "Mengurangi overhead CPU dalam memetakan virtual memory guest ke physical memory host",
+          "Menerjemahkan bahasa pemrograman Java ke C++",
+          "Mengenkripsi koneksi SSH administrator",
+          "Mempercepat waktu download ISO image"
+        ],
+        answer: 0,
+        explanation: "SLAT mengotomatisasi pemetaan alamat memori virtual Guest OS ke RAM fisik hardware secara hardware."
+      },
+      {
+        id: 17,
+        question: "Jika sebuah container melebihi batas alokasi memori Cgroup yang telah ditetapkan, mekanisme Linux yang akan mematikan proses tersebut adalah...",
+        options: ["OOM Killer (Out-Of-Memory Killer)", "Kernel Panic Daemon", "Garbage Collector", "Hypervisor Watchdog"],
+        answer: 0,
+        explanation: "Linux Out-Of-Memory (OOM) Killer akan menembak proses container yang melanggar batas alokasi cgroup memory."
+      },
+      {
+        id: 18,
+        question: "Dalam arsitektur Cloud Computing publik modern (seperti Kubernetes Managed Service), pendekatan yang paling umum digunakan adalah...",
+        options: [
+          "Menjalankan Container di dalam Virtual Machine (Worker Node)",
+          "Hanya menggunakan VM tanpa container sama sekali",
+          "Hanya menggunakan Container tanpa server fisik",
+          "Menghapus peran hypervisor dari data center"
+        ],
+        answer: 0,
+        explanation: "Kubernetes menjalankan pod container di dalam virtual machine untuk memperoleh elastisitas sekaligus proteksi isolasi antar-node."
+      },
+      {
+        id: 19,
+        question: "Manakah perintah Docker yang digunakan untuk memantau penggunaan CPU, Memory, dan Network I/O dari container secara realtime?",
+        options: ["docker stats", "docker top", "docker inspect", "docker monitor"],
+        answer: 0,
+        explanation: "Perintah 'docker stats' menampilkan live stream metrik penggunaan resource dari semua container yang sedang aktif."
+      },
+      {
+        id: 20,
+        question: "Teorema Popek-Goldberg (1974) menetapkan bahwa sebuah arsitektur komputer dapat divirtualisasikan secara efisien jika seluruh instruksi sensitif adalah himpunan bagian dari...",
+        options: ["Privileged instructions", "Ring 3 user instructions", "Floating point operations", "Network packet headers"],
+        answer: 0,
+        explanation: "Popek-Goldberg mensyaratkan semua instruksi sensitif harus privileged agar dapat di-trap oleh Hypervisor."
+      }
+    ];
+
+    // --- GAME 1 DATA & LOGIC: ARCHITECTURE BUILDER ---
+    const game1 = {
+      currentMode: 'type1',
+      stacks: {
+        type1: {
+          title: "Hypervisor Type 1 (Bare-Metal)",
+          correctOrder: ["app", "guest_os", "hypervisor_type1", "hardware"],
+          slotsCount: 4
+        },
+        type2: {
+          title: "Hypervisor Type 2 (Hosted)",
+          correctOrder: ["app", "guest_os", "hypervisor_type2", "host_os", "hardware"],
+          slotsCount: 5
+        },
+        container: {
+          title: "Container Engine Architecture",
+          correctOrder: ["app", "container_engine", "host_os", "hardware"],
+          slotsCount: 4
+        }
+      },
+      componentsPool: [
+        { id: "app", label: "Applications & Binaries", color: "bg-blue-600/30 border-blue-500 text-blue-300", icon: "box" },
+        { id: "guest_os", label: "Guest Operating System (Kernel + Init)", color: "bg-indigo-600/30 border-indigo-500 text-indigo-300", icon: "monitor" },
+        { id: "hypervisor_type1", label: "Hypervisor Type 1 (Bare-Metal / ESXi)", color: "bg-emerald-600/40 border-emerald-500 text-emerald-300", icon: "layers" },
+        { id: "hypervisor_type2", label: "Hypervisor Type 2 (VirtualBox / Hosted)", color: "bg-amber-600/40 border-amber-500 text-amber-300", icon: "layers" },
+        { id: "host_os", label: "Host Operating System (Windows / Ubuntu)", color: "bg-purple-600/30 border-purple-500 text-purple-300", icon: "terminal" },
+        { id: "container_engine", label: "Container Engine (Docker / containerd)", color: "bg-cyan-600/40 border-cyan-500 text-cyan-300", icon: "container" },
+        { id: "hardware", label: "Physical Hardware (CPU, RAM, NIC, SSD)", color: "bg-slate-700/60 border-slate-500 text-slate-200", icon: "cpu" }
+      ],
+      userStack: [],
+      score: 0,
+
+      init() {
+        this.setMode('type1');
+      },
+
+      setMode(mode) {
+        this.currentMode = mode;
+        this.userStack = [];
+        // Update tabs styling
+        ['type1', 'type2', 'container'].forEach(m => {
+          const btn = document.getElementById(`g1-btn-${m}`);
+          if (btn) {
+            if (m === mode) {
+              btn.className = "px-3 py-1 rounded-lg text-xs font-bold bg-brand-600 text-white transition";
+            } else {
+              btn.className = "px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition";
+            }
+          }
+        });
+        this.renderSlots();
+        this.renderPool();
+        this.updateFeedback("Silakan pilih komponen dari urutan tumpukan paling ATAS menuju BAWAH.", "info");
+      },
+
+      renderSlots() {
+        const container = document.getElementById('g1-slots-container');
+        if (!container) return;
+        const target = this.stacks[this.currentMode];
+        container.innerHTML = '';
+
+        for (let i = 0; i < target.slotsCount; i++) {
+          const slotItem = this.userStack[i];
+          const div = document.createElement('div');
+          
+          if (slotItem) {
+            const comp = this.componentsPool.find(c => c.id === slotItem);
+            div.className = `p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-between ${comp.color} animate-pulse-once`;
+            div.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-slate-900/60 flex items-center justify-center text-[10px] font-mono text-white">${i + 1}</span>
+                <span>${comp.label}</span>
+              </div>
+              <button onclick="game1.removeSlot(${i})" class="text-slate-400 hover:text-white p-1" title="Hapus"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            `;
+          } else {
+            div.className = "p-2.5 rounded-lg border border-dashed border-slate-700 text-xs text-slate-500 flex items-center justify-center gap-2 bg-slate-900/40";
+            div.innerHTML = `<span class="w-5 h-5 rounded-full border border-slate-700 flex items-center justify-center text-[10px] font-mono">${i + 1}</span> <span>Slot Kosong (Lapisan ${i + 1})</span>`;
+          }
+          container.appendChild(div);
+        }
+        lucide.createIcons();
+      },
+
+      renderPool() {
+        const poolEl = document.getElementById('g1-pool-container');
+        if (!poolEl) return;
+        poolEl.innerHTML = '';
+
+        this.componentsPool.forEach(comp => {
+          const btn = document.createElement('button');
+          btn.className = `p-2.5 rounded-lg border text-left text-xs font-semibold transition flex items-center gap-2 bg-slate-900 border-slate-800 hover:border-brand-500/80 text-slate-200 hover:bg-slate-800`;
+          btn.innerHTML = `<i data-lucide="${comp.icon}" class="w-4 h-4 text-brand-400"></i> <span class="flex-1">${comp.label}</span>`;
+          btn.onclick = () => this.placeComponent(comp.id);
+          poolEl.appendChild(btn);
+        });
+        lucide.createIcons();
+      },
+
+      placeComponent(compId) {
+        const target = this.stacks[this.currentMode];
+        if (this.userStack.length >= target.slotsCount) {
+          this.updateFeedback("Seluruh slot sudah terisi! Klik Reset jika ingin mengulang.", "warning");
+          return;
+        }
+
+        this.userStack.push(compId);
+        SoundFx.play('click');
+        this.renderSlots();
+
+        if (this.userStack.length === target.slotsCount) {
+          this.validateStack();
+        }
+      },
+
+      removeSlot(index) {
+        this.userStack.splice(index, 1);
+        SoundFx.play('click');
+        this.renderSlots();
+        const badge = document.getElementById('g1-status-badge');
+        if (badge) {
+          badge.textContent = "Belum Selesai";
+          badge.className = "text-xs text-amber-400 font-mono";
+        }
+      },
+
+      resetCurrent() {
+        this.userStack = [];
+        this.renderSlots();
+        this.updateFeedback("Tumpukan di-reset. Coba susun kembali dari atas ke bawah.", "info");
+        const badge = document.getElementById('g1-status-badge');
+        if (badge) {
+          badge.textContent = "Belum Selesai";
+          badge.className = "text-xs text-amber-400 font-mono";
+        }
+      },
+
+      validateStack() {
+        const target = this.stacks[this.currentMode];
+        const isMatch = target.correctOrder.every((val, idx) => val === this.userStack[idx]);
+
+        const badge = document.getElementById('g1-status-badge');
+        if (isMatch) {
+          SoundFx.play('success');
+          this.score += 50;
+          document.getElementById('g1-score').textContent = `${this.score} Poin`;
+          if (badge) {
+            badge.textContent = "✓ TEPAT 100%";
+            badge.className = "text-xs text-emerald-400 font-bold font-mono";
+          }
+          this.updateFeedback(`Luar biasa! Susunan arsitektur ${target.title} berhasil dirakit dengan akurat! (+50 Poin)`, "success");
+        } else {
+          SoundFx.play('error');
+          if (badge) {
+            badge.textContent = "✗ SALAH URUTAN";
+            badge.className = "text-xs text-rose-400 font-bold font-mono";
+          }
+          this.updateFeedback("Urutan komponen masih keliru. Ingat: Hardware selalu di tumpukan paling bawah, App di tumpukan paling atas!", "error");
+        }
+      },
+
+      updateFeedback(msg, type) {
+        const box = document.getElementById('g1-feedback-box');
+        if (!box) return;
+        box.textContent = msg;
+        if (type === 'success') {
+          box.className = "mt-3 p-2.5 rounded-lg text-xs bg-emerald-950/60 border border-emerald-700 text-emerald-300";
+        } else if (type === 'error') {
+          box.className = "mt-3 p-2.5 rounded-lg text-xs bg-rose-950/60 border border-rose-700 text-rose-300";
+        } else if (type === 'warning') {
+          box.className = "mt-3 p-2.5 rounded-lg text-xs bg-amber-950/60 border border-amber-700 text-amber-300";
+        } else {
+          box.className = "mt-3 p-2.5 rounded-lg text-xs bg-slate-900 border border-slate-800 text-slate-300";
+        }
+      }
+    };
+
+    // --- GAME 2 DATA & LOGIC: RESOURCE ALLOCATOR SIMULATOR ---
+    const game2 = {
+      serverMaxRam: 16384, // 16 GB in MB
+      serverMaxCpu: 8.0,    // 8 vCPU Cores
+      usedRam: 0,
+      usedCpu: 0,
+      instances: [],
+
+      // Profiles
+      workloads: {
+        vm: {
+          name: "Virtual Machine",
+          ram: 2304, // 2048 MB Guest OS overhead + 256 MB App
+          cpu: 1.0,
+          color: "bg-indigo-900/60 border-indigo-500 text-indigo-300",
+          icon: "server"
+        },
+        container: {
+          name: "Docker Container",
+          ram: 256,  // Zero Guest OS overhead, pure app
+          cpu: 0.2,
+          color: "bg-emerald-900/60 border-emerald-500 text-emerald-300",
+          icon: "container"
+        }
+      },
+
+      deployWorkload(type) {
+        const spec = this.workloads[type];
+        if (this.usedRam + spec.ram > this.serverMaxRam || this.usedCpu + spec.cpu > this.serverMaxCpu) {
+          SoundFx.play('error');
+          this.triggerOOM(type);
+          return;
+        }
+
+        this.usedRam += spec.ram;
+        this.usedCpu = Math.round((this.usedCpu + spec.cpu) * 10) / 10;
+        this.instances.push({ type, id: Date.now() + Math.random() });
+        SoundFx.play('click');
+        this.updateView();
+      },
+
+      deployBatch(count, type) {
+        for (let i = 0; i < count; i++) {
+          const spec = this.workloads[type];
+          if (this.usedRam + spec.ram > this.serverMaxRam || this.usedCpu + spec.cpu > this.serverMaxCpu) {
+            SoundFx.play('error');
+            this.triggerOOM(type);
+            break;
+          }
+          this.usedRam += spec.ram;
+          this.usedCpu = Math.round((this.usedCpu + spec.cpu) * 10) / 10;
+          this.instances.push({ type, id: Date.now() + Math.random() });
+        }
+        SoundFx.play('click');
+        this.updateView();
+      },
+
+      triggerOOM(attemptedType) {
+        const alertBox = document.getElementById('g2-status-alert');
+        if (alertBox) {
+          alertBox.className = "p-2.5 bg-rose-950/70 border border-rose-600 rounded-lg text-xs text-rose-200 animate-bounce";
+          alertBox.innerHTML = `<strong>CRASH OOM (Out Of Memory)!</strong> Server kehabisan kapasitas untuk menambah ${attemptedType.toUpperCase()}. Lakukan Reset atau kurangi beban!`;
+        }
+      },
+
+      resetServer() {
+        this.usedRam = 0;
+        this.usedCpu = 0;
+        this.instances = [];
+        SoundFx.play('click');
+        const alertBox = document.getElementById('g2-status-alert');
+        if (alertBox) {
+          alertBox.className = "p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300";
+          alertBox.textContent = "Status: Server di-reset ke kondisi awal kosong. Siap alokasi!";
+        }
+        this.updateView();
+      },
+
+      updateView() {
+        const ramPct = Math.min(100, Math.round((this.usedRam / this.serverMaxRam) * 100));
+        const cpuPct = Math.min(100, Math.round((this.usedCpu / this.serverMaxCpu) * 100));
+
+        // Update Text
+        const ramTxt = document.getElementById('g2-used-ram');
+        const cpuTxt = document.getElementById('g2-used-cpu');
+        const ramPctTxt = document.getElementById('g2-ram-percent');
+        const cpuPctTxt = document.getElementById('g2-cpu-percent');
+        const ramBar = document.getElementById('g2-ram-bar');
+        const cpuBar = document.getElementById('g2-cpu-bar');
+        const instCount = document.getElementById('g2-instance-count');
+
+        if (ramTxt) ramTxt.textContent = `${this.usedRam.toLocaleString()} MB (${ramPct}%)`;
+        if (cpuTxt) cpuTxt.textContent = `${this.usedCpu.toFixed(1)} Cores (${cpuPct}%)`;
+        if (ramPctTxt) ramPctTxt.textContent = `${ramPct}%`;
+        if (cpuPctTxt) cpuPctTxt.textContent = `${cpuPct}%`;
+
+        if (ramBar) {
+          ramBar.style.width = `${ramPct}%`;
+          ramBar.className = ramPct > 85 ? 'bg-rose-500 h-full transition-all' : (ramPct > 60 ? 'bg-amber-500 h-full transition-all' : 'bg-emerald-500 h-full transition-all');
+        }
+        if (cpuBar) {
+          cpuBar.style.width = `${cpuPct}%`;
+          cpuBar.className = cpuPct > 85 ? 'bg-rose-500 h-full transition-all' : 'bg-cyan-500 h-full transition-all';
+        }
+
+        if (instCount) instCount.textContent = `${this.instances.length} Instans Aktif`;
+
+        // Render Badges
+        const grid = document.getElementById('g2-instance-grid');
+        if (grid) {
+          grid.innerHTML = '';
+          this.instances.forEach((inst, i) => {
+            const spec = this.workloads[inst.type];
+            const span = document.createElement('span');
+            span.className = `px-2 py-0.5 rounded text-[10px] font-mono border flex items-center gap-1 ${spec.color}`;
+            span.innerHTML = `<i data-lucide="${spec.icon}" class="w-2.5 h-2.5"></i> ${inst.type === 'vm' ? 'VM' : 'CTR'} #${i+1}`;
+            grid.appendChild(span);
+          });
+          lucide.createIcons();
+        }
+      }
+    };
+
+    // --- TERMINAL SIMULATOR LOGIC ---
+    const terminalSim = {
+      history: [],
+      containers: [],
+      vms: [
+        { name: "db-master", state: "running", mem: "2048MB" },
+        { name: "backup-node", state: "shut off", mem: "1024MB" }
+      ],
+
+      handleKey(e) {
+        if (e.key === 'Enter') {
+          const input = e.target.value.trim();
+          if (input) {
+            this.runCmd(input);
+            e.target.value = '';
+          }
+        }
+      },
+
+      runCmd(cmdText) {
+        SoundFx.play('click');
+        const output = document.getElementById('sim-output');
+        if (!output) return;
+
+        const cmdLine = document.createElement('div');
+        cmdLine.className = "text-emerald-400 font-bold";
+        cmdLine.textContent = `$ ${cmdText}`;
+        output.appendChild(cmdLine);
+
+        const resLine = document.createElement('div');
+        resLine.className = "text-slate-300 pl-2 border-l border-slate-800 text-[11px] leading-relaxed";
+
+        const lower = cmdText.toLowerCase().trim();
+
+        if (lower === 'help') {
+          resLine.innerHTML = `
+            Perintah yang didukung di simulator ini:<br>
+            • <strong class="text-brand-300">docker run &lt;app&gt;</strong> : Menjalankan container baru<br>
+            • <strong class="text-brand-300">docker ps</strong> : Melihat container yang sedang berjalan<br>
+            • <strong class="text-indigo-300">virsh list</strong> : Melihat daftar Virtual Machine KVM<br>
+            • <strong class="text-indigo-300">virsh start &lt;name&gt;</strong> : Menyalakan VM<br>
+            • <strong class="text-emerald-300">free -m</strong> : Cek konsumsi memori sistem<br>
+            • <strong class="text-slate-400">clear</strong> : Membersihkan layar terminal
+          `;
+        } else if (lower.startsWith('docker run')) {
+          const appName = lower.replace('docker run', '').trim() || 'web-app';
+          const containerId = Math.random().toString(36).substring(2, 10);
+          this.containers.push({ id: containerId, image: appName, status: "Up 2 seconds" });
+          resLine.innerHTML = `<span class="text-emerald-400">Container started successfully!</span><br>Container ID: ${containerId} | Image: ${appName} (Status: Healthy)`;
+        } else if (lower === 'docker ps') {
+          if (this.containers.length === 0) {
+            resLine.textContent = "CONTAINER ID   IMAGE      COMMAND    CREATED        STATUS    PORTS";
+          } else {
+            let html = "<pre>CONTAINER ID   IMAGE          STATUS\n";
+            this.containers.forEach(c => {
+              html += `${c.id}       ${c.image.padEnd(14)} ${c.status}\n`;
+            });
+            html += "</pre>";
+            resLine.innerHTML = html;
+          }
+        } else if (lower === 'virsh list' || lower === 'virsh list --all') {
+          let html = "<pre> Id   Name          State\n---------------------------\n";
+          this.vms.forEach((vm, idx) => {
+            html += ` ${idx + 1}    ${vm.name.padEnd(13)} ${vm.state}\n`;
+          });
+          html += "</pre>";
+          resLine.innerHTML = html;
+        } else if (lower.startsWith('virsh start')) {
+          const target = lower.replace('virsh start', '').trim();
+          const found = this.vms.find(v => v.name === target);
+          if (found) {
+            found.state = "running";
+            resLine.innerHTML = `<span class="text-indigo-400">Domain ${target} started</span>`;
+          } else {
+            resLine.innerHTML = `<span class="text-rose-400">error: failed to get domain '${target}'</span>`;
+          }
+        } else if (lower === 'free -m') {
+          resLine.innerHTML = `
+            <pre>               total        used        free      shared  buff/cache   available
+Mem:           16384        2140       11244         120        3000       13980
+Swap:           4096           0        4096</pre>
+          `;
+        } else if (lower === 'clear') {
+          output.innerHTML = '';
+          return;
+        } else {
+          resLine.innerHTML = `<span class="text-rose-400">bash: ${cmdText}: command not found. Ketik 'help' untuk panduan.</span>`;
+        }
+
+        output.appendChild(resLine);
+        output.scrollTop = output.scrollHeight;
+      },
+
+      clear() {
+        const output = document.getElementById('sim-output');
+        if (output) output.innerHTML = '<div class="text-slate-500">Terminal dibersihkan.</div>';
+      }
+    };
+
+    // --- QUIZ MANAGER: 20 SOAL EVALUASI & REPORT ---
+    const quizManager = {
+      answers: {},
+      isSubmitted: false,
+
+      init() {
+        this.renderQuestions();
+      },
+
+      renderQuestions() {
+        const wrapper = document.getElementById('quiz-questions-wrapper');
+        if (!wrapper) return;
+        wrapper.innerHTML = '';
+
+        quizQuestions.forEach((q, idx) => {
+          const card = document.createElement('div');
+          card.className = "p-4 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3";
+          
+          let optionsHtml = '';
+          q.options.forEach((opt, oIdx) => {
+            const isChecked = this.answers[q.id] === oIdx;
+            optionsHtml += `
+              <label class="flex items-start gap-3 p-2.5 rounded-lg border border-slate-800/80 bg-slate-900 hover:bg-slate-800 cursor-pointer text-xs transition">
+                <input type="radio" name="question_${q.id}" value="${oIdx}" ${isChecked ? 'checked' : ''} onchange="quizManager.selectAnswer(${q.id}, ${oIdx})" class="mt-0.5 text-brand-600 focus:ring-0">
+                <span class="text-slate-300 leading-relaxed">${opt}</span>
+              </label>
+            `;
+          });
+
+          card.innerHTML = `
+            <div class="flex items-start justify-between gap-2">
+              <span class="text-xs font-bold text-brand-400 font-mono">Soal No. ${idx + 1} dari 20</span>
+              <span class="text-[11px] px-2 py-0.5 bg-slate-800 text-slate-400 rounded">Bobot: 5 Poin</span>
+            </div>
+            <p class="text-sm font-semibold text-white leading-relaxed">${q.question}</p>
+            <div class="space-y-2">
+              ${optionsHtml}
+            </div>
+          `;
+          wrapper.appendChild(card);
+        });
+
+        this.updateAnsweredCounter();
+      },
+
+      selectAnswer(qId, optionIdx) {
+        this.answers[qId] = optionIdx;
+        SoundFx.play('click');
+        this.updateAnsweredCounter();
+      },
+
+      updateAnsweredCounter() {
+        const count = Object.keys(this.answers).length;
+        const el = document.getElementById('quiz-answered-count');
+        if (el) el.textContent = count;
+      },
+
+      resetQuiz() {
+        this.answers = {};
+        this.isSubmitted = false;
+        this.renderQuestions();
+        SoundFx.play('click');
+      },
+
+      submitAll() {
+        const totalAnswered = Object.keys(this.answers).length;
+        if (totalAnswered < 20) {
+          if (!window.confirm(`Anda baru menjawab ${totalAnswered} dari 20 soal. Yakin ingin mengumpulkan sekarang?`)) {
+            return;
+          }
+        }
+
+        let correctCount = 0;
+        quizQuestions.forEach(q => {
+          if (this.answers[q.id] === q.answer) {
+            correctCount++;
+          }
+        });
+
+        const finalScore = correctCount * 5; // 20 * 5 = 100 max
+        this.isSubmitted = true;
+
+        if (finalScore >= 70) {
+          SoundFx.play('success');
+        } else {
+          SoundFx.play('error');
+        }
+
+        // Tampilkan Hasil di Slide 32
+        this.displayResults(finalScore, correctCount);
+        app.jumpToSlide(32);
+      },
+
+      displayResults(score, correctCount) {
+        const placeholder = document.getElementById('result-placeholder');
+        const card = document.getElementById('result-card');
+        const scoreVal = document.getElementById('final-score-val');
+        const statusTxt = document.getElementById('final-status-text');
+        const statsTxt = document.getElementById('final-stats-text');
+        const gradeTxt = document.getElementById('final-grade-text');
+
+        if (placeholder) placeholder.classList.add('hidden');
+        if (card) card.classList.remove('hidden');
+
+        if (scoreVal) scoreVal.textContent = `${score} / 100`;
+        if (statsTxt) statsTxt.textContent = `${correctCount} Benar • ${20 - correctCount} Salah`;
+
+        let grade = "E";
+        let status = "BELUM LULUS (Remedial)";
+        let statusColor = "text-rose-400";
+
+        if (score >= 85) {
+          grade = "A (Sangat Istimewa)";
+          status = "LULUS DENGAN PUJIAN";
+          statusColor = "text-emerald-400";
+        } else if (score >= 70) {
+          grade = "B (Kompeten)";
+          status = "LULUS MEMENUHI STANDAR";
+          statusColor = "text-brand-400";
+        } else if (score >= 55) {
+          grade = "C (Cukup)";
+          status = "REMEDIAL RINGAN";
+          statusColor = "text-amber-400";
+        }
+
+        if (statusTxt) {
+          statusTxt.textContent = status;
+          statusTxt.className = `text-lg font-bold ${statusColor}`;
+        }
+        if (gradeTxt) gradeTxt.textContent = grade;
+      },
+
+      showReviewModal() {
+        let reviewHtml = `
+          <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+              <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                  <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+                  Pembahasan Lengkap Evaluasi (20 Soal)
+                </h3>
+                <button onclick="document.getElementById('modal-review').remove()" class="p-1 text-slate-400 hover:text-white rounded">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+              <div class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+        `;
+
+        quizQuestions.forEach((q, idx) => {
+          const userAns = this.answers[q.id];
+          const isCorrect = userAns === q.answer;
+          reviewHtml += `
+            <div class="p-3.5 bg-slate-950 rounded-xl border ${isCorrect ? 'border-emerald-600/50' : 'border-rose-600/50'} space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-300">Nomor ${idx + 1}: ${q.question}</span>
+                <span class="font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${isCorrect ? '✓ Benar' : '✗ Salah'}</span>
+              </div>
+              <div class="text-slate-400">Kunci Jawaban: <strong class="text-emerald-300">${q.options[q.answer]}</strong></div>
+              ${!isCorrect && userAns !== undefined ? `<div class="text-slate-400">Jawaban Anda: <strong class="text-rose-300">${q.options[userAns]}</strong></div>` : ''}
+              <div class="p-2 bg-slate-900 rounded border border-slate-800 text-slate-300 italic mt-1">
+                <strong>Pembahasan:</strong> ${q.explanation}
+              </div>
+            </div>
+          `;
+        });
+
+        reviewHtml += `
+              </div>
+              <div class="p-3 border-t border-slate-800 text-right">
+                <button onclick="document.getElementById('modal-review').remove()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold">Tutup Review</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const modalDiv = document.createElement('div');
+        modalDiv.id = "modal-review";
+        modalDiv.innerHTML = reviewHtml;
+        document.body.appendChild(modalDiv);
+        lucide.createIcons();
+      }
+    };
+
+    // --- MAIN SPA CONTROLLER ---
+    const app = {
+      currentSlideIdx: 0,
+      totalSlides: slidesData.length,
+
+      init() {
+        this.renderDrawerTOC();
+        this.showSlide(0);
+        this.setupEventListeners();
+      },
+
+      setupEventListeners() {
+        // Navigation Buttons
+        document.getElementById('btn-prev-slide').onclick = () => this.prevSlide();
+        document.getElementById('btn-next-slide').onclick = () => this.nextSlide();
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+          // Abaikan jika user sedang mengetik di terminal simulator
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+            this.nextSlide();
+          } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            this.prevSlide();
+          }
+        });
+
+        // Drawer Handlers
+        const btnMenu = document.getElementById('btn-toggle-menu');
+        const btnClose = document.getElementById('btn-close-drawer');
+        const drawer = document.getElementById('sidebar-drawer');
+        const backdrop = document.getElementById('drawer-backdrop');
+
+        const toggleDrawer = () => {
+          drawer.classList.toggle('-translate-x-full');
+          backdrop.classList.toggle('hidden');
+        };
+
+        btnMenu.onclick = toggleDrawer;
+        btnClose.onclick = toggleDrawer;
+        backdrop.onclick = toggleDrawer;
+
+        // Sound Toggle
+        const btnSound = document.getElementById('btn-sound-toggle');
+        const soundIcon = document.getElementById('sound-icon');
+        btnSound.onclick = () => {
+          SoundFx.enabled = !SoundFx.enabled;
+          soundIcon.setAttribute('data-lucide', SoundFx.enabled ? 'volume-2' : 'volume-x');
+          btnSound.className = SoundFx.enabled 
+            ? "p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition"
+            : "p-2 text-rose-400 hover:bg-slate-800 rounded-lg transition";
+          lucide.createIcons();
+          this.showToast(SoundFx.enabled ? "Efek Suara Diaktifkan" : "Efek Suara Dimatikan");
+        };
+
+        // Fullscreen Toggle
+        const btnFull = document.getElementById('btn-fullscreen');
+        if (btnFull) {
+          btnFull.onclick = () => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+              document.exitFullscreen().catch(() => {});
+            }
+          };
+        }
+      },
+
+      renderDrawerTOC() {
+        const list = document.getElementById('table-of-contents-list');
+        if (!list) return;
+        list.innerHTML = '';
+
+        slidesData.forEach((s, idx) => {
+          const btn = document.createElement('button');
+          btn.id = `toc-item-${idx}`;
+          btn.className = `w-full text-left p-2.5 rounded-lg text-xs font-medium transition flex items-center gap-2.5 hover:bg-slate-800 text-slate-300`;
+          btn.onclick = () => {
+            this.jumpToSlide(idx);
+            document.getElementById('sidebar-drawer').classList.add('-translate-x-full');
+            document.getElementById('drawer-backdrop').classList.add('hidden');
+          };
+          btn.innerHTML = `
+            <span class="w-5 h-5 rounded bg-slate-800 flex items-center justify-center font-mono text-[10px] text-slate-400 flex-shrink-0">${idx + 1}</span>
+            <div class="truncate">
+              <div class="text-[10px] text-brand-400 uppercase tracking-wider">${s.category}</div>
+              <div class="truncate text-white font-semibold">${s.title}</div>
+            </div>
+          `;
+          list.appendChild(btn);
+        });
+      },
+
+      showSlide(idx) {
+        if (idx < 0 || idx >= this.totalSlides) return;
+        this.currentSlideIdx = idx;
+        const s = slidesData[idx];
+
+        // Update Top Bar & Header Text
+        document.getElementById('topbar-slide-title').textContent = s.title;
+        document.getElementById('slide-counter-badge').textContent = `Slide ${idx + 1} / ${this.totalSlides}`;
+
+        // Progress Calculation
+        const progressPct = Math.round(((idx + 1) / this.totalSlides) * 100);
+        document.getElementById('top-progress-fill').style.width = `${progressPct}%`;
+        document.getElementById('drawer-progress-bar').style.width = `${progressPct}%`;
+        document.getElementById('drawer-progress-text').textContent = `${progressPct}%`;
+
+        // Update Navigation Button States
+        const btnPrev = document.getElementById('btn-prev-slide');
+        const btnNext = document.getElementById('btn-next-slide');
+        btnPrev.disabled = (idx === 0);
+        if (idx === this.totalSlides - 1) {
+          btnNext.innerHTML = `<span>Selesai</span> <i data-lucide="check" class="w-4 h-4"></i>`;
+        } else {
+          btnNext.innerHTML = `<span>Selanjutnya</span> <i data-lucide="chevron-right" class="w-4 h-4"></i>`;
+        }
+
+        // Highlight TOC Item
+        for (let i = 0; i < this.totalSlides; i++) {
+          const el = document.getElementById(`toc-item-${i}`);
+          if (el) {
+            if (i === idx) {
+              el.className = "w-full text-left p-2.5 rounded-lg text-xs font-medium transition flex items-center gap-2.5 bg-brand-600/20 border border-brand-500/40 text-brand-300";
+            } else {
+              el.className = "w-full text-left p-2.5 rounded-lg text-xs font-medium transition flex items-center gap-2.5 hover:bg-slate-800 text-slate-300";
+            }
+          }
+        }
+
+        // Inject Content with Entrance Animation
+        const container = document.getElementById('slide-container');
+        container.classList.remove('slide-enter');
+        void container.offsetWidth; // Force CSS Reflow
+        container.classList.add('slide-enter');
+
+        container.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800/80">
+              <span class="text-xs font-mono font-bold text-brand-400 uppercase tracking-widest flex items-center gap-1.5">
+                <i data-lucide="hash" class="w-3.5 h-3.5"></i> Modul ${idx + 1} • ${s.category}
+              </span>
+              <span class="text-xs text-slate-400 font-medium">Teknik Informatika / Sistem Komputer</span>
+            </div>
+            <div>
+              ${s.content}
+            </div>
+          </div>
+        `;
+
+        lucide.createIcons();
+
+        // Specific Slide Logic Initialization
+        if (idx === 19 || idx === 20) {
+          setTimeout(() => game1.init(), 50);
+        } else if (idx === 21 || idx === 22) {
+          setTimeout(() => game2.updateView(), 50);
+        } else if (idx === 30 || idx === 31) {
+          setTimeout(() => quizManager.init(), 50);
+        }
+      },
+
+      nextSlide() {
+        if (this.currentSlideIdx < this.totalSlides - 1) {
+          SoundFx.play('click');
+          this.showSlide(this.currentSlideIdx + 1);
+        }
+      },
+
+      prevSlide() {
+        if (this.currentSlideIdx > 0) {
+          SoundFx.play('click');
+          this.showSlide(this.currentSlideIdx - 1);
+        }
+      },
+
+      jumpToSlide(targetIdx) {
+        if (targetIdx >= 0 && targetIdx < this.totalSlides) {
+          SoundFx.play('click');
+          this.showSlide(targetIdx);
+        }
+      },
+
+      showToast(msg) {
+        const c = document.getElementById('toast-container');
+        if (!c) return;
+        const toast = document.createElement('div');
+        toast.className = "px-3 py-2 bg-slate-900 border border-slate-700 text-white rounded-lg text-xs shadow-xl flex items-center gap-2 animate-pulse-once";
+        toast.innerHTML = `<i data-lucide="info" class="w-3.5 h-3.5 text-brand-400"></i> <span>${msg}</span>`;
+        c.appendChild(toast);
+        lucide.createIcons();
+        setTimeout(() => toast.remove(), 2400);
+      }
+    };
+
+    // Run on Load
+    window.onload = function () {
+      app.init();
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>

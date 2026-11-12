@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Ajar: Cloud Computing - Pendahuluan</title>
+  <style>
+    /* CSS Reset & Offline Native Modern Styling */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #0b1120;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #38bdf8;
+      --emerald: #10b981;
+      --emerald-dark: #064e3b;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Header */
+    header {
+      height: 60px;
+      background-color: #0f172a;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    .header-info h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-sks {
+      font-size: 10px;
+      background-color: #0c4a6e;
+      color: #7dd3fc;
+      border: 1px solid #0284c7;
+      padding: 1px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .header-info p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 320px;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 11px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: #1e293b;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      width: 3.33%;
+      transition: width 0.3s ease;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action {
+      background-color: #1e293b;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background-color: #334155;
+      border-color: #475569;
+    }
+
+    .btn-game-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .btn-game-hub:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    /* Main Viewport */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b1120 75%);
+    }
+
+    .slide-card {
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 980px;
+      height: 100%;
+      max-height: 640px;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 32px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .slide-header {
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .slide-category {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .slide-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .slide-pill {
+      font-size: 11px;
+      background-color: #1e293b;
+      border: 1px solid var(--card-border);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    /* Footer */
+    footer {
+      height: 60px;
+      background-color: #0f172a;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-prev {
+      background-color: #1e293b;
+      border: 1px solid var(--card-border);
+      color: #f1f5f9;
+    }
+
+    .btn-prev:hover:not(:disabled) {
+      background-color: #334155;
+    }
+
+    .btn-prev:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-next:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+    }
+
+    .btn-next:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .footer-tools {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-tool {
+      background-color: #1e293b;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-tool:hover {
+      background-color: #334155;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 760px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      background-color: #1e293b;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-close:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Grid Layouts for Slide Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .info-card {
+      background-color: #131d31;
+      border: 1px solid #24334a;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .info-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .info-card p, .info-card ul {
+      font-size: 11px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .info-card ul {
+      list-style-type: none;
+    }
+
+    .info-card li {
+      margin-bottom: 4px;
+    }
+
+    .highlight-text {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Index Grid */
+    .index-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .index-item {
+      padding: 10px 14px;
+      background-color: #131d31;
+      border: 1px solid #24334a;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #cbd5e1;
+      transition: all 0.2s;
+    }
+
+    .index-item:hover {
+      background-color: #1e293b;
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .index-item.active {
+      background-color: #0c4a6e;
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Game Arena Styles */
+    .game-tab-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 20px;
+      background-color: #131d31;
+      border-bottom: 1px solid #24334a;
+    }
+
+    .game-tab {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #334155;
+      background-color: #1e293b;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .game-tab.active {
+      background-color: var(--emerald);
+      color: #fff;
+      border-color: var(--emerald);
+    }
+
+    .quiz-option-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+
+    .quiz-option-btn:hover {
+      background-color: #334155;
+      border-color: var(--primary);
+    }
+
+    /* Table styles */
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+
+    .modern-table th {
+      background-color: #1e293b;
+      color: #94a3b8;
+      padding: 8px 12px;
+      border: 1px solid #334155;
+      font-weight: 700;
+    }
+
+    .modern-table td {
+      padding: 8px 12px;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+    }
+
+    .tag-vendor {
+      color: #34d399;
+      font-weight: 700;
+    }
+
+    .tag-customer {
+      color: #f87171;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div class="header-left">
+      <div class="logo-badge">&#9729;</div>
+      <div class="header-info">
+        <h1>Cloud Computing <span class="tag-sks">3 SKS</span></h1>
+        <p>Dosen: <strong>Dede Mulyana, S.T.</strong> &bull; Pertemuan 1</p>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="progress-labels">
+        <span id="navTitle" style="color: var(--accent); font-weight: 600;">Halaman 1: Cover</span>
+        <span id="navCounter" style="font-weight: 700; color: #cbd5e1;">1 / 30</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="navProgress" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-action" id="btnOpenIndex">
+        &#9776; <span>Daftar Isi</span>
+      </button>
+      <button class="btn-action btn-game-hub" id="btnOpenGameHub">
+        &#127918; <span>Game Hub</span>
+      </button>
+      <button class="btn-action" id="btnFullscreen" title="Layar Penuh">
+        &#x26F6;
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN SLIDE WORKSPACE ================= -->
+  <main>
+    <div class="slide-card" id="slideContainer">
+      <!-- Dynamic slide content injected by JavaScript -->
+    </div>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="nav-btns">
+      <button class="btn-nav btn-prev" id="btnPrevSlide">&#8592; Sebelumnya</button>
+      <button class="btn-nav btn-next" id="btnNextSlide">Selanjutnya &#8594;</button>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-muted);">
+      Kategori: <span id="footerCategory" style="color: #cbd5e1; font-weight: 600;">Identitas Kuliah</span>
+    </div>
+
+    <div class="footer-tools">
+      <button class="btn-tool" id="btnOpenTimer">&#9201; Timer Diskusi</button>
+      <button class="btn-tool" id="btnOpenNotes">&#9998; Catatan Kuliah</button>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL: DAFTAR ISI ================= -->
+  <div class="modal-overlay" id="modalIndex">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Daftar Isi Modul Ajar (30 Halaman)</h3>
+        <button class="btn-close" id="btnCloseIndex">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="index-grid" id="indexGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: GAME HUB ================= -->
+  <div class="modal-overlay" id="modalGameHub">
+    <div class="modal-box" style="max-width: 820px;">
+      <div class="modal-header" style="background-color: #064e3b; border-color: #047857;">
+        <div>
+          <h3 style="color: #6ee7b7;">Cloud Interactive Game Arena</h3>
+          <p style="font-size: 11px; color: #a7f3d0;">Latihan interaktif agar mahasiswa aktif & tidak jenuh</p>
+        </div>
+        <button class="btn-close" id="btnCloseGameHub">&times;</button>
+      </div>
+      <div class="game-tab-bar">
+        <button class="game-tab active" id="tabG1">Game 1: Architect Match</button>
+        <button class="game-tab" id="tabG2">Game 2: Speed Quiz Battle</button>
+        <button class="game-tab" id="tabG3">Game 3: CapEx vs OpEx</button>
+      </div>
+      <div class="modal-body" id="gameArena">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: TIMER DISKUSI ================= -->
+  <div class="modal-overlay" id="modalTimer">
+    <div class="modal-box" style="max-width: 360px; text-align: center;">
+      <div class="modal-header">
+        <h3>Timer Sesi Diskusi Mahasiswa</h3>
+        <button class="btn-close" id="btnCloseTimer">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; align-items: center;">
+        <div style="font-size: 42px; font-weight: 900; color: var(--amber); margin: 15px 0; font-family: monospace;" id="timerDisplay">03:00</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button class="btn-tool" id="btnTime2">2 Mnt</button>
+          <button class="btn-tool" id="btnTime3">3 Mnt</button>
+          <button class="btn-tool" id="btnTime5">5 Mnt</button>
+        </div>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button class="btn-nav btn-next" style="flex: 1; justify-content: center;" id="btnTimerToggle">Mulai</button>
+          <button class="btn-nav btn-prev" id="btnTimerReset">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CATATAN KULIAH ================= -->
+  <div class="modal-overlay" id="modalNotes">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Catatan Kuliah Mahasiswa</h3>
+        <button class="btn-close" id="btnCloseNotes">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Catatan ini tersimpan secara lokal di browser Anda:</p>
+        <textarea id="noteInput" style="width: 100%; height: 160px; background: #0b1120; border: 1px solid #334155; border-radius: 8px; color: #fff; padding: 10px; font-size: 12px; font-family: inherit; resize: none;"></textarea>
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button class="btn-nav btn-next" id="btnSaveNotes">Simpan Catatan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT CONTROLLER ================= -->
+  <script>
+    // DATA 30 SLIDE LENGKAP
+    const slidesData = [
+      // 1. Identitas Mata Kuliah & Dosen Pengampu (Halaman Pertama)
+      {
+        category: "Identitas Perkuliahan",
+        title: "Identitas Mata Kuliah & Silabus Pengantar",
+        html: `
+          <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin: auto; max-width: 760px;">
+            <div style="background: rgba(2, 132, 199, 0.15); border: 1px solid #0284c7; padding: 4px 14px; border-radius: 9999px; font-size: 11px; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 12px;">
+              Program Studi Teknik Informatika / Sistem Informasi
+            </div>
+            <h1 style="font-size: 32px; font-weight: 900; line-height: 1.25; color: #fff; margin-bottom: 8px;">
+              CLOUD COMPUTING
+            </h1>
+            <p style="font-size: 15px; color: #94a3b8; margin-bottom: 24px; font-weight: 500;">
+              Materi: Pendahuluan Cloud Computing &bull; Bobot: 3 SKS
+            </p>
+
+            <div style="width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; text-align: left;">
+              <div class="info-card" style="border-top: 3px solid #0284c7;">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Dosen Pengampu</div>
+                <div style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 4px;">Dede Mulyana, S.T.</div>
+                <div style="font-size: 11px; color: #38bdf8; margin-top: 2px;">Dosen Pengampu Cloud Computing</div>
+              </div>
+              <div class="info-card" style="border-top: 3px solid #818cf8;">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Sub Materi Pokok</div>
+                <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 4px;">Sejarah, Definisi, Manfaat &amp; Tantangan</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Fondasi NIST SP 800-145</div>
+              </div>
+              <div class="info-card" style="border-top: 3px solid #10b981;">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Metode Penyampaian</div>
+                <div style="font-size: 13px; font-weight: 800; color: #fff; margin-top: 4px;">Ceramah &amp; Diskusi</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Studi Kasus &amp; Game Interaktif</div>
+              </div>
+            </div>
+
+            <div style="background: #131d31; border: 1px solid #24334a; border-radius: 12px; padding: 12px 20px; font-size: 12px; color: #cbd5e1; width: 100%;">
+              <strong>Deskripsi Perkuliahan:</strong> Modul ajar terpadu ini membahas transformasi infrastruktur komputasi dari model server bare-metal konvensional menuju paradigma komputasi awan yang elastis, multi-tenant, dan terukur.
+            </div>
+          </div>
+        `
+      },
+      // 2. Capaian Pembelajaran Mata Kuliah (CPMK)
+      {
+        category: "Capaian Pembelajaran",
+        title: "Capaian Pembelajaran Mata Kuliah (CPMK 1)",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: auto;">
+            <p style="font-size: 13px; color: #cbd5e1;">Setelah menyelesaikan sesi pertemuan pertama ini, mahasiswa diharapkan mampu:</p>
+            <div class="grid-2">
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 1.1]</span>
+                <h4 style="margin-top: 4px;">Menguraikan Sejarah &amp; Evolusi Komputasi</h4>
+                <p>Mampu membedakan perbedaan mendasar antara era Mainframe Time-Sharing, Grid Computing, Virtualisasi x86, hingga era Modern Hyperscaler Cloud.</p>
+              </div>
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 1.2]</span>
+                <h4 style="margin-top: 4px;">Membedah Standarisasi NIST SP 800-145</h4>
+                <p>Mengidentifikasi secara presisi 5 karakteristik esensial, 3 model layanan (SPI: IaaS, PaaS, SaaS), serta 4 model penerapan cloud.</p>
+              </div>
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 1.3]</span>
+                <h4 style="margin-top: 4px;">Menganalisis Efisiensi Finansial (CapEx vs OpEx)</h4>
+                <p>Mampu menghitung perbandingan biaya investasi aset perangkat keras di muka versus biaya operasional berjalan berbasis konsumsi riil.</p>
+              </div>
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 1.4]</span>
+                <h4 style="margin-top: 4px;">Mengevaluasi Risiko, Keamanan &amp; Regulasi</h4>
+                <p>Memahami batasan Shared Responsibility Model, ancaman vendor lock-in, dan kepatuhan kedaulatan data di wilayah Indonesia.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 3. Masalah Infrastruktur Tradisional (On-Premises)
+      {
+        category: "Latar Belakang",
+        title: "Problematika Data Center Tradisional (On-Premises)",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 10px;">Mengapa Industri Meninggalkan Bare-Metal Server Konvensional?</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px;">
+                Sebelum era cloud, perusahaan harus membangun ruang server sendiri. Pengadaan server fisik membutuhkan waktu berminggu-minggu, sementara utilisasi rata-rata CPU sering kali berada di bawah <span style="color: var(--rose); font-weight: 700;">15%</span>.
+              </p>
+              <ul style="font-size: 12px; color: #cbd5e1; line-height: 1.6; padding-left: 18px;">
+                <li><strong>Procurement Bottleneck:</strong> PO dan perakitan rack server memakan waktu 1-3 bulan.</li>
+                <li><strong>Over-Provisioning:</strong> Membeli spesifikasi server raksasa hanya demi beban puncak musiman.</li>
+                <li><strong>Beban Listrik &amp; AC:</strong> Pengeluaran listrik pendingin CRAC yang bekerja non-stop 24/7.</li>
+              </ul>
+            </div>
+            <div class="info-card" style="text-align: center; background: #0f172a; border-color: #334155; padding: 20px;">
+              <div style="font-size: 32px; margin-bottom: 8px;">&#127970; &#128421; &#9888;</div>
+              <h4 style="color: var(--rose);">Siklus Kerugian Data Center Sendiri</h4>
+              <p style="font-size: 11px; color: #94a3b8; margin-top: 6px;">Biaya modal awal tinggi &bull; Depresiasi perangkat keras &bull; Sulit diperkecil saat bisnis sepi.</p>
+            </div>
+          </div>
+        `
+      },
+      // 4. Sejarah Awal: Mainframe & Time-Sharing
+      {
+        category: "Sejarah Cloud Computing",
+        title: "Akar Historis (1960-an): Mainframe & Time-Sharing",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: auto;">
+            <div style="background: rgba(2, 132, 199, 0.1); border-left: 4px solid var(--primary); padding: 12px 16px; border-radius: 4px;">
+              <blockquote style="font-size: 13px; font-style: italic; color: #e0f2fe;">
+                "Computation may someday be organized as a public utility, just as the telephone system is a public utility."
+              </blockquote>
+              <div style="font-size: 11px; font-weight: 700; color: var(--accent); margin-top: 4px;">&mdash; Prof. John McCarthy (MIT Centennial, 1961)</div>
+            </div>
+            <div class="grid-2">
+              <div class="info-card">
+                <h4>Era Mainframe IBM System/360</h4>
+                <p>Komputer awal sangat mahal dan berukuran masif. Sistem Time-Sharing diciptakan agar banyak pengguna dapat mengakses CPU sentral secara bersamaan melalui dumb terminal.</p>
+              </div>
+              <div class="info-card">
+                <h4>J.C.R. Licklider &amp; ARPANET (1969)</h4>
+                <p>Konsep *Intergalactic Computer Network* memelopori transmisi data terdistribusi yang menjadi cikal bakal jaringan internet global.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 5. Evolusi: Grid & Utility Computing
+      {
+        category: "Sejarah Cloud Computing",
+        title: "Era 1990-an: Grid Computing & Lahirnya Simbol Awan",
+        html: `
+          <div class="grid-3" style="margin: auto;">
+            <div class="info-card">
+              <span class="highlight-text">&#9638; Grid Computing</span>
+              <h4 style="margin-top: 4px;">Kolaborasi Daya Komputasi</h4>
+              <p>Menghubungkan ribuan komputer terdistribusi untuk memecahkan satu kalkulasi sains raksasa (contoh: riset SETI@home dan riset bioinformatika).</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#9889; Utility Computing</span>
+              <h4 style="margin-top: 4px;">Model Meteran Utilitas</h4>
+              <p>Konsep komputasi yang ditagihkan persis seperti pemakaian air PAM atau meteran listrik PLN: membayar sesuai jumlah watt yang dikonsumsi.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#9729; Simbol "The Cloud"</span>
+              <h4 style="margin-top: 4px;">Abstraksi Jaringan WAN</h4>
+              <p>Operator telekomunikasi menggambarkan awan pada topologi jaringan untuk mewakili infrastruktur routing yang terabstraksi bagi pengguna akhir.</p>
+            </div>
+          </div>
+        `
+      },
+      // 6. Revolusi Virtualisasi x86
+      {
+        category: "Sejarah Cloud Computing",
+        title: "Terobosan Virtualisasi x86 (1998-1999)",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Hypervisor: Enabler Utama Multi-Tenancy</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Sebelum tahun 1998, 1 server fisik hanya dapat menjalankan 1 sistem operasi. Kehadiran VMware memungkinkan pemisahan hardware fisik menjadi puluhan *Virtual Machine (VM)* terisolasi.
+              </p>
+              <div class="info-card" style="margin-bottom: 8px;">
+                <strong>Efek Konsolidasi Server:</strong> Dari 50 server fisik yang boros listrik, dipadatkan menjadi hanya 2 server fisik berkemampuan tinggi.
+              </div>
+            </div>
+            <div class="info-card" style="background: #0f172a; text-align: center; font-family: monospace; font-size: 11px;">
+              <div style="background: #1e3a8a; padding: 6px; border-radius: 4px; margin-bottom: 6px; color: #93c5fd;">VM 1 (Linux) | VM 2 (Windows) | VM 3 (BSD)</div>
+              <div style="background: #0369a1; padding: 8px; border-radius: 4px; margin-bottom: 6px; color: #fff; font-weight: 700;">Lapisan Hypervisor (ESXi / KVM / Xen)</div>
+              <div style="background: #334155; padding: 10px; border-radius: 4px; color: #cbd5e1;">Hardware Fisik: CPU Multi-Core, RAM ECC, NVMe Storage</div>
+            </div>
+          </div>
+        `
+      },
+      // 7. Tonggak Sejarah Modern: Salesforce & AWS
+      {
+        category: "Sejarah Cloud Computing",
+        title: "1999-2006: Lahirnya SaaS & Era Modern AWS",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <div style="font-size: 24px; margin-bottom: 6px;">&#9729;</div>
+              <h4>1999: Salesforce &amp; Slogan "No Software"</h4>
+              <p>Marc Benioff memelopori pengiriman aplikasi enterprise (CRM) murni melalui web browser tanpa perlu instalasi CD installer, melahirkan paradigma SaaS pertama di dunia.</p>
+            </div>
+            <div class="info-card">
+              <div style="font-size: 24px; margin-bottom: 6px;">&#128230;</div>
+              <h4>2006: Amazon Web Services (AWS) Diluncurkan</h4>
+              <p>Andy Jassy memimpin peluncuran Amazon S3 (Storage) dan EC2 (Elastic Compute Cloud), mengomersialisasikan IaaS modern bagi startup teknologi global.</p>
+            </div>
+          </div>
+        `
+      },
+      // 8. Garis Waktu Lengkap
+      {
+        category: "Sejarah Cloud Computing",
+        title: "Garis Waktu Evolusi Komputasi (1960 - Sekarang)",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; margin: auto; max-width: 720px;">
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <div style="background: #0284c7; color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; width: 90px; text-align: center;">1960-1970</div>
+              <div style="font-size: 12px; color: #cbd5e1;"><strong>Mainframe &amp; ARPANET:</strong> Time-sharing, ide komputasi sebagai utilitas publik.</div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <div style="background: #4f46e5; color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; width: 90px; text-align: center;">1990-2000</div>
+              <div style="font-size: 12px; color: #cbd5e1;"><strong>Virtualisasi &amp; Web SaaS:</strong> Kemunculan Hypervisor VMware dan Salesforce CRM online.</div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <div style="background: #10b981; color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; width: 90px; text-align: center;">2006-2015</div>
+              <div style="font-size: 12px; color: #cbd5e1;"><strong>Era Hyperscaler:</strong> Peluncuran AWS EC2, Google App Engine, Microsoft Azure, dan OpenStack.</div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <div style="background: #f59e0b; color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; width: 90px; text-align: center;">Sekarang</div>
+              <div style="font-size: 12px; color: #cbd5e1;"><strong>Cloud Native &amp; AI Infra:</strong> Docker, Kubernetes, Serverless, dan kluster GPU Cloud terdistribusi.</div>
+            </div>
+          </div>
+        `
+      },
+      // 9. Definisi Standar NIST SP 800-145
+      {
+        category: "Definisi & Karakteristik",
+        title: "Definisi Resmi Standar NIST SP 800-145",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: auto;">
+            <div style="background: #131d31; border: 1px solid #334155; padding: 16px; border-radius: 12px;">
+              <div style="font-size: 11px; color: var(--accent); font-weight: 800; text-transform: uppercase;">Definisi Resmi NIST:</div>
+              <p style="font-size: 13px; font-style: italic; color: #f1f5f9; line-height: 1.6; margin-top: 6px;">
+                "Cloud computing adalah model yang memungkinkan akses jaringan di mana saja, nyaman, sesuai permintaan ke kumpulan bersama sumber daya komputasi yang dapat dikonfigurasi (misalnya: jaringan, server, penyimpanan, aplikasi, dan layanan) yang dapat disediakan dan dirilis secara cepat dengan upaya manajemen minimal."
+              </p>
+            </div>
+            <div class="grid-3" style="text-align: center;">
+              <div class="info-card">
+                <div style="font-size: 16px; font-weight: 800; color: var(--accent);">5 Karakteristik</div>
+                <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Sifat fundamental sistem cloud</p>
+              </div>
+              <div class="info-card">
+                <div style="font-size: 16px; font-weight: 800; color: #a78bfa;">3 Model Layanan</div>
+                <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Tingkatan kontrol teknis (SPI)</p>
+              </div>
+              <div class="info-card">
+                <div style="font-size: 16px; font-weight: 800; color: #34d399;">4 Model Deployment</div>
+                <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Kepemilikan dan hak akses sistem</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 10. Karakteristik 1: On-Demand Self-Service
+      {
+        category: "5 Karakteristik NIST",
+        title: "Karakteristik 1: On-Demand Self-Service",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <span class="highlight-text">NIST Esensial #1</span>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 6px 0 10px;">Provisi Otomatis Tanpa Campur Tangan Manusia</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6;">
+                Konsumen dapat memesan kapasitas komputasi (waktu server, kapasitas disk, firewall) kapan pun dibutuhkan melalui konsol web atau API secara mandiri tanpa menunggu konfirmasi manual dari sales atau admin teknis.
+              </p>
+            </div>
+            <div class="info-card" style="font-family: monospace; font-size: 11px;">
+              <div style="color: var(--accent); margin-bottom: 4px;"># Provisi VM Instan via CLI</div>
+              <div style="color: #cbd5e1;">$ aws ec2 run-instances \</div>
+              <div style="color: #cbd5e1; padding-left: 12px;">--image-id ami-0c55b159cb \</div>
+              <div style="color: #cbd5e1; padding-left: 12px;">--instance-type t3.micro</div>
+              <div style="color: #34d399; margin-top: 6px;">&check; Server Running dalam 40 detik!</div>
+            </div>
+          </div>
+        `
+      },
+      // 11. Karakteristik 2: Broad Network Access
+      {
+        category: "5 Karakteristik NIST",
+        title: "Karakteristik 2: Broad Network Access",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: auto;">
+            <p style="font-size: 12px; color: #cbd5e1;">Layanan cloud tersedia melalui jaringan standar (internet/WAN) dan dapat diakses dari beragam perangkat klien tanpa memandang arsitektur hardware perangkat:</p>
+            <div class="grid-4" style="text-align: center;">
+              <div class="info-card">
+                <div style="font-size: 24px; margin-bottom: 4px;">&#128187;</div>
+                <h4>Laptop &amp; PC</h4>
+                <p>Browser, SSH, VSCode</p>
+              </div>
+              <div class="info-card">
+                <div style="font-size: 24px; margin-bottom: 4px;">&#128241;</div>
+                <h4>Smartphone</h4>
+                <p>Aplikasi Android &amp; iOS</p>
+              </div>
+              <div class="info-card">
+                <div style="font-size: 24px; margin-bottom: 4px;">&#9881;</div>
+                <h4>IoT &amp; Edge</h4>
+                <p>Sensor ESP32, Raspberry Pi</p>
+              </div>
+              <div class="info-card">
+                <div style="font-size: 24px; margin-bottom: 4px;">&#127760;</div>
+                <h4>REST API</h4>
+                <p>JSON over HTTPS</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 12. Karakteristik 3: Resource Pooling
+      {
+        category: "5 Karakteristik NIST",
+        title: "Karakteristik 3: Resource Pooling & Multi-Tenancy",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <span class="highlight-text">NIST Esensial #3</span>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 6px 0 10px;">Penyatuan Sumber Daya Multi-Tenant</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6;">
+                Penyedia layanan mengumpulkan resource fisik untuk melayani ribuan pelanggan secara dinamis. Pelanggan umumnya tidak mengetahui letak fisik pasti rack server, tetapi data tetap terisolasi aman secara logis.
+              </p>
+            </div>
+            <div class="info-card" style="background: #0f172a;">
+              <h4 style="color: var(--amber); margin-bottom: 6px;">Analogi Apartemen:</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.5;">
+                Semua penghuni menempati gedung yang sama dan berbagi instalasi pipa serta lift utama, namun tiap penyewa memiliki kunci pintu kamar masing-masing yang privat dan aman.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 13. Karakteristik 4: Rapid Elasticity
+      {
+        category: "5 Karakteristik NIST",
+        title: "Karakteristik 4: Rapid Elasticity (Skalabilitas)",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <span class="highlight-text">&#8597; Vertical Scaling (Scale-Up)</span>
+              <h4 style="margin-top: 4px;">Membesarkan Spesifikasi Node</h4>
+              <p style="margin-top: 6px;">Meningkatkan ukuran RAM dan CPU pada satu mesin VM (misal: dari 2 vCPU 4GB RAM menjadi 8 vCPU 32GB RAM). Memiliki batasan fisik server maksimum.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#8596; Horizontal Scaling (Scale-Out)</span>
+              <h4 style="margin-top: 4px;">Menambah Kuantitas Node</h4>
+              <p style="margin-top: 6px;">Menambah jumlah server baru di balik Load Balancer saat trafik ramai (Auto-Scaling), dan mematikan server ekstra saat malam hari ketika trafik sepi.</p>
+            </div>
+          </div>
+        `
+      },
+      // 14. Karakteristik 5: Measured Service
+      {
+        category: "5 Karakteristik NIST",
+        title: "Karakteristik 5: Measured Service (Pay-as-You-Go)",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <span class="highlight-text">NIST Esensial #5</span>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 6px 0 10px;">Penagihan Berbasis Konsumsi Riil</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6;">
+                Penggunaan resource dipantau, dikontrol, dan dilaporkan secara transparan bagi konsumen dan penyedia layanan. Anda hanya membayar apa yang Anda gunakan hingga satuan detik.
+              </p>
+            </div>
+            <div class="info-card" style="font-family: monospace; font-size: 11px;">
+              <div style="border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 6px; font-weight: 700; color: #fff;">Simulasi Invoice Cloud:</div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Compute (720 jam):</span><span>$14.50</span></div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Storage S3 (100 GB):</span><span>$2.30</span></div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Egress Data Transfer:</span><span>$3.20</span></div>
+              <div style="border-top: 1px solid #334155; padding-top: 6px; color: var(--accent); font-weight: 700; display: flex; justify-content: space-between;"><span>Total:</span><span>$20.00</span></div>
+            </div>
+          </div>
+        `
+      },
+      // 15. Checkpoint Kuis Singkat Karakteristik
+      {
+        category: "Evaluasi Konsep",
+        title: "Checkpoint Diskusi Kelas: Uji Karakteristik",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: auto; max-width: 720px;">
+            <div class="info-card" style="border-left: 4px solid var(--amber);">
+              <h4 style="color: var(--amber);">Skenario Kasus Nyata:</h4>
+              <p style="font-size: 12px; color: #f1f5f9; line-height: 1.6; margin-top: 6px;">
+                Sebuah vendor software menawarkan layanan bertajuk "Private Cloud". Namun ketika pengguna ingin menambah kapasitas disk, pengguna wajib mengirim surat resmi, membayar deposit di bank, dan menunggu teknisi datang 2 hari kemudian untuk memasang harddisk secara manual.
+              </p>
+              <div style="margin-top: 10px; font-size: 12px; color: #38bdf8; font-weight: 700;">
+                Pertanyaan Dosen: Apakah sistem tersebut memenuhi standar Cloud NIST? Karakteristik apa yang dilanggar?
+              </div>
+            </div>
+            <div style="display: flex; justify-content: center;">
+              <button class="btn-nav btn-next" id="btnDiscussTrigger">&#9201; Buka Timer Diskusi Mahasiswa (2 Menit)</button>
+            </div>
+          </div>
+        `
+      },
+      // 16. Piramida SPI Model Overview
+      {
+        category: "Model Layanan Cloud",
+        title: "Model Layanan Cloud: Piramida SPI (IaaS, PaaS, SaaS)",
+        html: `
+          <div class="grid-3" style="margin: auto;">
+            <div class="info-card" style="border-top: 4px solid #0284c7;">
+              <h4 style="color: #38bdf8;">IaaS</h4>
+              <p style="font-size: 11px; color: #94a3b8; font-weight: 600;">Infrastructure as a Service</p>
+              <p style="margin-top: 8px;">Menyewa hardware virtual, jaringan, dan disk. Pengguna mengelola OS, database, dan aplikasi sendiri.</p>
+              <div style="margin-top: 10px; font-size: 10px; color: var(--accent);">Contoh: AWS EC2, GCP Compute Engine, DigitalOcean.</div>
+            </div>
+            <div class="info-card" style="border-top: 4px solid #818cf8;">
+              <h4 style="color: #a78bfa;">PaaS</h4>
+              <p style="font-size: 11px; color: #94a3b8; font-weight: 600;">Platform as a Service</p>
+              <p style="margin-top: 8px;">Menyediakan runtime siap pakai. Pengembang hanya fokus men-deploy kode aplikasi.</p>
+              <div style="margin-top: 10px; font-size: 10px; color: #a78bfa;">Contoh: Heroku, Google App Engine, Vercel, AWS Elastic Beanstalk.</div>
+            </div>
+            <div class="info-card" style="border-top: 4px solid #10b981;">
+              <h4 style="color: #34d399;">SaaS</h4>
+              <p style="font-size: 11px; color: #94a3b8; font-weight: 600;">Software as a Service</p>
+              <p style="margin-top: 8px;">Aplikasi matang siap pakai langsung di browser tanpa perlu instalasi atau pemeliharaan server.</p>
+              <div style="margin-top: 10px; font-size: 10px; color: #34d399;">Contoh: Google Workspace, Microsoft 365, Canva.</div>
+            </div>
+          </div>
+        `
+      },
+      // 17. Deep Dive IaaS
+      {
+        category: "Model Layanan Cloud",
+        title: "IaaS (Infrastructure as a Service): Fleksibilitas Tertinggi",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Kendali Penuh Arsitektur Jaringan &amp; Server</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                IaaS memberikan kebebasan mutlak kepada System Administrator untuk memilih kernel Linux, mengonfigurasi IP routing, iptables, hingga partisi storage.
+              </p>
+              <ul style="font-size: 11px; color: #cbd5e1; padding-left: 16px;">
+                <li>Ideal untuk migrasi aplikasi legacy yang butuh spesifikasi OS spesifik.</li>
+                <li>Tanggung jawab pembaruan patch OS berada di tangan pengguna.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h4>Kapan Perusahaan Memilih IaaS?</h4>
+              <p style="font-size: 11px; color: #cbd5e1; margin-top: 6px;">
+                1. Membangun cluster database berkecepatan tinggi dengan tuning custom.<br>
+                2. Menjalankan software simulasi jaringan atau container orchestration mandiri.<br>
+                3. Memerlukan kepatuhan audit keamanan tingkat server OS.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 18. Deep Dive PaaS
+      {
+        category: "Model Layanan Cloud",
+        title: "PaaS (Platform as a Service): Fokus Penuh Pada Kode",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Produktivitas Developer Tanpa Beban Server</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6;">
+                PaaS memangkas waktu peluncuran produk (*time-to-market*). Developer hanya menulis kode Node.js, Python, atau Go, lalu men-deploy-nya via <code>git push</code>. Semua load balancer dan runtime diurus penyedia cloud.
+              </p>
+            </div>
+            <div class="info-card" style="font-family: monospace; font-size: 11px;">
+              <div style="color: var(--accent); margin-bottom: 4px;">// Alur Kerja PaaS</div>
+              <div style="color: #cbd5e1;">$ git commit -m "Deploy Fitur Baru"</div>
+              <div style="color: #a78bfa;">$ git push heroku main</div>
+              <div style="color: #94a3b8; margin-top: 6px;">----&gt; Building runtime Node.js<br>----&gt; Menjalankan 3 dyno web otomatis<br>----&gt; Sukses tayang di internet!</div>
+            </div>
+          </div>
+        `
+      },
+      // 19. Deep Dive SaaS
+      {
+        category: "Model Layanan Cloud",
+        title: "SaaS (Software as a Service): Aplikasi Siap Pakai",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Konsumsi Langsung oleh End-User</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Pengguna tidak mengelola kode maupun server sama sekali. Model bisnis berupa langganan bulanan (*subscription model*) dengan pembaruan otomatis tanpa downtime.
+              </p>
+            </div>
+            <div class="info-card">
+              <h4 style="color: var(--rose);">Keterbatasan SaaS:</h4>
+              <p style="font-size: 11px; color: #cbd5e1; margin-top: 6px;">
+                1. Kustomisasi fitur terbatas pada menu yang disediakan vendor.<br>
+                2. Data disimpan sepenuhnya di infrastruktur vendor (isu privasi).<br>
+                3. Ketergantungan penuh pada SLA dan uptime penyedia SaaS.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 20. Shared Responsibility Model
+      {
+        category: "Model Layanan Cloud",
+        title: "Shared Responsibility Model (Tanggung Jawab Bersama)",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; margin: auto;">
+            <p style="font-size: 12px; color: #cbd5e1;">Prinsip pembagian tanggung jawab keamanan antara Pelanggan vs Penyedia Cloud:</p>
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Lapisan Keamanan</th>
+                  <th>On-Premises</th>
+                  <th>IaaS</th>
+                  <th>PaaS</th>
+                  <th>SaaS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Data &amp; Akses Akun</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-customer">Pelanggan</td>
+                </tr>
+                <tr>
+                  <td>Aplikasi &amp; Kode</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-vendor">Vendor</td>
+                </tr>
+                <tr>
+                  <td>Operating System (OS)</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-vendor">Vendor</td>
+                  <td class="tag-vendor">Vendor</td>
+                </tr>
+                <tr>
+                  <td>Hypervisor &amp; Hardware Fisik</td>
+                  <td class="tag-customer">Pelanggan</td>
+                  <td class="tag-vendor">Vendor</td>
+                  <td class="tag-vendor">Vendor</td>
+                  <td class="tag-vendor">Vendor</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 11px; color: var(--text-muted); font-style: italic;">
+              *Vendor menjamin keamanan cloud (of the cloud), sedangkan pelanggan wajib menjaga data di dalam cloud (in the cloud).
+            </div>
+          </div>
+        `
+      },
+      // 21. Model Deployment Cloud
+      {
+        category: "Model Deployment",
+        title: "4 Model Deployment Cloud Berdasarkan Akses",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <h4>1. Public Cloud</h4>
+              <p>Milik vendor komersial besar (AWS, Azure, GCP), diakses secara multi-tenant oleh masyarakat umum. Skalabilitas tertinggi tanpa modal awal.</p>
+            </div>
+            <div class="info-card">
+              <h4>2. Private Cloud</h4>
+              <p>Didedikasikan khusus untuk satu organisasi tunggal (*single-tenant*). Keamanan dan kepatuhan maksimal (misal: bank sentral atau militer).</p>
+            </div>
+            <div class="info-card">
+              <h4>3. Hybrid Cloud</h4>
+              <p>Kombinasi antara private cloud (on-prem) dan public cloud yang dihubungkan melalui VPN/Direct Connect (contoh: *Cloud Bursting* saat trafik melonjak).</p>
+            </div>
+            <div class="info-card">
+              <h4>4. Community Cloud</h4>
+              <p>Infrastruktur bersama yang dikelola dan digunakan oleh konsorsium institusi dengan misi serupa (contoh: cloud gabungan perguruan tinggi atau rumah sakit).</p>
+            </div>
+          </div>
+        `
+      },
+      // 22. Analisis Finansial: CapEx vs OpEx
+      {
+        category: "Manfaat Finansial",
+        title: "Pergeseran Paradigma Finansial: CapEx ke OpEx",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card" style="border-top: 4px solid var(--rose);">
+              <h4 style="color: var(--rose);">CapEx (Capital Expenditure)</h4>
+              <p style="font-weight: 600; color: var(--text-muted);">Investasi Modal di Muka (Tradisional)</p>
+              <ul style="margin-top: 8px; font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+                <li>&bull; Membeli server fisik, switch, lisensi software permanen.</li>
+                <li>&bull; Uang kas tunai perusahaan langsung terikat di awal tahun.</li>
+                <li>&bull; Aset mengalami depresiasi selama 3-5 tahun.</li>
+              </ul>
+            </div>
+            <div class="info-card" style="border-top: 4px solid var(--emerald);">
+              <h4 style="color: #34d399;">OpEx (Operational Expenditure)</h4>
+              <p style="font-weight: 600; color: var(--text-muted);">Biaya Operasional Berjalan (Cloud)</p>
+              <ul style="margin-top: 8px; font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+                <li>&bull; Tagihan dibayar bulanan sesuai pemakaian riil.</li>
+                <li>&bull; Nol biaya komitmen di muka (Zero Upfront Cost).</li>
+                <li>&bull; Instans dapat dimatikan kapan pun untuk menghentikan pengeluaran.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      // 23. Manfaat Operasional: Agilitas & Global Reach
+      {
+        category: "Manfaat Cloud Computing",
+        title: "Agilitas Bisnis & Deploy Global dalam Hitungan Menit",
+        html: `
+          <div class="grid-3" style="margin: auto;">
+            <div class="info-card">
+              <span class="highlight-text">&#9889; Agilitas Bisnis</span>
+              <p style="margin-top: 6px;">Eksperimen fitur baru dapat diuji coba dalam hitungan jam. Jika gagal, server langsung dimatikan tanpa risiko kerugian perangkat fisik.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#127760; Jangkauan Global</span>
+              <p style="margin-top: 6px;">Aplikasi yang dibuat di Indonesia dapat dideploy serentak ke data center Virginia, Frankfurt, dan Tokyo dengan bantuan CDN.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#128737; Disaster Recovery</span>
+              <p style="margin-top: 6px;">Replikasi database lintas wilayah geografis (*Multi-Region*) menjaga ketersediaan layanan meskipun terjadi bencana alam di kota utama.</p>
+            </div>
+          </div>
+        `
+      },
+      // 24. Tantangan Utama 1: Keamanan & Misconfiguration
+      {
+        category: "Tantangan Cloud Computing",
+        title: "Tantangan 1: Celah Keamanan & Misconfiguration",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: var(--rose); margin-bottom: 8px;">95% Insiden Cloud Akibat Kelalaian Pengguna</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 8px;">
+                Penyedia cloud menjaga data center secara ketat, tetapi kebocoran data umumnya terjadi karena kelalaian pengaturan izin akses (*misconfiguration*) dari sisi pengguna.
+              </p>
+              <ul style="font-size: 11px; color: #cbd5e1; padding-left: 16px;">
+                <li>Storage bucket S3 terbuka untuk publik tanpa enkripsi.</li>
+                <li>Kunci akses API token terunggah ke repositori publik GitHub.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h4>Kedaulatan Data (Data Sovereignty) di Indonesia</h4>
+              <p style="font-size: 11px; color: #cbd5e1; margin-top: 6px;">
+                Sesuai PP No. 71/2019 (PSTE) dan UU Perlindungan Data Pribadi (UU PDP), data finansial dan identitas publik wajib disimpan di wilayah hukum Indonesia. Hal ini memicu pembukaan Cloud Region Jakarta oleh Google, AWS, dan Alibaba.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 25. Tantangan Utama 2: Vendor Lock-in & Jaringan
+      {
+        category: "Tantangan Cloud Computing",
+        title: "Tantangan 2: Ancaman Vendor Lock-in & Ketergantungan Jaringan",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <span class="highlight-text">&#128279; Risiko Vendor Lock-in</span>
+              <p style="margin-top: 6px;">Menggunakan API eksklusif milik satu vendor tertentu (misal: AWS DynamoDB murni) membuat aplikasi sangat sulit dan mahal untuk dipindahkan ke vendor lain.</p>
+              <div style="margin-top: 8px; font-size: 10px; color: #34d399;">Solusi: Gunakan standar terbuka (Docker, Kubernetes).</div>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#128268; Ketergantungan Internet</span>
+              <p style="margin-top: 6px;">Tanpa koneksi internet atau jalur fiber optik yang stabil, aplikasi cloud terputus total dari pengguna akhir di lapangan.</p>
+              <div style="margin-top: 8px; font-size: 10px; color: #34d399;">Solusi: Multi-homing ISP redundan &amp; Edge Caching.</div>
+            </div>
+          </div>
+        `
+      },
+      // 26. Tantangan Utama 3: Cloud Bill Shock & FinOps
+      {
+        category: "Tantangan Cloud Computing",
+        title: "Tantangan 3: Fenomena 'Cloud Bill Shock' & Disiplin FinOps",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Mengapa Tagihan Cloud Bisa Membengkak?</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Karena kemudahan klik membuat instance, developer sering lupa mematikan server uji coba (*zombie server*), atau query database looping yang memicu tagihan puluhan juta rupiah.
+              </p>
+            </div>
+            <div class="info-card">
+              <h4 style="color: var(--accent);">Disiplin FinOps (Cloud Financial Ops):</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                <li>1. <strong>Resource Tagging:</strong> Beri label nama tim pada setiap server.</li>
+                <li>2. <strong>Budget Alerts:</strong> Set alarm email saat biaya mencapai 80%.</li>
+                <li>3. <strong>Right-Sizing:</strong> Turunkan kapasitas server yang sepi utilisasi.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      // 27. Studi Kasus: Netflix Migrasi ke AWS
+      {
+        category: "Studi Kasus Industri",
+        title: "Studi Kasus: Migrasi Total Netflix ke Cloud",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: auto;">
+            <div class="info-card" style="border-left: 4px solid var(--rose);">
+              <h4 style="color: var(--rose);">Kisah Nyata Migrasi (2008-2016):</h4>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                Tahun 2008, data center database Netflix rusak total selama 3 hari. Netflix memutuskan menutup seluruh data center fisiknya dan memindahkan 100% video processing ke AWS agar fokus pada pengalaman streaming pelanggan.
+              </p>
+            </div>
+            <div class="grid-3" style="text-align: center;">
+              <div class="info-card">
+                <div style="font-size: 18px; font-weight: 800; color: #fff;">260+ Juta</div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Pelanggan di 190 negara</p>
+              </div>
+              <div class="info-card">
+                <div style="font-size: 18px; font-weight: 800; color: var(--accent);">Chaos Monkey</div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Menguji sistem dengan sengaja mematikan server acak</p>
+              </div>
+              <div class="info-card">
+                <div style="font-size: 18px; font-weight: 800; color: #34d399;">Open Connect</div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">CDN lokal di ISP agar streaming lancar</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 28. Sesi Diskusi Terarah
+      {
+        category: "Aktivitas Kelas",
+        title: "Sesi Diskusi: Pemilihan Arsitektur Startup",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto; max-width: 720px;">
+            <div class="info-card" style="background: #1e1b4b; border-color: #4338ca;">
+              <h4 style="color: #c7d2fe;">Studi Kasus Diskusi Mahasiswa:</h4>
+              <p style="font-size: 12px; color: #e0e7ff; line-height: 1.6; margin-top: 6px;">
+                "Sebuah startup fintech dompet digital di Kota Bogor sedang merintis aplikasi. Tim beranggotakan 4 programmer. Dihadapkan pada 2 opsi: menyewa 3 rack server fisik sendiri di kantor, atau menggunakan PaaS / Managed Cloud."
+              </p>
+            </div>
+            <div class="grid-2">
+              <div class="info-card">
+                <strong style="color: var(--accent);">Tim A (Kubu Pro-Cloud):</strong>
+                <p style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">Jelaskan 3 argumen efisiensi waktu, agilitas rilis, dan skalabilitas jika startup memilih Cloud.</p>
+              </div>
+              <div class="info-card">
+                <strong style="color: var(--amber);">Tim B (Kubu Analisis Risiko):</strong>
+                <p style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">Jelaskan 3 kewaspadaan terkait regulasi Bank Indonesia/OJK, risiko bill shock, dan keamanan data.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 29. Rangkuman Pertemuan 1
+      {
+        category: "Rangkuman Perkuliahan",
+        title: "Rangkuman Materi Pertemuan 1",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; margin: auto; max-width: 720px;">
+            <div class="info-card">
+              <ul style="font-size: 12px; color: #cbd5e1; line-height: 1.6; padding-left: 18px;">
+                <li><strong>Evolusi Komputasi:</strong> Bergeser dari Mainframe Time-sharing, Virtualisasi x86, menuju Cloud Terdistribusi.</li>
+                <li><strong>NIST 5 Karakteristik:</strong> On-demand, Broad Access, Resource Pooling, Elasticity, Measured Service.</li>
+                <li><strong>SPI Model:</strong> IaaS (kendali OS/network), PaaS (fokus kode), SaaS (aplikasi siap saji).</li>
+                <li><strong>Finansial:</strong> Transisi belanja modal aset (CapEx) menjadi biaya operasional fleksibel (OpEx).</li>
+              </ul>
+            </div>
+            <div style="background: #131d31; border: 1px solid #24334a; border-radius: 10px; padding: 12px; font-size: 11px; color: var(--accent);">
+              <strong>Topik Pertemuan 2 Minggu Depan:</strong> Arsitektur Virtualisasi, Deep Dive Hypervisor Type-1 vs Type-2, dan Pengenalan Containerization (Docker).
+            </div>
+          </div>
+        `
+      },
+      // 30. Penutup & Akses Games
+      {
+        category: "Evaluasi Akhir",
+        title: "Sesi Selesai - Mari Uji Pemahaman di Game Hub!",
+        html: `
+          <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin: auto;">
+            <div style="font-size: 48px; margin-bottom: 12px;">&#127881; &#127918;</div>
+            <h2 style="font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px;">Selamat, Anda Telah Menyelesaikan 30 Modul Slide!</h2>
+            <p style="font-size: 13px; color: #94a3b8; max-width: 560px; margin-bottom: 24px;">
+              Untuk memperkuat daya ingat dan menguji pemahaman konsep dasar, silakan pilih salah satu game interaktif di bawah ini:
+            </p>
+            <div style="display: flex; gap: 12px;">
+              <button class="btn-nav btn-next" id="btnLaunchG1" style="background: linear-gradient(135deg, #10b981, #059669);">&#129513; Game 1: Architect Match</button>
+              <button class="btn-nav btn-next" id="btnLaunchG2">&#9889; Game 2: Speed Quiz</button>
+              <button class="btn-nav btn-next" id="btnLaunchG3" style="background: linear-gradient(135deg, #818cf8, #4f46e5);">&#128176; Game 3: CapEx vs OpEx</button>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // STATE CONTROLLER
+    let currentSlide = 0;
+    const totalSlides = slidesData.length;
+
+    // RENDER SLIDE FUNCTION
+    function renderSlide(idx) {
+      if (idx < 0 || idx >= totalSlides) return;
+      currentSlide = idx;
+      const s = slidesData[currentSlide];
+
+      // Update text indicators
+      document.getElementById("navCounter").textContent = `${currentSlide + 1} / ${totalSlides}`;
+      document.getElementById("navTitle").textContent = `Halaman ${currentSlide + 1}: ${s.title}`;
+      document.getElementById("footerCategory").textContent = s.category;
+
+      // Update progress bar
+      const pct = ((currentSlide + 1) / totalSlides) * 100;
+      document.getElementById("navProgress").style.width = pct + "%";
+
+      // Buttons state
+      document.getElementById("btnPrevSlide").disabled = (currentSlide === 0);
+      document.getElementById("btnNextSlide").disabled = (currentSlide === totalSlides - 1);
+
+      // Render content
+      const container = document.getElementById("slideContainer");
+      container.innerHTML = `
+        <div class="slide-header">
+          <div>
+            <div class="slide-category">${s.category}</div>
+            <div class="slide-title">${s.title}</div>
+          </div>
+          <div class="slide-pill">Modul ${currentSlide + 1}</div>
+        </div>
+        <div class="slide-body">
+          ${s.html}
+        </div>
+      `;
+
+      // Attach in-slide button listeners if present
+      const discussTrigger = document.getElementById("btnDiscussTrigger");
+      if (discussTrigger) {
+        discussTrigger.onclick = () => openTimerModal(2);
+      }
+
+      const launchG1 = document.getElementById("btnLaunchG1");
+      if (launchG1) {
+        launchG1.onclick = () => openGameModal(1);
+      }
+      const launchG2 = document.getElementById("btnLaunchG2");
+      if (launchG2) {
+        launchG2.onclick = () => openGameModal(2);
+      }
+      const launchG3 = document.getElementById("btnLaunchG3");
+      if (launchG3) {
+        launchG3.onclick = () => openGameModal(3);
+      }
+    }
+
+    // NAVIGATION ACTIONS
+    document.getElementById("btnPrevSlide").addEventListener("click", () => {
+      if (currentSlide > 0) renderSlide(currentSlide - 1);
+    });
+
+    document.getElementById("btnNextSlide").addEventListener("click", () => {
+      if (currentSlide < totalSlides - 1) renderSlide(currentSlide + 1);
+    });
+
+    // Keyboard Arrow Shortcuts
+    window.addEventListener("keydown", (e) => {
+      const activeTag = document.activeElement ? document.activeElement.tagName : '';
+      if (activeTag === 'TEXTAREA' || activeTag === 'INPUT') return;
+
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault();
+        if (currentSlide < totalSlides - 1) renderSlide(currentSlide + 1);
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        if (currentSlide > 0) renderSlide(currentSlide - 1);
+      }
+    });
+
+    // FULLSCREEN TOGGLE
+    document.getElementById("btnFullscreen").addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    });
+
+    // MODAL: DAFTAR ISI CONTROLLER
+    const modalIndex = document.getElementById("modalIndex");
+    document.getElementById("btnOpenIndex").addEventListener("click", () => {
+      renderIndexGrid();
+      modalIndex.classList.add("active");
+    });
+    document.getElementById("btnCloseIndex").addEventListener("click", () => {
+      modalIndex.classList.remove("active");
+    });
+
+    function renderIndexGrid() {
+      const grid = document.getElementById("indexGrid");
+      grid.innerHTML = "";
+      slidesData.forEach((s, i) => {
+        const item = document.createElement("div");
+        item.className = "index-item" + (i === currentSlide ? " active" : "");
+        item.innerHTML = `
+          <span><strong>${i + 1}.</strong> ${s.title}</span>
+          <span style="font-size: 9px; opacity: 0.8;">${s.category.split(' ')[0]}</span>
+        `;
+        item.onclick = () => {
+          renderSlide(i);
+          modalIndex.classList.remove("active");
+        };
+        grid.appendChild(item);
+      });
+    }
+
+    // MODAL: TIMER DISKUSI CONTROLLER
+    const modalTimer = document.getElementById("modalTimer");
+    let timerSeconds = 180;
+    let timerTotal = 180;
+    let timerInterval = null;
+    let timerRunning = false;
+
+    function openTimerModal(mins = 3) {
+      setTimerMins(mins);
+      modalTimer.classList.add("active");
+    }
+
+    document.getElementById("btnOpenTimer").addEventListener("click", () => openTimerModal(3));
+    document.getElementById("btnCloseTimer").addEventListener("click", () => {
+      modalTimer.classList.remove("active");
+    });
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60);
+      const s = timerSeconds % 60;
+      document.getElementById("timerDisplay").textContent = 
+        String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
+    }
+
+    function setTimerMins(mins) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById("btnTimerToggle").textContent = "Mulai";
+      timerTotal = mins * 60;
+      timerSeconds = timerTotal;
+      updateTimerDisplay();
+    }
+
+    document.getElementById("btnTime2").addEventListener("click", () => setTimerMins(2));
+    document.getElementById("btnTime3").addEventListener("click", () => setTimerMins(3));
+    document.getElementById("btnTime5").addEventListener("click", () => setTimerMins(5));
+
+    document.getElementById("btnTimerToggle").addEventListener("click", () => {
+      const btn = document.getElementById("btnTimerToggle");
+      if (!timerRunning) {
+        timerRunning = true;
+        btn.textContent = "Jeda";
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            btn.textContent = "Mulai";
+            alert("⏰ Waktu diskusi kelas telah selesai! Silakan berikan kesimpulan.");
+          }
+        }, 1000);
+      } else {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.textContent = "Lanjutkan";
+      }
+    });
+
+    document.getElementById("btnTimerReset").addEventListener("click", () => {
+      setTimerMins(timerTotal / 60);
+    });
+
+    // MODAL: CATATAN CONTROLLER
+    const modalNotes = document.getElementById("modalNotes");
+    document.getElementById("btnOpenNotes").addEventListener("click", () => {
+      document.getElementById("noteInput").value = localStorage.getItem("cloud_notes_dede") || "";
+      modalNotes.classList.add("active");
+    });
+    document.getElementById("btnCloseNotes").addEventListener("click", () => {
+      modalNotes.classList.remove("active");
+    });
+    document.getElementById("btnSaveNotes").addEventListener("click", () => {
+      localStorage.setItem("cloud_notes_dede", document.getElementById("noteInput").value);
+      alert("Catatan kuliah Anda berhasil disimpan di browser lokal!");
+      modalNotes.classList.remove("active");
+    });
+
+    // ==========================================
+    // GAME HUB CONTROLLER
+    // ==========================================
+    const modalGameHub = document.getElementById("modalGameHub");
+    document.getElementById("btnOpenGameHub").addEventListener("click", () => openGameModal(1));
+    document.getElementById("btnCloseGameHub").addEventListener("click", () => {
+      modalGameHub.classList.remove("active");
+    });
+
+    function openGameModal(gameId) {
+      modalGameHub.classList.add("active");
+      switchGameTab(gameId);
+    }
+
+    document.getElementById("tabG1").addEventListener("click", () => switchGameTab(1));
+    document.getElementById("tabG2").addEventListener("click", () => switchGameTab(2));
+    document.getElementById("tabG3").addEventListener("click", () => switchGameTab(3));
+
+    function switchGameTab(id) {
+      [1, 2, 3].forEach(i => {
+        const tab = document.getElementById("tabG" + i);
+        if (i === id) tab.classList.add("active");
+        else tab.classList.remove("active");
+      });
+
+      const arena = document.getElementById("gameArena");
+      if (id === 1) renderGame1(arena);
+      else if (id === 2) renderGame2(arena);
+      else if (id === 3) renderGame3(arena);
+    }
+
+    // GAME 1: CLOUD ARCHITECT MATCH
+    const g1Data = [
+      {
+        scenario: "Perusahaan memerlukan migrasi database enterprise lama yang membutuhkan modifikasi kernel sistem operasi secara mandiri.",
+        correct: "IaaS",
+        options: ["IaaS", "PaaS", "SaaS", "Serverless"]
+      },
+      {
+        scenario: "Tim beranggotakan 3 programmer ingin segera meluncurkan aplikasi e-commerce tanpa memikirkan update patch OS dan routing firewall.",
+        correct: "PaaS",
+        options: ["IaaS", "PaaS", "SaaS", "Private Cloud"]
+      },
+      {
+        scenario: "Sekolah memerlukan aplikasi olah dokumen instan untuk 400 siswa yang langsung dipakai via browser tanpa instalasi.",
+        correct: "SaaS",
+        options: ["IaaS", "PaaS", "SaaS", "Bare-Metal"]
+      },
+      {
+        scenario: "Bank BUMN memiliki aturan kepatuhan audit bahwa server dan data finansial tidak boleh bercampur di multi-tenant publik.",
+        correct: "Private Cloud",
+        options: ["Public Cloud", "Private Cloud", "SaaS", "Community Cloud"]
+      }
+    ];
+
+    let g1Idx = 0;
+    let g1Score = 0;
+
+    function renderGame1(arena) {
+      g1Idx = 0;
+      g1Score = 0;
+      showG1Question(arena);
+    }
+
+    function showG1Question(arena) {
+      if (g1Idx >= g1Data.length) {
+        arena.innerHTML = `
+          <div style="text-align: center; padding: 24px;">
+            <div style="font-size: 36px;">🏆</div>
+            <h3 style="font-size: 16px; color: #fff; margin: 10px 0;">Selesai! Skor Anda: ${g1Score} / ${g1Data.length}</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">Pemahaman Anda mengenai arsitektur cloud sangat baik!</p>
+            <button class="btn-nav btn-next" onclick="renderGame1(document.getElementById('gameArena'))">Main Lagi</button>
+          </div>
+        `;
+        return;
+      }
+
+      const q = g1Data[g1Idx];
+      arena.innerHTML = `
+        <div style="max-width: 560px; margin: auto;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
+            <span>Skenario ${g1Idx + 1} dari ${g1Data.length}</span>
+            <span>Skor: ${g1Score}</span>
+          </div>
+          <div class="info-card" style="margin-bottom: 14px;">
+            <div style="font-size: 10px; color: var(--accent); font-weight: 700;">STUDI KASUS:</div>
+            <div style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 4px;">"${q.scenario}"</div>
+          </div>
+          <div style="font-size: 11px; color: #cbd5e1; margin-bottom: 8px;">Pilih solusi arsitektur terbaik:</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;" id="g1Options"></div>
+          <div id="g1Feedback" style="font-size: 12px; font-weight: 700; margin-top: 10px; min-height: 20px;"></div>
+        </div>
+      `;
+
+      const optBox = document.getElementById("g1Options");
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-option-btn";
+        btn.textContent = opt;
+        btn.onclick = () => {
+          const fb = document.getElementById("g1Feedback");
+          if (opt === q.correct) {
+            g1Score++;
+            fb.innerHTML = `<span style="color: #34d399;">&check; Benar! Solusi yang tepat adalah ${q.correct}.</span>`;
+          } else {
+            fb.innerHTML = `<span style="color: #f87171;">&cross; Kurang tepat. Pilihan terbaik: ${q.correct}.</span>`;
+          }
+          setTimeout(() => {
+            g1Idx++;
+            showG1Question(arena);
+          }, 900);
+        };
+        optBox.appendChild(btn);
+      });
+    }
+
+    // GAME 2: SPEED QUIZ BATTLE
+    const g2Data = [
+      {
+        q: "Karakteristik NIST yang memungkinkan server bertambah dan berkurang secara otomatis sesuai beban transaksi disebut?",
+        choices: ["Rapid Elasticity", "Resource Pooling", "Measured Service", "Broad Network Access"],
+        ans: 0
+      },
+      {
+        q: "Pada model IaaS, siapakah yang memegang tanggung jawab memperbarui security patch pada Operating System (OS)?",
+        choices: ["Vendor Cloud (AWS/GCP)", "Pelanggan / Pengguna", "Penyedia Internet (ISP)", "Pemerintah"],
+        ans: 1
+      },
+      {
+        q: "Pergeseran biaya modal awal membeli server di muka menjadi tagihan bulanan fleksibel disebut transisi dari...",
+        choices: ["CapEx ke OpEx", "OpEx ke CapEx", "SaaS ke IaaS", "Public ke Private"],
+        ans: 0
+      },
+      {
+        q: "Regulasi di Indonesia yang mewajibkan data tertentu ditempatkan di dalam negeri adalah...",
+        choices: ["ISO 9001", "UU PDP & PP 71/2019 (PSTE)", "NIST SP 800-53", "HIPAA Act"],
+        ans: 1
+      }
+    ];
+
+    let g2Idx = 0;
+    let g2Score = 0;
+
+    function renderGame2(arena) {
+      g2Idx = 0;
+      g2Score = 0;
+      showG2Question(arena);
+    }
+
+    function showG2Question(arena) {
+      if (g2Idx >= g2Data.length) {
+        arena.innerHTML = `
+          <div style="text-align: center; padding: 24px;">
+            <div style="font-size: 36px;">⚡</div>
+            <h3 style="font-size: 16px; color: #fff; margin: 10px 0;">Kuis Selesai! Skor Anda: ${g2Score * 25} / 100</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">Hebat! Pengetahuan konsep dasar Anda sudah sangat teruji.</p>
+            <button class="btn-nav btn-next" onclick="renderGame2(document.getElementById('gameArena'))">Ulangi Kuis</button>
+          </div>
+        `;
+        return;
+      }
+
+      const item = g2Data[g2Idx];
+      arena.innerHTML = `
+        <div style="max-width: 560px; margin: auto;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
+            <span>Soal ${g2Idx + 1} dari ${g2Data.length}</span>
+            <span>Nilai: ${g2Score * 25}</span>
+          </div>
+          <div class="info-card" style="margin-bottom: 12px;">
+            <h4 style="font-size: 13px; color: #fff; line-height: 1.5;">${item.q}</h4>
+          </div>
+          <div id="g2Choices"></div>
+          <div id="g2Feedback" style="font-size: 12px; font-weight: 700; margin-top: 8px; min-height: 20px;"></div>
+        </div>
+      `;
+
+      const choicesBox = document.getElementById("g2Choices");
+      item.choices.forEach((choice, i) => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-option-btn";
+        btn.textContent = choice;
+        btn.onclick = () => {
+          const fb = document.getElementById("g2Feedback");
+          if (i === item.ans) {
+            g2Score++;
+            fb.innerHTML = `<span style="color: #34d399;">&check; Benar! +25 Poin</span>`;
+          } else {
+            fb.innerHTML = `<span style="color: #f87171;">&cross; Kurang tepat.</span>`;
+          }
+          setTimeout(() => {
+            g2Idx++;
+            showG2Question(arena);
+          }, 800);
+        };
+        choicesBox.appendChild(btn);
+      });
+    }
+
+    // GAME 3: CAPEX VS OPEX SORTER
+    const g3Data = [
+      { desc: "Membeli 5 unit server fisik Dell PowerEdge seharga Rp 250 Juta", type: "CapEx" },
+      { desc: "Membayar tagihan bulanan Google Workspace Rp 140.000 / user / bulan", type: "OpEx" },
+      { desc: "Instalasi genset diesel & AC presisi untuk ruang data center kantor", type: "CapEx" },
+      { desc: "Tagihan komputasi AWS EC2 sebesar $45 untuk lonjakan trafik weekend", type: "OpEx" }
+    ];
+
+    let g3Idx = 0;
+    let g3Score = 0;
+
+    function renderGame3(arena) {
+      g3Idx = 0;
+      g3Score = 0;
+      showG3Question(arena);
+    }
+
+    function showG3Question(arena) {
+      if (g3Idx >= g3Data.length) {
+        arena.innerHTML = `
+          <div style="text-align: center; padding: 24px;">
+            <div style="font-size: 36px;">💰</div>
+            <h3 style="font-size: 16px; color: #fff; margin: 10px 0;">Klasifikasi Tuntas! Skor: ${g3Score} / ${g3Data.length}</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">Anda kini mahir memisahkan pos belanja modal aset dan operasional cloud.</p>
+            <button class="btn-nav btn-next" onclick="renderGame3(document.getElementById('gameArena'))">Mulai Ulang</button>
+          </div>
+        `;
+        return;
+      }
+
+      const curr = g3Data[g3Idx];
+      arena.innerHTML = `
+        <div style="max-width: 540px; margin: auto; text-align: center;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 10px;">
+            <span>Biaya ${g3Idx + 1} dari ${g3Data.length}</span>
+            <span>Skor: ${g3Score}</span>
+          </div>
+          <div class="info-card" style="padding: 20px; margin-bottom: 16px;">
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Tentukan Pos Anggaran:</div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 6px;">"${curr.desc}"</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button class="btn-nav" style="background: rgba(244, 63, 94, 0.2); border: 1px solid var(--rose); color: #f43f5e; justify-content: center; padding: 12px;" onclick="checkG3('CapEx', '${curr.type}')">
+              CapEx (Capital Expenditure)
+            </button>
+            <button class="btn-nav" style="background: rgba(16, 185, 129, 0.2); border: 1px solid var(--emerald); color: #10b981; justify-content: center; padding: 12px;" onclick="checkG3('OpEx', '${curr.type}')">
+              OpEx (Operational Expenditure)
+            </button>
+          </div>
+          <div id="g3Feedback" style="font-size: 12px; font-weight: 700; margin-top: 14px; min-height: 20px;"></div>
+        </div>
+      `;
+    }
+
+    function checkG3(chosen, actual) {
+      const fb = document.getElementById("g3Feedback");
+      if (chosen === actual) {
+        g3Score++;
+        fb.innerHTML = `<span style="color: #34d399;">&check; Tepat Sekali! Komponen ini adalah ${actual}.</span>`;
+      } else {
+        fb.innerHTML = `<span style="color: #f87171;">&cross; Salah. Komponen ini masuk dalam ${actual}.</span>`;
+      }
+      setTimeout(() => {
+        g3Idx++;
+        showG3Question(document.getElementById("gameArena"));
+      }, 800);
+    }
+
+    // INITIAL RENDER ON LOAD
+    window.addEventListener("DOMContentLoaded", () => {
+      renderSlide(0);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Ajar: Model Deployment Cloud Computing</title>
+  <style>
+    /* CSS Reset & Offline Native Modern Styling */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #070d19;
+      --card-bg: #111c30;
+      --card-border: #1f2f4c;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #38bdf8;
+      --public: #38bdf8;
+      --private: #ef4444;
+      --hybrid: #a855f7;
+      --community: #10b981;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Header */
+    header {
+      height: 60px;
+      background-color: #0d1527;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #a855f7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    .header-info h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-sks {
+      font-size: 10px;
+      background-color: #0c4a6e;
+      color: #7dd3fc;
+      border: 1px solid #0284c7;
+      padding: 1px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .header-info p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 320px;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 11px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: #1e293b;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #a855f7);
+      width: 3.33%;
+      transition: width 0.3s ease;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action {
+      background-color: #162238;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background-color: #233554;
+      border-color: #38bdf8;
+    }
+
+    .btn-game-hub {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+    }
+
+    .btn-game-hub:hover {
+      background: rgba(168, 85, 247, 0.3);
+    }
+
+    /* Main Viewport */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, #16243d 0%, #070d19 75%);
+    }
+
+    .slide-card {
+      background: rgba(13, 21, 39, 0.94);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 980px;
+      height: 100%;
+      max-height: 640px;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 32px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .slide-header {
+      border-bottom: 1px solid #1a2a47;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .slide-category {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .slide-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .slide-pill {
+      font-size: 11px;
+      background-color: #162238;
+      border: 1px solid var(--card-border);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    /* Footer */
+    footer {
+      height: 60px;
+      background-color: #0d1527;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-prev {
+      background-color: #162238;
+      border: 1px solid var(--card-border);
+      color: #f1f5f9;
+    }
+
+    .btn-prev:hover:not(:disabled) {
+      background-color: #233554;
+    }
+
+    .btn-prev:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-next:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+    }
+
+    .btn-next:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .footer-tools {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-tool {
+      background-color: #162238;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-tool:hover {
+      background-color: #233554;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: #0d1527;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 820px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      background-color: #162238;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-close:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Grids & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .info-card {
+      background-color: #111c30;
+      border: 1px solid #1e304f;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .info-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .info-card p, .info-card ul {
+      font-size: 11px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .info-card ul {
+      list-style-type: none;
+    }
+
+    .info-card li {
+      margin-bottom: 4px;
+    }
+
+    .highlight-text {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .badge-public {
+      background-color: rgba(56, 189, 248, 0.2);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .badge-private {
+      background-color: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444;
+      color: #f87171;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .badge-hybrid {
+      background-color: rgba(168, 85, 247, 0.2);
+      border: 1px solid #a855f7;
+      color: #c084fc;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .badge-community {
+      background-color: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      color: #34d399;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    /* Index Grid */
+    .index-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .index-item {
+      padding: 10px 14px;
+      background-color: #111c30;
+      border: 1px solid #1e304f;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #cbd5e1;
+      transition: all 0.2s;
+    }
+
+    .index-item:hover {
+      background-color: #192a47;
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .index-item.active {
+      background-color: #0c4a6e;
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Game Tab Bar */
+    .game-tab-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 20px;
+      background-color: #111c30;
+      border-bottom: 1px solid #1e304f;
+    }
+
+    .game-tab {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #1e304f;
+      background-color: #162238;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .game-tab.active {
+      background-color: var(--purple);
+      color: #fff;
+      border-color: var(--purple);
+    }
+
+    /* Modern Table */
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+
+    .modern-table th {
+      background-color: #162238;
+      color: #94a3b8;
+      padding: 8px 12px;
+      border: 1px solid #1e304f;
+      font-weight: 700;
+    }
+
+    .modern-table td {
+      padding: 8px 12px;
+      border: 1px solid #1e304f;
+      color: #e2e8f0;
+    }
+
+    /* Simulation Game Elements */
+    .sim-card {
+      background: #111c30;
+      border: 1px solid #1e304f;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sim-slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sim-slider-group label {
+      font-size: 11px;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .sim-slider-group input[type=range] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .sim-result-box {
+      background: #090f1d;
+      border: 1px solid #1e304f;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sim-bar {
+      height: 10px;
+      background: #162238;
+      border-radius: 5px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .sim-bar-fill {
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    /* Architecture Drag-and-Drop Area */
+    .arch-dropzone {
+      min-height: 90px;
+      border: 2px dashed #2a4168;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      background: rgba(13, 21, 39, 0.6);
+      transition: all 0.2s;
+    }
+
+    .arch-dropzone.dragover {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .arch-chip {
+      background: #1e304f;
+      border: 1px solid #38bdf8;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: grab;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    .arch-chip:active {
+      cursor: grabbing;
+    }
+
+    /* Evaluasi Quiz Styles */
+    .eval-question-card {
+      background: #111c30;
+      border: 1px solid #1e304f;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .eval-q-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .eval-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .eval-opt-label {
+      background: #162238;
+      border: 1px solid #1e304f;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: #cbd5e1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .eval-opt-label:hover {
+      background: #233554;
+      border-color: #38bdf8;
+    }
+
+    .eval-opt-label.selected {
+      background: #0c4a6e;
+      border-color: #38bdf8;
+      color: #fff;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div class="header-left">
+      <div class="logo-badge">&#9729;</div>
+      <div class="header-info">
+        <h1>Cloud Computing <span class="tag-sks">3 SKS</span></h1>
+        <p>Dosen: <strong>Dede Mulyana, S.T.</strong> &bull; Model Deployment Cloud</p>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="progress-labels">
+        <span id="navTitle" style="color: var(--accent); font-weight: 600;">Halaman 1: Cover</span>
+        <span id="navCounter" style="font-weight: 700; color: #cbd5e1;">1 / 30</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="navProgress" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-action" id="btnOpenIndex">
+        &#9776; <span>Daftar Isi</span>
+      </button>
+      <button class="btn-action btn-game-hub" id="btnOpenGameHub">
+        &#127918; <span>Game &amp; Lab Hub</span>
+      </button>
+      <button class="btn-action" id="btnFullscreen" title="Layar Penuh">
+        &#x26F6;
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN SLIDE WORKSPACE ================= -->
+  <main>
+    <div class="slide-card" id="slideContainer">
+      <!-- Dynamic slide content injected by JavaScript -->
+    </div>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="nav-btns">
+      <button class="btn-nav btn-prev" id="btnPrevSlide">&#8592; Sebelumnya</button>
+      <button class="btn-nav btn-next" id="btnNextSlide">Selanjutnya &#8594;</button>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-muted);">
+      Kategori: <span id="footerCategory" style="color: #cbd5e1; font-weight: 600;">Identitas Kuliah</span>
+    </div>
+
+    <div class="footer-tools">
+      <button class="btn-tool" id="btnOpenTimer">&#9201; Timer Diskusi</button>
+      <button class="btn-tool" id="btnOpenNotes">&#9998; Catatan Kuliah</button>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL: DAFTAR ISI ================= -->
+  <div class="modal-overlay" id="modalIndex">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Daftar Isi Modul Ajar: Model Deployment Cloud (30 Halaman)</h3>
+        <button class="btn-close" id="btnCloseIndex">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="index-grid" id="indexGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: GAME & LAB HUB (INTERAKTIF NON-QUIZ) ================= -->
+  <div class="modal-overlay" id="modalGameHub">
+    <div class="modal-box" style="max-width: 860px;">
+      <div class="modal-header" style="background-color: #1e1b4b; border-color: #4338ca;">
+        <div>
+          <h3 style="color: #c7d2fe;">Cloud Deployment Interactive Lab &amp; Simulator</h3>
+          <p style="font-size: 11px; color: #a5b4fc;">Eksplorasi interaktif: Simulator Arsitektur, Kalkulator Biaya TCO &amp; Live Scenario Builder</p>
+        </div>
+        <button class="btn-close" id="btnCloseGameHub">&times;</button>
+      </div>
+      <div class="game-tab-bar">
+        <button class="game-tab active" id="tabG1">&#128736; Game 1: Cloud Deployment Architect Lab</button>
+        <button class="game-tab" id="tabG2">&#128184; Game 2: TCO &amp; Latency Live Simulator</button>
+        <button class="game-tab" id="tabG3">&#128640; Game 3: Cloud Bursting Stress Test</button>
+      </div>
+      <div class="modal-body" id="gameArena">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: TIMER DISKUSI KELOMPOK ================= -->
+  <div class="modal-overlay" id="modalTimer">
+    <div class="modal-box" style="max-width: 360px; text-align: center;">
+      <div class="modal-header">
+        <h3>Timer Sesi Diskusi Kelompok</h3>
+        <button class="btn-close" id="btnCloseTimer">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; align-items: center;">
+        <div style="font-size: 42px; font-weight: 900; color: var(--amber); margin: 15px 0; font-family: monospace;" id="timerDisplay">03:00</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button class="btn-tool" id="btnTime2">2 Mnt</button>
+          <button class="btn-tool" id="btnTime3">3 Mnt</button>
+          <button class="btn-tool" id="btnTime5">5 Mnt</button>
+        </div>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button class="btn-nav btn-next" style="flex: 1; justify-content: center;" id="btnTimerToggle">Mulai</button>
+          <button class="btn-nav btn-prev" id="btnTimerReset">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CATATAN KULIAH ================= -->
+  <div class="modal-overlay" id="modalNotes">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Catatan Kuliah Mahasiswa</h3>
+        <button class="btn-close" id="btnCloseNotes">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Catatan ini tersimpan secara lokal di browser Anda (offline-ready):</p>
+        <textarea id="noteInput" style="width: 100%; height: 160px; background: #070d19; border: 1px solid #1f2f4c; border-radius: 8px; color: #fff; padding: 10px; font-size: 12px; font-family: inherit; resize: none;"></textarea>
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button class="btn-nav btn-next" id="btnSaveNotes">Simpan Catatan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT CONTROLLER ================= -->
+  <script>
+    // DATA 30 SLIDE LENGKAP: MODEL DEPLOYMENT CLOUD COMPUTING
+    const slidesData = [
+      // 1. Identitas Mata Kuliah & Dosen Pengampu (Halaman Pertama)
+      {
+        category: "Identitas Perkuliahan",
+        title: "Identitas Mata Kuliah & Silabus Pengantar",
+        html: `
+          <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin: auto; max-width: 760px;">
+            <div style="background: rgba(2, 132, 199, 0.15); border: 1px solid #0284c7; padding: 4px 14px; border-radius: 9999px; font-size: 11px; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 12px;">
+              Program Studi Teknik Informatika / Sistem Informasi
+            </div>
+            <h1 style="font-size: 32px; font-weight: 900; line-height: 1.25; color: #fff; margin-bottom: 8px;">
+              CLOUD COMPUTING
+            </h1>
+            <p style="font-size: 15px; color: #94a3b8; margin-bottom: 24px; font-weight: 500;">
+              Materi: Model Deployment Cloud &bull; Bobot: 3 SKS
+            </p>
+
+            <div style="width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; text-align: left;">
+              <div class="info-card" style="border-top: 3px solid #0284c7;">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Dosen Pengampu</div>
+                <div style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 4px;">Dede Mulyana, S.T.</div>
+                <div style="font-size: 11px; color: #38bdf8; margin-top: 2px;">Dosen Pengampu Cloud Computing</div>
+              </div>
+              <div class="info-card" style="border-top: 3px solid #a855f7;">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Sub Materi Pokok</div>
+                <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 4px;">Public, Private, Hybrid &amp; Community Cloud</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Analisis Arsitektur &amp; Kepatuhan</div>
+              </div>
+              <div class="info-card" style="border-top: 3px solid #10b981;">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Metode Pembelajaran</div>
+                <div style="font-size: 13px; font-weight: 800; color: #fff; margin-top: 4px;">Ceramah &amp; Diskusi Kelompok</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Simulasi Interaktif &amp; Evaluasi 20 Soal</div>
+              </div>
+            </div>
+
+            <div style="background: #111c30; border: 1px solid #1f2f4c; border-radius: 12px; padding: 12px 20px; font-size: 12px; color: #cbd5e1; width: 100%;">
+              <strong>Deskripsi Modul:</strong> Modul pembelajaran ini mengkaji secara terstruktur 4 Model Deployment Cloud Computing berdasarkan kerangka NIST SP 800-145, meliputi topologi hak akses, kepemilikan aset, isolasi multi-tenant vs single-tenant, keamanan data, analisis biaya TCO, hingga panduan arsitektur di industri.
+            </div>
+          </div>
+        `
+      },
+      // 2. Capaian Pembelajaran (CPMK)
+      {
+        category: "Capaian Pembelajaran",
+        title: "Capaian Pembelajaran Mata Kuliah (CPMK)",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: auto;">
+            <p style="font-size: 13px; color: #cbd5e1;">Setelah menyelesaikan sesi pembelajaran ini, mahasiswa diharapkan mampu:</p>
+            <div class="grid-2">
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 3.1]</span>
+                <h4 style="margin-top: 4px;">Menganalisis 4 Taksonomi Deployment NIST</h4>
+                <p>Membedakan karakteristik arsitektural, hak kepemilikan, lokasi fisik infrastruktur, dan batasan operasional Public, Private, Hybrid, dan Community Cloud.</p>
+              </div>
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 3.2]</span>
+                <h4 style="margin-top: 4px;">Mengevaluasi Kepatuhan &amp; Kedaulatan Data</h4>
+                <p>Mengidentifikasi implikasi kepatuhan hukum (UU PDP, PP 71/2019, OJK, HIPAA) terhadap penempatan lokasi server cloud.</p>
+              </div>
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 3.3]</span>
+                <h4 style="margin-top: 4px;">Merancang Pola Arsitektur Hybrid &amp; Multi-Cloud</h4>
+                <p>Menjelaskan teknik interkoneksi secure tunnel (VPN, AWS Direct Connect), arsitektur cloud bursting, dan mitigasi downtime sistem.</p>
+              </div>
+              <div class="info-card">
+                <span class="highlight-text">[CPMK 3.4]</span>
+                <h4 style="margin-top: 4px;">Mengambil Keputusan Strategis Berbasis Kasus</h4>
+                <p>Mampu berkolaborasi dalam diskusi kelompok untuk merekomendasikan model deployment paling efektif dari segi biaya (TCO), kinerja, dan keamanan.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 3. Konsep Fundamental Model Deployment Cloud
+      {
+        category: "Konsep Dasar",
+        title: "Konsep Fundamental Model Deployment Cloud",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Apa Itu Model Deployment Cloud?</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Jika <strong>Model Layanan (SPI)</strong> menjawab pertanyaan <em>"Apa yang disediakan penyedia (infrastruktur, platform, atau software)?"</em>, maka <strong>Model Deployment</strong> menjawab:
+              </p>
+              <div class="info-card" style="margin-bottom: 10px; border-left: 3px solid var(--accent);">
+                <strong>"Di mana infrastruktur berada, siapa yang memiliki dan mengelolanya, serta siapa saja yang memiliki hak akses terhadap sistem tersebut?"</strong>
+              </div>
+              <p style="font-size: 11px; color: var(--text-muted);">
+                Model deployment menentukan isolasi data, batas tanggung jawab legalitas, model keamanan jaringan, dan kalkulasi pengeluaran biaya perusahaan.
+              </p>
+            </div>
+            <div class="info-card" style="background: #090f1d; text-align: center; padding: 20px;">
+              <h4 style="color: var(--accent); margin-bottom: 12px;">4 Model Deployment Standar NIST</h4>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; padding: 10px; border-radius: 8px; color: #38bdf8; font-weight: 700; font-size: 12px;">
+                  1. Public Cloud (Akses Publik / Multi-Tenant)
+                </div>
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; padding: 10px; border-radius: 8px; color: #f87171; font-weight: 700; font-size: 12px;">
+                  2. Private Cloud (Organisasi Tunggal / Single-Tenant)
+                </div>
+                <div style="background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; padding: 10px; border-radius: 8px; color: #c084fc; font-weight: 700; font-size: 12px;">
+                  3. Hybrid Cloud (Kombinasi Publik &amp; Privat)
+                </div>
+                <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; padding: 10px; border-radius: 8px; color: #34d399; font-weight: 700; font-size: 12px;">
+                  4. Community Cloud (Konsorsium Komunitas Bersama)
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 4. Analogi Dunia Nyata: Transportasi Publik vs Pribadi
+      {
+        category: "Analogi Konsep",
+        title: "Analogi Dunia Nyata: Sistem Transportasi",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto;">
+            <p style="font-size: 12px; color: #cbd5e1;">Memahami 4 model deployment dengan analogi moda transportasi:</p>
+            <div class="grid-4" style="text-align: center;">
+              <div class="info-card" style="border-top: 3px solid #38bdf8;">
+                <span class="badge-public">Public Cloud</span>
+                <div style="font-size: 24px; margin: 6px 0;">&#128652;</div>
+                <h4 style="color: #38bdf8;">Bus Raya Terpadu</h4>
+                <p>Milik umum, berbagi kursi dengan orang lain, biaya tiket murah, rute sudah ditentukan operator.</p>
+              </div>
+              <div class="info-card" style="border-top: 3px solid #ef4444;">
+                <span class="badge-private">Private Cloud</span>
+                <div style="font-size: 24px; margin: 6px 0;">&#128663;</div>
+                <h4 style="color: #f87171;">Mobil Pribadi</h4>
+                <p>Milik sendiri, kendali rute penuh, privasi mutlak, namun biaya beli dan perawatan ditanggung sendiri.</p>
+              </div>
+              <div class="info-card" style="border-top: 3px solid #a855f7;">
+                <span class="badge-hybrid">Hybrid Cloud</span>
+                <div style="font-size: 24px; margin: 6px 0;">&#128665;</div>
+                <h4 style="color: #c084fc;">Mobil + Kereta</h4>
+                <p>Naik mobil pribadi ke stasiun, lalu naik kereta cepat ke kantor. Memadukan privasi dan kecepatan akses.</p>
+              </div>
+              <div class="info-card" style="border-top: 3px solid #10b981;">
+                <span class="badge-community">Community Cloud</span>
+                <div style="font-size: 24px; margin: 6px 0;">&#128654;</div>
+                <h4 style="color: #34d399;">Mobil Antar-Jemput</h4>
+                <p>Satu van disewa bersama oleh beberapa tetangga di satu kompleks perumahan yang sama demi efisiensi bersama.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 5. Public Cloud: Definisi & Prinsip Kerja
+      {
+        category: "Public Cloud",
+        title: "Public Cloud: Definisi & Prinsip Kerja",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <span class="badge-public">Multi-Tenant Architecture</span>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 8px 0;">Infrastruktur Berbagi Skala Masif</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Public Cloud adalah model di mana infrastruktur komputasi dimiliki, dioperasikan, dan dikelola oleh penyedia cloud pihak ketiga (Hyperscaler) dan dialokasikan untuk masyarakat umum secara multi-tenant melalui internet publik.
+              </p>
+              <ul style="font-size: 11px; color: #cbd5e1; padding-left: 16px;">
+                <li><strong>Kepemilikan:</strong> Dimiliki 100% oleh penyedia cloud komersial.</li>
+                <li><strong>Lokasi:</strong> Di mega data center penyedia yang tersebar secara global.</li>
+                <li><strong>Aksesibilitas:</strong> Dapat diakses dari mana saja melalui koneksi internet.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h4 style="color: #38bdf8;">Prinsip Isolasi Multi-Tenant:</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                Meskipun ribuan perusahaan (seperti startup, e-commerce, bahkan perbankan) berbagi CPU dan memori pada rack server fisik yang sama, sistem hypervisor dan Software-Defined Network (SDN) menjamin bahwa setiap tenant terisolasi secara virtual dan tidak dapat membaca data tenant lain.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 6. Public Cloud: Keunggulan & Keterbatasan
+      {
+        category: "Public Cloud",
+        title: "Public Cloud: Keunggulan & Keterbatasan",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card" style="border-left: 4px solid var(--emerald);">
+              <h4 style="color: #34d399;">Keunggulan Public Cloud</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                <li>&check; <strong>Nol Investasi Modal Awal (Zero CapEx):</strong> Cukup membayar tagihan bulanan (OpEx) sesuai penggunaan.</li>
+                <li>&check; <strong>Skalabilitas Tak Terbatas:</strong> Kapasitas server dapat ditambah ribuan core dalam hitungan detik.</li>
+                <li>&check; <strong>Bebas Maintenance Hardware:</strong> Pemeliharaan genset, listrik, dan server fisik ditangani vendor.</li>
+                <li>&check; <strong>Jangkauan Global:</strong> Deploy aplikasi ke puluhan negara dengan latensi rendah.</li>
+              </ul>
+            </div>
+            <div class="info-card" style="border-left: 4px solid var(--rose);">
+              <h4 style="color: var(--rose);">Keterbatasan Public Cloud</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                <li>&cross; <strong>Kontrol Terbatas:</strong> Pengguna tidak memiliki akses terhadap konfigurasi perangkat fisik.</li>
+                <li>&cross; <strong>Kekhawatiran Kepatuhan:</strong> Beberapa data rahasia negara dilarang disimpan di server multi-tenant.</li>
+                <li>&cross; <strong>Tagihan Tak Terduga (Bill Shock):</strong> Jika konsumsi resource tidak dikontrol, biaya operasional bisa melonjak drastis.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      // 7. Public Cloud: Pemain Utama di Dunia & Indonesia
+      {
+        category: "Public Cloud",
+        title: "Public Cloud: Ekosistem Penyedia Global & Lokal",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <h4 style="color: #38bdf8; font-size: 14px;">The Big Hyperscalers</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 8px;">
+                <li><strong>Amazon Web Services (AWS):</strong> Pelopor dan pemimpin pasar global (Region Jakarta: ap-southeast-3).</li>
+                <li><strong>Google Cloud Platform (GCP):</strong> Unggul dalam ekosistem Big Data, Kubernetes &amp; AI (Region Jakarta: asia-southeast2).</li>
+                <li><strong>Microsoft Azure:</strong> Integrasi kuat dengan Windows Server enterprise &amp; Active Directory.</li>
+                <li><strong>Alibaba Cloud:</strong> Penyedia public cloud dengan data center terlengkap pertama di Indonesia.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h4 style="color: #34d399; font-size: 14px;">Penyedia Public Cloud Lokal</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 8px;">
+                <li><strong>Biznet Gio Cloud:</strong> Layanan IaaS/PaaS berdaya saing tinggi di dalam negeri.</li>
+                <li><strong>Telkom Cloud (Telkomsigma):</strong> Pilihan utama BUMN dan instansi pemerintah Indonesia.</li>
+                <li><strong>IDCloudHost:</strong> Pilihan ramah kantong untuk startup dan pengembang lokal.</li>
+                <li><strong>Lintasarta Cloudeka:</strong> Penyedia solusi cloud terintegrasi korporat nasional.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      // 8. Private Cloud: Definisi & Filosofi Single-Tenant
+      {
+        category: "Private Cloud",
+        title: "Private Cloud: Definisi & Filosofi Single-Tenant",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <span class="badge-private">Dedicated Single-Tenant</span>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 8px 0;">Eksklusif untuk Satu Organisasi Tunggal</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Private Cloud adalah model deployment di mana infrastruktur cloud dioperasikan dan didedikasikan secara eksklusif hanya untuk satu organisasi tunggal. Tidak ada sumber daya fisik yang dibagi dengan organisasi lain.
+              </p>
+              <ul style="font-size: 11px; color: #cbd5e1; padding-left: 16px;">
+                <li><strong>Hak Kendali:</strong> 100% berada di bawah otoritas organisasi sendiri.</li>
+                <li><strong>Isolasi Jaringan:</strong> Berada di dalam firewall tertutup / jaringan intranet privat.</li>
+                <li><strong>Kustomisasi:</strong> Arsitektur hardware dan software dapat disesuaikan tanpa batas.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h4 style="color: #f87171;">Siapa Pengguna Utama Private Cloud?</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                Lembaga keuangan perbankan (Core Banking System), instansi militer/pertahanan negara, rumah sakit dengan rekam medis pasien rahasia, serta korporasi multinasional dengan hak kekayaan intelektual (IP) yang sangat sensitif.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 9. Private Cloud: On-Premise vs Hosted Private Cloud
+      {
+        category: "Private Cloud",
+        title: "Private Cloud: On-Premise vs Hosted Private Cloud",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <h4 style="color: #f87171;">1. On-Premise Private Cloud</h4>
+              <p style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Dikelola Mandiri di Ruang Server Sendiri</p>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 8px;">
+                <li>&bull; Perusahaan membeli server fisik dan menempatkannya di kantor sendiri.</li>
+                <li>&bull; Tim internal mengurus listrik, AC pendingin, kabel jaringan, dan hypervisor.</li>
+                <li>&bull; Kendali fisik 100%, namun biaya modal awal (CapEx) sangat mahal.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h4 style="color: #a855f7;">2. Hosted Private Cloud (Managed)</h4>
+              <p style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Dedicated Server di Data Center Pihak Ketiga</p>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 8px;">
+                <li>&bull; Perusahaan menyewa rack server fisik khusus (Dedicated Bare-Metal) di data center vendor.</li>
+                <li>&bull; Server tidak dibagi dengan pelanggan lain, namun pemeliharaan fisik ditangani vendor.</li>
+                <li>&bull; Mengurangi kerepotan pemeliharaan gedung data center internal.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      // 10. Private Cloud: Teknologi Pembangun (OpenStack, VMware, Proxmox)
+      {
+        category: "Private Cloud",
+        title: "Teknologi Pembangun Private Cloud Mandiri",
+        html: `
+          <div class="grid-3" style="margin: auto;">
+            <div class="info-card">
+              <span class="highlight-text">&#128396; OpenStack</span>
+              <h4 style="margin-top: 4px;">Platform Open-Source Standar</h4>
+              <p>Software orkestrasi cloud paling populer di dunia. Mengelola resource compute (Nova), storage (Cinder/Swift), dan jaringan (Neutron) skala masif.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#128421; VMware Cloud Foundation</span>
+              <h4 style="margin-top: 4px;">Solusi Enterprise Matang</h4>
+              <p>Kombinasi VMware vSphere (ESXi), vSAN, dan NSX untuk membangun Software-Defined Data Center (SDDC) kelas korporasi perbankan.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#128736; Proxmox VE / Nutanix</span>
+              <h4 style="margin-top: 4px;">Hyper-Converged Infrastructure</h4>
+              <p>Solusi virtualisasi berbasis KVM &amp; LXC yang efisien dan stabil untuk kampus, instansi pemerintah, dan UKM yang ingin membangun private cloud.</p>
+            </div>
+          </div>
+        `
+      },
+      // 11. Private Cloud: Keunggulan & Keterbatasan
+      {
+        category: "Private Cloud",
+        title: "Private Cloud: Analisis Keunggulan & Keterbatasan",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card" style="border-left: 4px solid var(--emerald);">
+              <h4 style="color: #34d399;">Keunggulan Private Cloud</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                <li>&check; <strong>Keamanan &amp; Privasi Maksimal:</strong> Data tersimpan di lingkungan fisik tertutup.</li>
+                <li>&check; <strong>Kepatuhan Regulasi Penuh:</strong> Memenuhi standar audit ketat perbankan dan kedaulatan data.</li>
+                <li>&check; <strong>Performa Terprediksi:</strong> Tidak ada risiko "Noisy Neighbor" (gangguan tenant lain).</li>
+                <li>&check; <strong>Kustomisasi Tanpa Batas:</strong> Konfigurasi hardware dan kernel OS bebas diubah.</li>
+              </ul>
+            </div>
+            <div class="info-card" style="border-left: 4px solid var(--rose);">
+              <h4 style="color: var(--rose);">Keterbatasan Private Cloud</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                <li>&cross; <strong>Biaya Awal Sangat Mahal (High CapEx):</strong> Pengadaan server fisik miliaran rupiah.</li>
+                <li>&cross; <strong>Skalabilitas Lambat:</strong> Menambah server butuh proses pengadaan berbulan-bulan.</li>
+                <li>&cross; <strong>Beban SDM Ahli:</strong> Membutuhkan tim insinyur data center dan jaringan yang berdedikasi.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      // 12. Hybrid Cloud: Menggabungkan Dua Dunia
+      {
+        category: "Hybrid Cloud",
+        title: "Hybrid Cloud: Sinergi Dunia Publik & Privat",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <span class="badge-hybrid">Best of Both Worlds</span>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 8px 0;">Integrasi Sempurna Dua Infrastruktur</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Hybrid Cloud adalah lingkungan komputasi yang menggabungkan Private Cloud (atau data center on-premise) dengan Public Cloud, yang saling terhubung secara aman melalui teknologi enkripsi jaringan dan orkestrasi data terpadu.
+              </p>
+              <ul style="font-size: 11px; color: #cbd5e1; padding-left: 16px;">
+                <li><strong>Portabilitas Data:</strong> Data dan aplikasi dapat berpindah mulus di antara keduanya.</li>
+                <li><strong>Strategi Pembagian Beban:</strong> Data rahasia tetap di private, web publik di public cloud.</li>
+              </ul>
+            </div>
+            <div class="info-card" style="background: #090f1d; text-align: center;">
+              <h4 style="color: #c084fc; margin-bottom: 8px;">Arsitektur Hybrid Standar</h4>
+              <div style="font-size: 11px; color: #cbd5e1; line-height: 1.8;">
+                Data Nasabah &amp; DB Inti &rarr; <span class="badge-private">Private Cloud</span><br>
+                Jalur Penghubung &rarr; <strong>IPsec VPN / AWS Direct Connect</strong><br>
+                Aplikasi Web Frontend &rarr; <span class="badge-public">Public Cloud (AWS/GCP)</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 13. Hybrid Cloud: Konsep "Cloud Bursting"
+      {
+        category: "Hybrid Cloud",
+        title: "Fenomena Kunci: Mekanisme 'Cloud Bursting'",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Apa Itu Cloud Bursting?</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Cloud Bursting adalah teknik arsitektur di mana aplikasi berjalan di Private Cloud dalam kondisi normal. Namun ketika beban trafik melonjak tajam melebihi kapasitas server internal (misal saat *Hari Belanja Online 12.12*), beban trafik otomatis "meletup" (*burst*) ke Public Cloud untuk menyerap kelebihan beban.
+              </p>
+            </div>
+            <div class="info-card">
+              <h4 style="color: var(--accent);">Manfaat Finansial Cloud Bursting:</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                Perusahaan tidak perlu memboroskan anggaran miliaran rupiah untuk membeli server cadangan yang hanya terpakai 2 hari dalam setahun. Server tambahan disewa di public cloud hanya selama event promosi berlangsung, lalu langsung dimatikan kembali.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 14. Hybrid Cloud: Teknologi Interkoneksi (Direct Connect, VPN)
+      {
+        category: "Hybrid Cloud",
+        title: "Teknologi Interkoneksi Penghubung Hybrid Cloud",
+        html: `
+          <div class="grid-3" style="margin: auto;">
+            <div class="info-card">
+              <span class="highlight-text">&#128274; 1. Site-to-Site IPsec VPN</span>
+              <h4 style="margin-top: 4px;">Koneksi Terenkripsi Internet</h4>
+              <p>Membangun tunnel VPN terenkripsi melalui jaringan internet publik. Biaya murah, setup cepat, namun throughput dan latensi bergantung kestabilan ISP publik.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#9889; 2. Dedicated Direct Connection</span>
+              <h4 style="margin-top: 4px;">Kabel Fisik Khusus (Bypass Internet)</h4>
+              <p>Menghubungkan data center lokal langsung ke cloud via fiber optik khusus. Contoh: AWS Direct Connect, Azure ExpressRoute, Google Cloud Interconnect. Latensi ultra-rendah dan stabil.</p>
+            </div>
+            <div class="info-card">
+              <span class="highlight-text">&#128230; 3. Kubernetes Hybrid Mesh</span>
+              <h4 style="margin-top: 4px;">Orkestrasi Multi-Cluster</h4>
+              <p>Menggunakan platform seperti Google Anthos atau Red Hat OpenShift untuk men-deploy dan mengelola kontainer aplikasi secara seragam di on-prem maupun cloud.</p>
+            </div>
+          </div>
+        `
+      },
+      // 15. Community Cloud: Konsep & Kolaborasi Antar-Institusi
+      {
+        category: "Community Cloud",
+        title: "Community Cloud: Kolaborasi Sektor Spesifik",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <span class="badge-community">Shared Mission &amp; Compliance</span>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 8px 0;">Infrastruktur Bersama untuk Komunitas Tertentu</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Community Cloud adalah model deployment di mana infrastruktur komputasi dibangun dan digunakan bersama secara eksklusif oleh beberapa organisasi yang memiliki kepentingan, visi misi, atau tuntutan kepatuhan regulasi yang serupa.
+              </p>
+              <ul style="font-size: 11px; color: #cbd5e1; padding-left: 16px;">
+                <li><strong>Pembagian Biaya:</strong> Biaya investasi dibagi rata antar anggota konsorsium.</li>
+                <li><strong>Tingkat Kepercayaan:</strong> Lebih privat dibanding public cloud, namun lebih murah dibanding membangun private cloud mandiri.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h4 style="color: #34d399;">Contoh Komunitas di Dunia Nyata:</h4>
+              <ul style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                <li>&bull; <strong>Sektor Kesehatan:</strong> Konsorsium rumah sakit yang saling bertukar data rekam medis pasien sesuai standar kepatuhan medis HIPAA.</li>
+                <li>&bull; <strong>Sektor Perbankan Syariah:</strong> Jaringan bank syariah yang terhubung ke satu sistem kliring bersama.</li>
+                <li>&bull; <strong>Sektor Pemerintahan:</strong> Cloud terintegrasi antar kementerian dan lembaga negara.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      // 16. Implementasi Community Cloud: Government Cloud (GovCloud)
+      {
+        category: "Community Cloud",
+        title: "Studi Nyata: Government Cloud (GovCloud) di Indonesia & Global",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <h4 style="color: #34d399; font-size: 14px;">Pusat Data Nasional (PDN) Indonesia</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                Kementerian Kominfo membangun <strong>Pusat Data Nasional (PDN)</strong> sebagai wujud Community Cloud bagi seluruh kementerian, lembaga pemerintah daerah, dan institusi negara dalam mewujudkan Sistem Pemerintahan Berbasis Elektronik (SPBE).
+              </p>
+              <div style="margin-top: 8px; font-size: 10px; color: var(--accent);">Manfaat: Menghentikan pemborosan pembangunan ribuan ruang server kecil yang tidak standar di tiap dinas pemda.</div>
+            </div>
+            <div class="info-card">
+              <h4 style="color: #38bdf8; font-size: 14px;">AWS GovCloud &amp; Azure Government</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+                Penyedia hyperscaler membuat wilayah region cloud khusus (misal: AWS GovCloud US) yang terisolasi secara fisik dan hanya boleh diakses oleh instansi pemerintah federal serta militer dengan verifikasi kewarganegaraan ketat.
+              </p>
+              <div style="margin-top: 8px; font-size: 10px; color: var(--accent);">Kepatuhan: Standar FedRAMP High dan DoD Security Requirements.</div>
+            </div>
+          </div>
+        `
+      },
+      // 17. Multi-Cloud: Tren Modern Melampaui Satu Vendor
+      {
+        category: "Arsitektur Modern",
+        title: "Multi-Cloud: Strategi Mencegah Ketergantungan Vendor",
+        html: `
+          <div class="grid-2" style="align-items: center; margin: auto;">
+            <div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px;">Apa Perbedaan Hybrid Cloud vs Multi-Cloud?</h3>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;">
+                Jika <strong>Hybrid Cloud</strong> menggabungkan private dan public, maka <strong>Multi-Cloud</strong> adalah strategi perusahaan menggunakan lebih dari satu penyedia Public Cloud sekaligus (misal: AWS + Google Cloud + Azure).
+              </p>
+              <ul style="font-size: 11px; color: #cbd5e1; padding-left: 16px;">
+                <li><strong>Anti Vendor Lock-In:</strong> Posisi tawar negosiasi harga lebih kuat.</li>
+                <li><strong>Best of Breed:</strong> Memakai AI dari Google Cloud, namun database di AWS.</li>
+                <li><strong>Disaster Resilience:</strong> Jika AWS mengalami outage, sistem langsung dialihkan ke Azure.</li>
+              </ul>
+            </div>
+            <div class="info-card" style="background: #090f1d; text-align: center;">
+              <h4 style="color: var(--accent); margin-bottom: 8px;">Tantangan Multi-Cloud:</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+                1. Kompleksitas manajemen keamanan yang sangat tinggi.<br>
+                2. Biaya transfer data antar-cloud (*Egress Cost*) yang sangat mahal.<br>
+                3. Perlunya insinyur yang menguasai banyak sertifikasi cloud sekaligus.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 18. Matriks Perbandingan Komprehensif 4 Model
+      {
+        category: "Komparasi Mendalam",
+        title: "Matriks Komparasi 4 Model Deployment Cloud",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; margin: auto;">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th style="color: #38bdf8;">Public Cloud</th>
+                  <th style="color: #f87171;">Private Cloud</th>
+                  <th style="color: #c084fc;">Hybrid Cloud</th>
+                  <th style="color: #34d399;">Community Cloud</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Tipe Kepemilikan</strong></td>
+                  <td>Penyedia Cloud (Vendor)</td>
+                  <td>Organisasi Tunggal</td>
+                  <td>Kombinasi Bersama</td>
+                  <td>Konsorsium Anggota</td>
+                </tr>
+                <tr>
+                  <td><strong>Isolasi Tenant</strong></td>
+                  <td>Multi-Tenant (Virtual)</td>
+                  <td>Single-Tenant (Fisik)</td>
+                  <td>Campuran (Publik + Privat)</td>
+                  <td>Multi-Tenant Tertutup</td>
+                </tr>
+                <tr>
+                  <td><strong>Model Biaya</strong></td>
+                  <td>OpEx murni (Pay-as-you-go)</td>
+                  <td>CapEx tinggi + OpEx</td>
+                  <td>Keseimbangan CapEx &amp; OpEx</td>
+                  <td>Biaya dibagi rata anggota</td>
+                </tr>
+                <tr>
+                  <td><strong>Skalabilitas</strong></td>
+                  <td>Sangat Cepat &amp; Tak Terbatas</td>
+                  <td>Terbatas kapasitas fisik</td>
+                  <td>Sangat Elastis (Cloud Bursting)</td>
+                  <td>Tergantung kuota konsorsium</td>
+                </tr>
+                <tr>
+                  <td><strong>Tingkat Keamanan</strong></td>
+                  <td>Tergantung konfigurasi pengguna</td>
+                  <td>Maksimal &amp; Terisolasi</td>
+                  <td>Tinggi untuk data inti</td>
+                  <td>Tinggi (Sesuai kesepakatan)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `
+      },
+      // 19. Aspek Keamanan & Isolasi Data (Multi-Tenant vs Single-Tenant)
+      {
+        category: "Keamanan Komparatif",
+        title: "Keamanan: Multi-Tenancy vs Dedicated Hardware",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <span class="badge-public">Multi-Tenant (Public Cloud)</span>
+              <h4 style="margin-top: 6px;">Isolasi Berbasis Software Hypervisor</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+                Keamanan bergantung pada ketangguhan hypervisor (KVM/Xen/Nitro) dan Virtual Private Cloud (VPC). Celah pada CPU hardware (seperti Spectre/Meltdown) secara teoritis bisa menjadi celah intrusi antar-tenant, meskipun penyedia cloud selalu sigap melakukan microcode patching.
+              </p>
+            </div>
+            <div class="info-card">
+              <span class="badge-private">Single-Tenant (Private Cloud)</span>
+              <h4 style="margin-top: 6px;">Isolasi Fisik Nyata (Physical Air-Gap)</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.6;">
+                Tidak ada entitas luar yang berbagi CPU atau storage fisik. Kabel jaringan dan switch bersifat fisik terdedikasi, menutup kemungkinan kebocoran data antar-tenant dari sisi infrastruktur perangkat keras.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 20. Kepatuhan Regulasi & Kedaulatan Data di Indonesia
+      {
+        category: "Hukum & Regulasi",
+        title: "Regulasi Kedaulatan Data & UU PDP di Indonesia",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto; max-width: 760px;">
+            <div class="info-card" style="border-left: 4px solid var(--amber);">
+              <h4 style="color: var(--amber); font-size: 14px;">Payung Hukum Penempatan Server di Indonesia:</h4>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-top: 4px;">
+                1. <strong>PP No. 71 Tahun 2019 (PSTE):</strong> Penyelenggara Sistem Elektronik (PSE) Lingkup Publik wajib mengelola, memproses, dan menyimpan data di wilayah Indonesia.<br>
+                2. <strong>UU No. 27 Tahun 2022 (UU PDP):</strong> Mengatur sanksi pidana dan denda miliaran rupiah bagi kebocoran data pribadi warga negara Indonesia.<br>
+                3. <strong>Surat Edaran OJK No. 21/SEOJK.03/2017:</strong> Bank wajib menempatkan data center dan disaster recovery center (DRC) di wilayah NKRI.
+              </p>
+            </div>
+            <div class="info-card">
+              <h4 style="color: #38bdf8;">Dampak Terhadap Model Deployment:</h4>
+              <p style="font-size: 11px; color: #cbd5e1; line-height: 1.5; margin-top: 4px;">
+                Perusahaan tidak boleh sembarangan men-deploy database ke region luar negeri (misal Virginia/Singapura). Hal ini yang mendorong Hyperscaler dunia berinvestasi membuka Data Center lokal di Jakarta (Region Jakarta).
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 21. Studi Kasus 1: Bank Perkreditan Rakyat (BPR)
+      {
+        category: "Studi Kasus 1",
+        title: "Studi Kasus 1: Modernisasi BPR Sesuai Regulasi OJK",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto; max-width: 760px;">
+            <div class="info-card" style="border-left: 4px solid var(--amber);">
+              <h4 style="color: var(--amber);">Latar Belakang Masalah:</h4>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-top: 4px;">
+                Sebuah Bank Perkreditan Rakyat (BPR) di Jawa Barat ingin meluncurkan layanan Mobile Banking. Namun, BPR tidak memiliki anggaran ratusan miliar rupiah untuk membangun gedung data center sendiri, sementara OJK melarang data saldo nasabah disimpan sembarangan di luar negeri.
+              </p>
+            </div>
+            <div class="grid-2">
+              <div class="info-card">
+                <h4 style="color: var(--rose);">Solusi Kurang Tepat:</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Menggunakan Public Cloud server di Amerika Serikat karena melanggar kepatuhan OJK dan UU PDP, atau memaksakan bangun private cloud sendiri yang memicu kebangkrutan modal.</p>
+              </div>
+              <div class="info-card" style="border-left: 3px solid #10b981;">
+                <h4 style="color: #34d399;">Rekomendasi Arsitektur: Hybrid Cloud</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Menyewa <strong>Hosted Private Cloud</strong> di penyedia lokal Indonesia (untuk Core Banking saldo), dipadukan dengan <strong>Public Cloud Region Jakarta</strong> untuk frontend mobile app yang elastis.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 22. Studi Kasus 2: Startup EdTech Skala Nasional
+      {
+        category: "Studi Kasus 2",
+        title: "Studi Kasus 2: Tryout Akbar Startup Pendidikan (EdTech)",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto; max-width: 760px;">
+            <div class="info-card" style="border-left: 4px solid var(--accent);">
+              <h4 style="color: var(--accent);">Latar Belakang Masalah:</h4>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-top: 4px;">
+                Startup EdTech memiliki 10.000 pengguna aktif harian. Namun tiap akhir semester diadakan Tryout Akbar Nasional serentak yang diakses 1.500.000 siswa dalam waktu 2 jam.
+              </p>
+            </div>
+            <div class="grid-2">
+              <div class="info-card">
+                <h4 style="color: var(--rose);">Mengapa Private Cloud Gagal?</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Jika membeli server fisik untuk menampung 1,5 juta siswa, server tersebut akan menganggur dan memboroskan listrik selama 363 hari sisa dalam setahun.</p>
+              </div>
+              <div class="info-card" style="border-left: 3px solid #38bdf8;">
+                <h4 style="color: #38bdf8;">Rekomendasi Arsitektur: Public Cloud</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Memanfaatkan <strong>Public Cloud dengan Auto-Scaling Group</strong>. Server otomatis membesar menjadi ratusan instans saat tryout berlangsung, lalu menciut kembali saat acara usai. Biaya hanya dihitung per jam event.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 23. Studi Kasus 3: Konsorsium Rumah Sakit Daerah
+      {
+        category: "Studi Kasus 3",
+        title: "Studi Kasus 3: Integrasi Rekam Medis Lintas RSUD",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto; max-width: 760px;">
+            <div class="info-card" style="border-left: 4px solid var(--emerald);">
+              <h4 style="color: var(--emerald);">Latar Belakang Masalah:</h4>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-top: 4px;">
+                Dinas Kesehatan Provinsi menginstruksikan 15 RSUD di wilayahnya untuk saling mengintegrasikan riwayat rekam medis pasien rujukan. Data rekam medis tidak boleh dicampur di server publik bebas, namun tiap RSUD memiliki keterbatasan anggaran jika harus membangun infrastruktur sendiri.
+              </p>
+            </div>
+            <div class="grid-2">
+              <div class="info-card">
+                <h4 style="color: var(--rose);">Tantangan Sektor Kesehatan:</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Format data radiologi dan riwayat pasien harus terenkripsi standar medis, dengan hak akses tertutup antar tenaga medis resmi.</p>
+              </div>
+              <div class="info-card" style="border-left: 3px solid #10b981;">
+                <h4 style="color: #34d399;">Rekomendasi Arsitektur: Community Cloud</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Membangun <strong>Healthcare Community Cloud</strong> yang dibiayai patungan APBD oleh 15 RSUD. Seluruh rumah sakit menikmati infrastruktur aman terdedikasi dengan efisiensi biaya kolektif.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 24. Studi Kasus 4: Instansi Pertahanan & Intelijen Negara
+      {
+        category: "Studi Kasus 4",
+        title: "Studi Kasus 4: Sistem Kriptografi & Intelijen Militer",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto; max-width: 760px;">
+            <div class="info-card" style="border-left: 4px solid var(--rose);">
+              <h4 style="color: var(--rose);">Latar Belakang Masalah:</h4>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-top: 4px;">
+                Lembaga sandi dan siber militer memproses data radar pertahanan laut dan komunikasi satelit taktis yang berklasifikasi rahasia negara (*Top Secret*).
+              </p>
+            </div>
+            <div class="grid-2">
+              <div class="info-card">
+                <h4 style="color: var(--rose);">Ancaman Spionase Asing:</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Jika data ditaruh di Public Cloud milik vendor asing, terdapat risiko intrik geopolitik dan *backdoor* dari regulasi luar negeri (seperti US CLOUD Act).</p>
+              </div>
+              <div class="info-card" style="border-left: 3px solid #ef4444;">
+                <h4 style="color: #f87171;">Rekomendasi Mutlak: Air-Gapped Private Cloud</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Membangun <strong>On-Premise Private Cloud</strong> dengan sistem <em>Air-Gapped</em> (terisolasi fisik secara total tanpa ada koneksi kabel ke internet publik), dengan pengamanan fisik personel militer 24 jam.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 25. Framework Pengambilan Keputusan (Decision Tree)
+      {
+        category: "Framework Keputusan",
+        title: "Pohon Keputusan (Decision Tree) Pemilihan Deployment",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; margin: auto; max-width: 760px;">
+            <p style="font-size: 12px; color: #cbd5e1;">Gunakan diagram alur logika berikut dalam menentukan model deployment:</p>
+            <div class="grid-2">
+              <div class="info-card">
+                <h4 style="color: #38bdf8;">1. Pertanyaan Biaya &amp; Skalabilitas</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Apakah perusahaan Anda memiliki anggaran modal awal (CapEx) besar dan butuh rilis cepat?<br>
+                &rarr; <strong>TIDAK:</strong> Pilih <span class="badge-public">Public Cloud</span><br>
+                &rarr; <strong>YA:</strong> Lanjut ke pertanyaan berikutnya.</p>
+              </div>
+              <div class="info-card">
+                <h4 style="color: #f87171;">2. Pertanyaan Regulasi &amp; Privasi</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Apakah data Anda terikat regulasi audit ketat yang melarang multi-tenancy?<br>
+                &rarr; <strong>YA MUTLAK:</strong> Pilih <span class="badge-private">Private Cloud</span><br>
+                &rarr; <strong>SEBAGIAN:</strong> Lanjut ke pertanyaan berikutnya.</p>
+              </div>
+              <div class="info-card">
+                <h4 style="color: #a855f7;">3. Pertanyaan Fluktuasi Beban</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Apakah Anda memiliki data center lokal namun sering mengalami lonjakan trafik periodik?<br>
+                &rarr; <strong>YA:</strong> Pilih <span class="badge-hybrid">Hybrid Cloud (Cloud Bursting)</span></p>
+              </div>
+              <div class="info-card">
+                <h4 style="color: #34d399;">4. Pertanyaan Kesamaan Misi</h4>
+                <p style="font-size: 11px; color: #cbd5e1;">Apakah ada organisasi rekanan yang bersedia patungan berbagi infrastruktur tertutup?<br>
+                &rarr; <strong>YA:</strong> Pilih <span class="badge-community">Community Cloud</span></p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      // 26. Sesi Diskusi Kelompok Terarah
+      {
+        category: "Aktivitas Diskusi",
+        title: "Instruksi Diskusi Kelompok Terarah (Focus Group)",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 12px; margin: auto; max-width: 760px;">
+            <div class="info-card" style="background: #1e1b4b; border-color: #4338ca;">
+              <h4 style="color: #c7d2fe; font-size: 14px;">Studi Kasus Diskusi Mahasiswa:</h4>
+              <p style="font-size: 12px; color: #e0e7ff; line-height: 1.6; margin-top: 4px;">
+                "Supermarket Ritel Nasional di Bogor sedang bertransformasi menjadi jaringan Smart Retail. Mereka memiliki 3 kebutuhan data: (1) Transaksi Kasir POS di toko fisik offline, (2) Aplikasi Belanja Online &amp; Promo Flash Sale, dan (3) Data Kartu Kredit Nasabah &amp; Penggajian Karyawan."
+              </p>
+            </div>
+            <div class="grid-2">
+              <div class="info-card">
+                <strong style="color: var(--accent);">Tugas Kelompok 1 &amp; 2:</strong>
+                <p style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">Rancang model deployment terbaik untuk ketiga sistem di atas dengan pertimbangan biaya efisien dan uptime tinggi.</p>
+              </div>
+              <div class="info-card">
+                <strong style="color: var(--amber);">Tugas Kelompok 3 &amp; 4:</strong>
+                <p style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">Analisis risiko kegagalan koneksi jika jaringan fiber optik antar toko fisik dan cloud terputus total.</p>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: center; margin-top: 6px;">
+              <button class="btn-nav btn-next" id="btnDiscussTrigger">&#9201; Buka Timer Diskusi Mahasiswa (3 Menit)</button>
+            </div>
+          </div>
+        `
+      },
+      // 27. Kesalahan Persepsi & Mitos Deployment
+      {
+        category: "Wawasan Kritis",
+        title: "Kesalahan Persepsi Umum Mengenai Deployment Cloud",
+        html: `
+          <div class="grid-2" style="margin: auto;">
+            <div class="info-card">
+              <h4 style="color: var(--rose);">Mitos 1: "Public Cloud Selalu Tidak Aman"</h4>
+              <p style="margin-top: 4px; font-size: 11px; color: #cbd5e1; line-height: 1.5;">
+                <strong>Fakta:</strong> Data center AWS/GCP dijaga ribuan insinyur keamanan terbaik dunia. Kebocoran data umumnya terjadi karena salah konfigurasi izin akses (*misconfiguration*) dari sisi pengguna, bukan pembobolan fisik cloud.
+              </p>
+            </div>
+            <div class="info-card">
+              <h4 style="color: var(--rose);">Mitos 2: "Private Cloud Selalu Lebih Murah Jangka Panjang"</h4>
+              <p style="margin-top: 4px; font-size: 11px; color: #cbd5e1; line-height: 1.5;">
+                <strong>Fakta:</strong> Biaya depresiasi perangkat, pendingin AC 24 jam, pemeliharaan genset, dan gaji tim insinyur internal sering kali membuat TCO private cloud jauh lebih mahal daripada menyewa public cloud.
+              </p>
+            </div>
+            <div class="info-card">
+              <h4 style="color: var(--rose);">Mitos 3: "Hybrid Cloud Sangat Mudah Diterapkan"</h4>
+              <p style="margin-top: 4px; font-size: 11px; color: #cbd5e1; line-height: 1.5;">
+                <strong>Fakta:</strong> Mengintegrasikan dua sistem berbeda membutuhkan konfigurasi jaringan kompleks, sinkronisasi database real-time, dan tim yang menguasai dua teknologi sekaligus.
+              </p>
+            </div>
+            <div class="info-card">
+              <h4 style="color: var(--rose);">Mitos 4: "Pindah ke Cloud Berarti Masalah Selesai"</h4>
+              <p style="margin-top: 4px; font-size: 11px; color: #cbd5e1; line-height: 1.5;">
+                <strong>Fakta:</strong> Tanpa arsitektur yang dirancang untuk resiliensi (*Fault Tolerance*), aplikasi di cloud tetap bisa mengalami *crash* saat server zona tertentu down.
+              </p>
+            </div>
+          </div>
+        `
+      },
+      // 28. Rangkuman Materi Pembelajaran
+      {
+        category: "Rangkuman Perkuliahan",
+        title: "Rangkuman Intisari Model Deployment Cloud",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; margin: auto; max-width: 760px;">
+            <div class="info-card">
+              <ul style="font-size: 12px; color: #cbd5e1; line-height: 1.6; padding-left: 18px;">
+                <li><strong>Public Cloud:</strong> Solusi paling efisien, elastis tanpa batas, dan berbasis OpEx untuk kebutuhan umum dan startup.</li>
+                <li><strong>Private Cloud:</strong> Dedicated single-tenant dengan kendali mutlak dan privasi tertinggi untuk data rahasia dan kepatuhan ketat.</li>
+                <li><strong>Hybrid Cloud:</strong> Menjembatani privasi on-premise dan elastisitas public cloud melalui teknik seperti *Cloud Bursting*.</li>
+                <li><strong>Community Cloud:</strong> Kerjasama infrastruktur bersama untuk kelompok organisasi dengan kesamaan regulasi dan misi.</li>
+              </ul>
+            </div>
+            <div style="background: #111c30; border: 1px solid #1f2f4c; border-radius: 10px; padding: 12px; font-size: 11px; color: var(--accent);">
+              <strong>Langkah Selanjutnya:</strong> Uji kompetensi Anda melalui <strong>3 Game Interaktif</strong> di Game Hub dan selesaikan <strong>20 Soal Evaluasi Mandiri</strong> pada slide berikutnya!
+            </div>
+          </div>
+        `
+      },
+      // 29. Portal Game Hub Interaktif
+      {
+        category: "Interaktif & Games",
+        title: "Game Arena: Laboratorium Interaktif Deployment",
+        html: `
+          <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin: auto; max-width: 680px;">
+            <div style="font-size: 42px; margin-bottom: 8px;">&#127918; &#128736;</div>
+            <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px;">Uji Kemampuan Arsitektur Anda Melalui Simulator Interaktif!</h2>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 20px;">
+              Bukan kuis teks membosankan! Anda akan memainkan simulator drag-and-drop arsitektur, kalkulator TCO &amp; latensi real-time, serta simulasi uji stres Cloud Bursting:
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+              <button class="btn-nav btn-next" id="btnLaunchLab1" style="background: linear-gradient(135deg, #0284c7, #0369a1);">&#128736; Game 1: Deployment Architect Lab</button>
+              <button class="btn-nav btn-next" id="btnLaunchLab2" style="background: linear-gradient(135deg, #10b981, #059669);">&#128184; Game 2: TCO &amp; Latency Simulator</button>
+              <button class="btn-nav btn-next" id="btnLaunchLab3" style="background: linear-gradient(135deg, #a855f7, #7e22ce);">&#128640; Game 3: Cloud Bursting Stress Test</button>
+            </div>
+          </div>
+        `
+      },
+      // 30. Evaluasi 20 Soal Pilihan Ganda (Self-Assessment Lengkap)
+      {
+        category: "Evaluasi Akhir Materi",
+        title: "Evaluasi Akhir: 20 Soal Uji Kompetensi Deployment Cloud",
+        html: `
+          <div style="display: flex; flex-direction: column; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+              <div>
+                <h4 style="font-size: 13px; font-weight: 700; color: #fff;">Uji Mandiri Pemahaman Materi Model Deployment</h4>
+                <p style="font-size: 11px; color: var(--text-muted);">Kerjakan 20 butir soal berikut untuk mengukur ketuntasan CPMK kuliah Anda.</p>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <span id="evalScoreBadge" style="font-size: 12px; font-weight: 800; color: var(--accent); background: #162238; padding: 4px 12px; border-radius: 6px; border: 1px solid #1f2f4c;">Skor: 0 / 100</span>
+                <button class="btn-nav btn-next" id="btnCheckAllAnswers" style="padding: 6px 14px;">Periksa Jawaban</button>
+              </div>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding-right: 6px;" id="evalQuestionsContainer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // DATA 20 SOAL EVALUASI AKHIR
+    const evaluationQuestions = [
+      {
+        q: "1. Model deployment cloud yang infrastrukturnya dimiliki oleh pihak ketiga dan dibagi secara multi-tenant kepada masyarakat umum adalah...",
+        options: ["Private Cloud", "Public Cloud", "Hybrid Cloud", "Community Cloud"],
+        answer: 1,
+        exp: "Public cloud dimiliki oleh vendor komersial dan dialokasikan untuk umum secara multi-tenant."
+      },
+      {
+        q: "2. Keuntungan finansial paling signifikan dari adopsi Public Cloud bagi perusahaan startup adalah...",
+        options: ["Peralihan dari model CapEx ke OpEx", "Kewajiban membeli lisensi seumur hidup", "Peningkatan biaya depresiasi perangkat keras", "Pengurangan kecepatan konektivitas internet"],
+        answer: 0,
+        exp: "Public cloud menghilangkan biaya belanja modal awal (CapEx) menjadi biaya operasional bulanan (OpEx)."
+      },
+      {
+        q: "3. Karakteristik utama yang membedakan Private Cloud dari Public Cloud secara arsitektural adalah...",
+        options: ["Hanya dapat diakses melalui kabel LAN 10 Mbps", "Sifatnya yang dedicated single-tenant untuk satu organisasi", "Tidak memiliki lapisan hypervisor virtualisasi", "Wajib menggunakan server buatan dalam negeri"],
+        answer: 1,
+        exp: "Private cloud bersifat single-tenant khusus untuk melayani satu organisasi saja."
+      },
+      {
+        q: "4. Istilah untuk infrastruktur private cloud yang server fisiknya disewa secara dedicated di data center pihak ketiga disebut...",
+        options: ["On-Premise Cloud", "Hosted Private Cloud", "Public Multi-Tenant", "Community Hybrid"],
+        answer: 1,
+        exp: "Hosted Private Cloud menyewa server dedicated di fasilitas data center pihak ketiga."
+      },
+      {
+        q: "5. Teknologi integrasi yang memadukan Private Cloud internal dengan Public Cloud saat terjadi lonjakan beban trafik disebut...",
+        options: ["Cloud Bursting", "Serverless Shrinking", "Data Center Flooding", "Hypervisor Splitting"],
+        answer: 0,
+        exp: "Cloud Bursting mengalirkan beban trafik ke public cloud saat server privat penuh."
+      },
+      {
+        q: "6. Model deployment yang dibangun secara konsorsium bersama oleh beberapa institusi yang memiliki kesamaan misi disebut...",
+        options: ["Public Cloud", "Community Cloud", "Personal Cloud", "Global Cloud"],
+        answer: 1,
+        exp: "Community cloud dirancang khusus untuk kelompok organisasi dengan kesamaan misi/regulasi."
+      },
+      {
+        q: "7. Pusat Data Nasional (PDN) yang dibangun pemerintah Indonesia untuk melayani seluruh kementerian dan pemda tergolong dalam model...",
+        options: ["Government Community Cloud", "Public Commercial Cloud", "Single-Tenant Desktop", "Peer-to-Peer Cloud"],
+        answer: 0,
+        exp: "PDN merupakan wujud Government Community Cloud untuk instansi publik."
+      },
+      {
+        q: "8. Salah satu kelemahan terbesar dari pembangunan On-Premise Private Cloud adalah...",
+        options: ["Tidak memiliki sistem keamanan", "Tingginya biaya modal awal (CapEx) dan beban maintenance", "Mudah disusupi tenant lain dari internet", "Tidak dapat diinstal sistem operasi Linux"],
+        answer: 1,
+        exp: "Private cloud mandiri membutuhkan biaya pembelian server, pendingin, dan SDM yang sangat mahal."
+      },
+      {
+        q: "9. Strategi perusahaan yang menggunakan layanan dari lebih dari satu penyedia Public Cloud sekaligus (misal AWS + Azure) disebut...",
+        options: ["Hybrid Cloud", "Multi-Cloud", "Dual Stack", "Inter-Cloud"],
+        answer: 1,
+        exp: "Multi-cloud mengombinasikan dua atau lebih penyedia public cloud yang berbeda."
+      },
+      {
+        q: "10. Di Indonesia, regulasi yang mewajibkan Penyelenggara Sistem Elektronik (PSE) Publik menempatkan data di wilayah NKRI tercantum pada...",
+        options: ["PP No. 71 Tahun 2019", "UU Cipta Kerja", "KUH Perdata", "Permenaker 2021"],
+        answer: 0,
+        exp: "PP No. 71/2019 (PSTE) mewajibkan penempatan data sektor publik di Indonesia."
+      },
+      {
+        q: "11. Jalur koneksi jaringan fisik berkecepatan tinggi yang menghubungkan data center lokal ke cloud tanpa lewat internet publik adalah...",
+        options: ["Dial-up Modem", "Dedicated Direct Connection (misal AWS Direct Connect)", "WiFi 2.4 GHz", "DNS Query"],
+        answer: 1,
+        exp: "Direct Connect menyediakan link fiber optik terdedikasi langsung ke router cloud."
+      },
+      {
+        q: "12. Platform perangkat lunak open-source yang paling populer untuk membangun infrastruktur Private Cloud mandiri adalah...",
+        options: ["OpenStack", "Microsoft Word", "Adobe Photoshop", "WinRAR"],
+        answer: 0,
+        exp: "OpenStack adalah software orkestrasi open-source standar industri untuk private cloud."
+      },
+      {
+        q: "13. Manakah skenario bisnis yang PALING TEPAT menggunakan Public Cloud?",
+        options: ["Pangkalan radar militer taktis", "Situs e-commerce dengan trafik fluktuatif tinggi saat flash sale", "Pusat enkripsi sandi intelijen negara", "Ruang operasi bedah jantung"],
+        answer: 1,
+        exp: "E-commerce dengan lonjakan trafik sangat ideal memanfaatkan elastisitas auto-scaling public cloud."
+      },
+      {
+        q: "14. Fenomena 'Noisy Neighbor' di mana kinerja komputasi melambat akibat aktivitas pengguna lain hanya dapat terjadi pada model...",
+        options: ["Air-Gapped Private Cloud", "Public Cloud (Multi-Tenant)", "Dedicated On-Premise Server", "Manual Typewriter"],
+        answer: 1,
+        exp: "Noisy neighbor terjadi di public cloud multi-tenant ketika tenant lain memonopoli I/O hardware bersama."
+      },
+      {
+        q: "15. Apa risiko utama dari strategi Multi-Cloud yang harus diwaspadai perusahaan?",
+        options: ["Biaya transfer data keluar (Egress Cost) dan kompleksitas konfigurasi", "Server tidak bisa dimatikan", "Tidak bisa menggunakan peramban Google Chrome", "Ukuran monitor komputer harus besar"],
+        answer: 0,
+        exp: "Transfer data antar provider dikenakan biaya egress yang mahal dan menambah kompleksitas keamanan."
+      },
+      {
+        q: "16. Untuk menghubungkan kantor cabang ke Private Cloud melalui internet publik dengan biaya terjangkau, teknologi yang digunakan adalah...",
+        options: ["Site-to-Site IPsec VPN", "Kabel Telepon RJ11", "Bluetooth 5.0", "Inframerah"],
+        answer: 0,
+        exp: "IPsec VPN membuat tunnel terenkripsi yang aman di atas jaringan internet publik."
+      },
+      {
+        q: "17. Manakah alasan utama bank sentral enggan menaruh database inti transaksi nasabah di Public Cloud milik vendor luar negeri?",
+        options: ["Kecepatan mengetik pegawai bank melambat", "Kedaulatan data dan kepatuhan terhadap audit regulasi perbankan", "Public cloud tidak mendukung mata uang rupiah", "Biaya tagihan listrik kantor bank melonjak"],
+        answer: 1,
+        exp: "Bank sentral terikat aturan ketat privasi finansial dan kedaulatan data nasional."
+      },
+      {
+        q: "18. Sebuah model deployment yang menggabungkan On-Premise Private Cloud dan Public Cloud disebut...",
+        options: ["Private Cloud", "Hybrid Cloud", "Community Cloud", "Atmospheric Cloud"],
+        answer: 1,
+        exp: "Hybrid cloud memadukan infrastruktur private dan public cloud secara terintegrasi."
+      },
+      {
+        q: "19. Jika sebuah rumah sakit ingin menjaga data pasien di server lokal tertutup namun menggunakan cloud publik untuk portal pendaftaran online, maka model yang diterapkan adalah...",
+        options: ["Hybrid Cloud", "Community Cloud murni", "Public Cloud murni", "On-Premise murni"],
+        answer: 0,
+        exp: "Memadukan server rekam medis lokal dengan portal online publik adalah arsitektur Hybrid Cloud."
+      },
+      {
+        q: "20. Faktor penentu paling mendasar dalam memilih antara Public Cloud vs Private Cloud adalah...",
+        options: ["Warna casing rack server", "Toleransi regulasi terhadap multi-tenancy, anggaran CapEx, dan kebutuhan fleksibilitas", "Merek mouse yang dipakai staf IT", "Kecepatan kipas angin di ruang server"],
+        answer: 1,
+        exp: "Pilihan ditentukan oleh kepatuhan regulasi, ketersediaan anggaran modal (CapEx vs OpEx), dan elastisitas bisnis."
+      }
+    ];
+
+    // STATE CONTROLLER
+    let currentSlide = 0;
+    const totalSlides = slidesData.length;
+    let studentAnswers = {};
+
+    // RENDER SLIDE FUNCTION
+    function renderSlide(idx) {
+      if (idx < 0 || idx >= totalSlides) return;
+      currentSlide = idx;
+      const s = slidesData[currentSlide];
+
+      // Update text indicators
+      document.getElementById("navCounter").textContent = `${currentSlide + 1} / ${totalSlides}`;
+      document.getElementById("navTitle").textContent = `Halaman ${currentSlide + 1}: ${s.title}`;
+      document.getElementById("footerCategory").textContent = s.category;
+
+      // Update progress bar
+      const pct = ((currentSlide + 1) / totalSlides) * 100;
+      document.getElementById("navProgress").style.width = pct + "%";
+
+      // Buttons state
+      document.getElementById("btnPrevSlide").disabled = (currentSlide === 0);
+      document.getElementById("btnNextSlide").disabled = (currentSlide === totalSlides - 1);
+
+      // Render content
+      const container = document.getElementById("slideContainer");
+      container.innerHTML = `
+        <div class="slide-header">
+          <div>
+            <div class="slide-category">${s.category}</div>
+            <div class="slide-title">${s.title}</div>
+          </div>
+          <div class="slide-pill">Halaman ${currentSlide + 1}</div>
+        </div>
+        <div class="slide-body">
+          ${s.html}
+        </div>
+      `;
+
+      // Attach in-slide button listeners if present
+      const discussTrigger = document.getElementById("btnDiscussTrigger");
+      if (discussTrigger) {
+        discussTrigger.onclick = () => openTimerModal(3);
+      }
+
+      const launchLab1 = document.getElementById("btnLaunchLab1");
+      if (launchLab1) {
+        launchLab1.onclick = () => openGameModal(1);
+      }
+      const launchLab2 = document.getElementById("btnLaunchLab2");
+      if (launchLab2) {
+        launchLab2.onclick = () => openGameModal(2);
+      }
+      const launchLab3 = document.getElementById("btnLaunchLab3");
+      if (launchLab3) {
+        launchLab3.onclick = () => openGameModal(3);
+      }
+
+      // If slide 30 (Evaluasi), render 20 questions
+      if (currentSlide === 29) {
+        renderEvaluationQuestions();
+      }
+    }
+
+    // NAVIGATION ACTIONS
+    document.getElementById("btnPrevSlide").addEventListener("click", () => {
+      if (currentSlide > 0) renderSlide(currentSlide - 1);
+    });
+
+    document.getElementById("btnNextSlide").addEventListener("click", () => {
+      if (currentSlide < totalSlides - 1) renderSlide(currentSlide + 1);
+    });
+
+    // Keyboard Arrow Shortcuts
+    window.addEventListener("keydown", (e) => {
+      const activeTag = document.activeElement ? document.activeElement.tagName : '';
+      if (activeTag === 'TEXTAREA' || activeTag === 'INPUT') return;
+
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault();
+        if (currentSlide < totalSlides - 1) renderSlide(currentSlide + 1);
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        if (currentSlide > 0) renderSlide(currentSlide - 1);
+      }
+    });
+
+    // FULLSCREEN TOGGLE
+    document.getElementById("btnFullscreen").addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    });
+
+    // MODAL: DAFTAR ISI CONTROLLER
+    const modalIndex = document.getElementById("modalIndex");
+    document.getElementById("btnOpenIndex").addEventListener("click", () => {
+      renderIndexGrid();
+      modalIndex.classList.add("active");
+    });
+    document.getElementById("btnCloseIndex").addEventListener("click", () => {
+      modalIndex.classList.remove("active");
+    });
+
+    function renderIndexGrid() {
+      const grid = document.getElementById("indexGrid");
+      grid.innerHTML = "";
+      slidesData.forEach((s, i) => {
+        const item = document.createElement("div");
+        item.className = "index-item" + (i === currentSlide ? " active" : "");
+        item.innerHTML = `
+          <span><strong>${i + 1}.</strong> ${s.title}</span>
+          <span style="font-size: 9px; opacity: 0.8;">${s.category.split(' ')[0]}</span>
+        `;
+        item.onclick = () => {
+          renderSlide(i);
+          modalIndex.classList.remove("active");
+        };
+        grid.appendChild(item);
+      });
+    }
+
+    // MODAL: TIMER DISKUSI CONTROLLER
+    const modalTimer = document.getElementById("modalTimer");
+    let timerSeconds = 180;
+    let timerTotal = 180;
+    let timerInterval = null;
+    let timerRunning = false;
+
+    function openTimerModal(mins = 3) {
+      setTimerMins(mins);
+      modalTimer.classList.add("active");
+    }
+
+    document.getElementById("btnOpenTimer").addEventListener("click", () => openTimerModal(3));
+    document.getElementById("btnCloseTimer").addEventListener("click", () => {
+      modalTimer.classList.remove("active");
+    });
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60);
+      const s = timerSeconds % 60;
+      document.getElementById("timerDisplay").textContent = 
+        String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
+    }
+
+    function setTimerMins(mins) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById("btnTimerToggle").textContent = "Mulai";
+      timerTotal = mins * 60;
+      timerSeconds = timerTotal;
+      updateTimerDisplay();
+    }
+
+    document.getElementById("btnTime2").addEventListener("click", () => setTimerMins(2));
+    document.getElementById("btnTime3").addEventListener("click", () => setTimerMins(3));
+    document.getElementById("btnTime5").addEventListener("click", () => setTimerMins(5));
+
+    document.getElementById("btnTimerToggle").addEventListener("click", () => {
+      const btn = document.getElementById("btnTimerToggle");
+      if (!timerRunning) {
+        timerRunning = true;
+        btn.textContent = "Jeda";
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            btn.textContent = "Mulai";
+            alert("⏰ Waktu diskusi kelompok telah selesai! Silakan berikan pemaparan hasil.");
+          }
+        }, 1000);
+      } else {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.textContent = "Lanjutkan";
+      }
+    });
+
+    document.getElementById("btnTimerReset").addEventListener("click", () => {
+      setTimerMins(timerTotal / 60);
+    });
+
+    // MODAL: CATATAN CONTROLLER
+    const modalNotes = document.getElementById("modalNotes");
+    document.getElementById("btnOpenNotes").addEventListener("click", () => {
+      document.getElementById("noteInput").value = localStorage.getItem("cloud_notes_dede_deployment") || "";
+      modalNotes.classList.add("active");
+    });
+    document.getElementById("btnCloseNotes").addEventListener("click", () => {
+      modalNotes.classList.remove("active");
+    });
+    document.getElementById("btnSaveNotes").addEventListener("click", () => {
+      localStorage.setItem("cloud_notes_dede_deployment", document.getElementById("noteInput").value);
+      alert("Catatan kuliah Anda berhasil disimpan secara offline di browser!");
+      modalNotes.classList.remove("active");
+    });
+
+    // ==========================================
+    // GAME & LAB HUB CONTROLLER (INTERAKTIF NON-QUIZ)
+    // ==========================================
+    const modalGameHub = document.getElementById("modalGameHub");
+    document.getElementById("btnOpenGameHub").addEventListener("click", () => openGameModal(1));
+    document.getElementById("btnCloseGameHub").addEventListener("click", () => {
+      modalGameHub.classList.remove("active");
+    });
+
+    function openGameModal(gameId) {
+      modalGameHub.classList.add("active");
+      switchGameTab(gameId);
+    }
+
+    document.getElementById("tabG1").addEventListener("click", () => switchGameTab(1));
+    document.getElementById("tabG2").addEventListener("click", () => switchGameTab(2));
+    document.getElementById("tabG3").addEventListener("click", () => switchGameTab(3));
+
+    function switchGameTab(id) {
+      [1, 2, 3].forEach(i => {
+        const tab = document.getElementById("tabG" + i);
+        if (i === id) tab.classList.add("active");
+        else tab.classList.remove("active");
+      });
+
+      const arena = document.getElementById("gameArena");
+      if (id === 1) renderLab1(arena);
+      else if (id === 2) renderLab2(arena);
+      else if (id === 3) renderLab3(arena);
+    }
+
+    // GAME 1: DEPLOYMENT ARCHITECT DRAG-AND-DROP LAB
+    function renderLab1(arena) {
+      arena.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: #111c30; border: 1px solid #1e304f; padding: 12px; border-radius: 10px;">
+            <h4 style="font-size: 13px; color: #fff; margin-bottom: 4px;">&#128736; Misi: Pasang Komponen Sistem ke Model Deployment yang Tepat</h4>
+            <p style="font-size: 11px; color: var(--text-muted);">Tarik (drag) atau klik chip komponen sistem di bawah ini, lalu tempatkan ke kotak model deployment yang sesuai.</p>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; background: #090f1d; padding: 10px; border-radius: 8px; border: 1px solid #1e304f;" id="chipPool">
+            <div class="arch-chip" draggable="true" id="c1" data-target="private">&#128274; Core Banking Saldo Rekening</div>
+            <div class="arch-chip" draggable="true" id="c2" data-target="public">&#128640; Katalog Web Promo Flash Sale 12.12</div>
+            <div class="arch-chip" draggable="true" id="c3" data-target="community">&#127973; Sistem Rekam Medis Bersama 10 RSUD</div>
+            <div class="arch-chip" draggable="true" id="c4" data-target="private">&#128293; Enkripsi Sandi Taktis Militer</div>
+            <div class="arch-chip" draggable="true" id="c5" data-target="hybrid">&#128256; Arsitektur Cloud Bursting Tiket Konser</div>
+            <div class="arch-chip" draggable="true" id="c6" data-target="public">&#128241; Video Streaming Edukasi Siswa Terbuka</div>
+          </div>
+
+          <div class="grid-2" style="gap: 10px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #38bdf8; margin-bottom: 4px;">PUBLIC CLOUD ZONE</div>
+              <div class="arch-dropzone" id="zone-public" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'public')"></div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #f87171; margin-bottom: 4px;">PRIVATE CLOUD ZONE</div>
+              <div class="arch-dropzone" id="zone-private" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'private')"></div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #c084fc; margin-bottom: 4px;">HYBRID CLOUD ZONE</div>
+              <div class="arch-dropzone" id="zone-hybrid" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'hybrid')"></div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #34d399; margin-bottom: 4px;">COMMUNITY CLOUD ZONE</div>
+              <div class="arch-dropzone" id="zone-community" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'community')"></div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+            <div id="lab1Feedback" style="font-size: 12px; font-weight: 700; color: var(--accent);">Pindahkan semua chip ke zona yang tepat!</div>
+            <button class="btn-nav btn-next" onclick="renderLab1(document.getElementById('gameArena'))">Reset Lab</button>
+          </div>
+        </div>
+      `;
+
+      // Enable drag on chips
+      document.querySelectorAll('.arch-chip').forEach(chip => {
+        chip.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', chip.id);
+        });
+        // Click-to-move fallback for mobile/touch
+        chip.addEventListener('click', () => {
+          const target = chip.getAttribute('data-target');
+          const zone = document.getElementById('zone-' + target);
+          if (zone) {
+            zone.appendChild(chip);
+            checkLab1Status();
+          }
+        });
+      });
+    }
+
+    window.allowDrop = function(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('dragover');
+    };
+
+    window.handleDrop = function(e, zoneType) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
+      const chipId = e.dataTransfer.getData('text/plain');
+      const chip = document.getElementById(chipId);
+      if (chip) {
+        e.currentTarget.appendChild(chip);
+        checkLab1Status();
+      }
+    };
+
+    function checkLab1Status() {
+      let correct = 0;
+      let total = 6;
+      ['public', 'private', 'hybrid', 'community'].forEach(z => {
+        const zone = document.getElementById('zone-' + z);
+        if (zone) {
+          zone.querySelectorAll('.arch-chip').forEach(c => {
+            if (c.getAttribute('data-target') === z) {
+              correct++;
+              c.style.borderColor = '#10b981';
+            } else {
+              c.style.borderColor = '#ef4444';
+            }
+          });
+        }
+      });
+
+      const fb = document.getElementById('lab1Feedback');
+      if (correct === total) {
+        fb.innerHTML = `<span style="color: #10b981;">&#10004; Luar Biasa! Semua 6 komponen berhasil diarsiteki dengan sempurna!</span>`;
+      } else {
+        fb.innerHTML = `Terpasang benar: ${correct} dari ${total} komponen. Terus susun!`;
+      }
+    }
+
+    // GAME 2: TCO & LATENCY LIVE SIMULATOR
+    function renderLab2(arena) {
+      arena.innerHTML = `
+        <div class="sim-card">
+          <div style="border-bottom: 1px solid #1e304f; padding-bottom: 8px;">
+            <h4 style="font-size: 14px; color: #fff;">&#128184; Interactive Simulator: Kalkulator TCO 3 Tahun &amp; Latensi Jaringan</h4>
+            <p style="font-size: 11px; color: var(--text-muted);">Geser parameter bisnis di bawah ini untuk melihat perbandingan dinamis biaya (Public vs Private) dan performa latensi:</p>
+          </div>
+
+          <div class="grid-3" style="gap: 12px;">
+            <div class="sim-slider-group">
+              <label>Kebutuhan vCPU: <strong id="valCpu" style="color: var(--accent);">16 Core</strong></label>
+              <input type="range" id="sliderCpu" min="4" max="128" step="4" value="16" oninput="updateSim()">
+            </div>
+            <div class="sim-slider-group">
+              <label>Kapasitas Storage: <strong id="valStorage" style="color: var(--accent);">500 GB</strong></label>
+              <input type="range" id="sliderStorage" min="100" max="5000" step="100" value="500" oninput="updateSim()">
+            </div>
+            <div class="sim-slider-group">
+              <label>Trafik Lonjakan / Bulan: <strong id="valSpike" style="color: var(--accent);">20%</strong></label>
+              <input type="range" id="sliderSpike" min="0" max="100" step="5" value="20" oninput="updateSim()">
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 8px;">
+            <div class="sim-result-box" style="border-top: 3px solid #38bdf8;">
+              <span class="badge-public">PUBLIC CLOUD (AWS / GCP)</span>
+              <div style="font-size: 20px; font-weight: 800; color: #38bdf8;" id="costPublic">Rp 12.400.000 / bln</div>
+              <div style="font-size: 11px; color: #cbd5e1;">CapEx Awal: <strong>Rp 0</strong> &bull; Latensi: <strong>18 - 35 ms</strong></div>
+              <div style="font-size: 10px; color: var(--text-muted);">Estimasi TCO 3 Tahun: <strong id="tcoPublic" style="color: #fff;">Rp 446.400.000</strong></div>
+              <div class="sim-bar"><div id="barPublic" class="sim-bar-fill" style="background: #38bdf8; width: 45%;"></div></div>
+            </div>
+
+            <div class="sim-result-box" style="border-top: 3px solid #ef4444;">
+              <span class="badge-private">PRIVATE CLOUD (ON-PREM)</span>
+              <div style="font-size: 20px; font-weight: 800; color: #f87171;" id="costPrivate">Rp 8.500.000 / bln</div>
+              <div style="font-size: 11px; color: #cbd5e1;">CapEx Awal Server: <strong id="capexPrivate">Rp 280.000.000</strong> &bull; Latensi: <strong>&lt; 2 ms</strong></div>
+              <div style="font-size: 10px; color: var(--text-muted);">Estimasi TCO 3 Tahun: <strong id="tcoPrivate" style="color: #fff;">Rp 586.000.000</strong></div>
+              <div class="sim-bar"><div id="barPrivate" class="sim-bar-fill" style="background: #ef4444; width: 55%;"></div></div>
+            </div>
+          </div>
+
+          <div id="simInsight" style="background: #090f1d; padding: 10px 14px; border-radius: 8px; border: 1px solid #1e304f; font-size: 11px; color: #38bdf8;">
+            &bull; <strong>Kesimpulan Arsitek:</strong> Untuk beban komputasi ini dengan trafik berfluktuasi, Public Cloud memberikan penghematan TCO yang lebih baik tanpa membebani modal tunai di awal.
+          </div>
+        </div>
+      `;
+      updateSim();
+    }
+
+    window.updateSim = function() {
+      const cpu = parseInt(document.getElementById('sliderCpu').value);
+      const storage = parseInt(document.getElementById('sliderStorage').value);
+      const spike = parseInt(document.getElementById('sliderSpike').value);
+
+      document.getElementById('valCpu').textContent = cpu + " Core";
+      document.getElementById('valStorage').textContent = storage + " GB";
+      document.getElementById('valSpike').textContent = spike + "%";
+
+      // Rumus simulasi biaya
+      const monthlyPublic = Math.round((cpu * 350000) + (storage * 3500) + (spike * 150000));
+      const tco3YrPublic = monthlyPublic * 36;
+
+      const capex = Math.round(150000000 + (cpu * 6000000) + (storage * 50000));
+      const monthlyPrivate = Math.round(6000000 + (cpu * 120000) + 1500000); // Listrik AC + admin
+      const tco3YrPrivate = capex + (monthlyPrivate * 36);
+
+      document.getElementById('costPublic').textContent = "Rp " + monthlyPublic.toLocaleString('id-ID') + " / bln";
+      document.getElementById('tcoPublic').textContent = "Rp " + tco3YrPublic.toLocaleString('id-ID');
+
+      document.getElementById('capexPrivate').textContent = "Rp " + capex.toLocaleString('id-ID');
+      document.getElementById('costPrivate').textContent = "Rp " + monthlyPrivate.toLocaleString('id-ID') + " / bln";
+      document.getElementById('tcoPrivate').textContent = "Rp " + tco3YrPrivate.toLocaleString('id-ID');
+
+      const maxTco = Math.max(tco3YrPublic, tco3YrPrivate);
+      document.getElementById('barPublic').style.width = Math.round((tco3YrPublic / maxTco) * 100) + "%";
+      document.getElementById('barPrivate').style.width = Math.round((tco3YrPrivate / maxTco) * 100) + "%";
+
+      const insight = document.getElementById('simInsight');
+      if (tco3YrPublic < tco3YrPrivate) {
+        insight.innerHTML = `&#128161; <strong>Analisis Dosen:</strong> Pada skala beban ini, <strong>Public Cloud</strong> lebih unggul secara finansial karena CapEx privat terlalu membebani kas.`;
+      } else {
+        insight.innerHTML = `&#128161; <strong>Analisis Dosen:</strong> Pada skala beban komputasi masif dan konstan, <strong>Private Cloud</strong> mulai menunjukkan efisiensi TCO jangka panjang (break-even point tercapai).`;
+      }
+    };
+
+    // GAME 3: CLOUD BURSTING STRESS TEST SIMULATOR
+    let trafficLoad = 40;
+    let burstActive = false;
+    function renderLab3(arena) {
+      trafficLoad = 40;
+      burstActive = false;
+      arena.innerHTML = `
+        <div class="sim-card">
+          <div style="border-bottom: 1px solid #1e304f; padding-bottom: 8px;">
+            <h4 style="font-size: 14px; color: #fff;">&#128640; Simulasi Live: Cloud Bursting Stress Test under Peak Traffic</h4>
+            <p style="font-size: 11px; color: var(--text-muted);">Simulasikan lonjakan pengunjung tiba-tiba. Amati apa yang terjadi pada server Private Cloud dan bagaimana mekanisme Hybrid Bursting mencegah server tumbang (*crash*)!</p>
+          </div>
+
+          <div style="display: flex; justify-content: space-around; align-items: center; background: #090f1d; padding: 20px; border-radius: 12px; border: 1px solid #1e304f;">
+            <div style="text-align: center; width: 40%;">
+              <div style="font-size: 12px; font-weight: 700; color: #f87171; margin-bottom: 6px;">PRIVATE CLOUD (Kapasitas: 100 req/s)</div>
+              <div style="font-size: 28px; font-weight: 900; color: #fff;" id="loadPrivateDisplay">40 req/s</div>
+              <div class="sim-bar" style="margin-top: 8px;"><div id="barLoadPrivate" class="sim-bar-fill" style="background: #10b981; width: 40%;"></div></div>
+              <div id="statusPrivate" style="font-size: 10px; color: #34d399; margin-top: 6px;">Status: Normal Operation</div>
+            </div>
+
+            <div style="font-size: 24px; color: #a855f7;">&#8644;</div>
+
+            <div style="text-align: center; width: 40%;">
+              <div style="font-size: 12px; font-weight: 700; color: #38bdf8; margin-bottom: 6px;">PUBLIC CLOUD (Elastis Auto-Scale)</div>
+              <div style="font-size: 28px; font-weight: 900; color: #fff;" id="loadPublicDisplay">0 req/s</div>
+              <div class="sim-bar" style="margin-top: 8px;"><div id="barLoadPublic" class="sim-bar-fill" style="background: #38bdf8; width: 0%;"></div></div>
+              <div id="statusPublic" style="font-size: 10px; color: var(--text-muted); margin-top: 6px;">Status: Standby (Idle)</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+            <button class="btn-nav" style="background: #1e304f; color: #fff;" onclick="adjustTraffic(-25)">- Kurangi Beban</button>
+            <button class="btn-nav" style="background: #0284c7; color: #fff;" onclick="adjustTraffic(30)">+ Tambah Beban Pengunjung</button>
+            <button class="btn-nav" style="background: #ef4444; color: #fff; font-weight: bold;" onclick="triggerFlashSale()">&#9889; Simulasikan Flash Sale (250 req/s)</button>
+          </div>
+
+          <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 8px;">
+            <label style="font-size: 12px; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <input type="checkbox" id="toggleBurst" checked onchange="toggleBurstMode()">
+              <strong>Aktifkan Fitur Hybrid Cloud Bursting Otomatis</strong>
+            </label>
+          </div>
+
+          <div id="burstLog" style="background: #090f1d; padding: 10px; border-radius: 8px; font-size: 11px; font-family: monospace; color: #a855f7; text-align: center;">
+            [Log]: Sistem berjalan stabil di Private Cloud. Kapasitas mencukupi.
+          </div>
+        </div>
+      `;
+    }
+
+    window.adjustTraffic = function(delta) {
+      trafficLoad = Math.max(10, trafficLoad + delta);
+      updateTrafficDisplay();
+    };
+
+    window.triggerFlashSale = function() {
+      trafficLoad = 260;
+      updateTrafficDisplay();
+    };
+
+    window.toggleBurstMode = function() {
+      updateTrafficDisplay();
+    };
+
+    function updateTrafficDisplay() {
+      const isBurstOn = document.getElementById('toggleBurst').checked;
+      const log = document.getElementById('burstLog');
+      const maxPrivate = 100;
+
+      let pLoad = trafficLoad;
+      let pubLoad = 0;
+
+      if (trafficLoad <= maxPrivate) {
+        document.getElementById('statusPrivate').textContent = "Status: Aman (Utilisasi Normal)";
+        document.getElementById('statusPrivate').style.color = "#34d399";
+        document.getElementById('barLoadPrivate').style.background = "#10b981";
+        document.getElementById('statusPublic').textContent = "Status: Standby (Idle)";
+        log.textContent = `[Log]: Beban ${trafficLoad} req/s dapat ditangani penuh oleh Private Cloud lokal.`;
+      } else {
+        if (isBurstOn) {
+          pLoad = maxPrivate;
+          pubLoad = trafficLoad - maxPrivate;
+          document.getElementById('statusPrivate').textContent = "Status: Maksimal 100% (Stabil)";
+          document.getElementById('statusPrivate').style.color = "#f59e0b";
+          document.getElementById('barLoadPrivate').style.background = "#f59e0b";
+
+          document.getElementById('statusPublic').textContent = `Status: BURSTING ACTIVE (${pubLoad} req/s diserap)`;
+          document.getElementById('statusPublic').style.color = "#38bdf8";
+          log.innerHTML = `<span style="color: #38bdf8;">[Cloud Burst Alert]:</span> Trafik melonjak ke ${trafficLoad} req/s! Kelebihan beban ${pubLoad} req/s berhasil dialihkan otomatis ke Public Cloud. Server lokal selamat dari crash!`;
+        } else {
+          pLoad = trafficLoad;
+          pubLoad = 0;
+          document.getElementById('statusPrivate').textContent = "STATUS: CRASH / DOWN (OVERLOAD)!";
+          document.getElementById('statusPrivate').style.color = "#ef4444";
+          document.getElementById('barLoadPrivate').style.background = "#ef4444";
+          document.getElementById('statusPublic').textContent = "Status: Non-Aktif";
+          log.innerHTML = `<span style="color: #ef4444;">[CRITICAL FAILURE]:</span> Tanpa Cloud Bursting, server Private Cloud tumbang karena beban melebihi 100 req/s! Pengguna mengalami Error 503 Service Unavailable!`;
+        }
+      }
+
+      document.getElementById('loadPrivateDisplay').textContent = pLoad + " req/s";
+      document.getElementById('barLoadPrivate').style.width = Math.min(100, Math.round((pLoad / maxPrivate) * 100)) + "%";
+
+      document.getElementById('loadPublicDisplay').textContent = pubLoad + " req/s";
+      document.getElementById('barLoadPublic').style.width = Math.min(100, Math.round((pubLoad / 200) * 100)) + "%";
+    }
+
+    // ==========================================
+    // EVALUASI 20 SOAL CONTROLLER
+    // ==========================================
+    function renderEvaluationQuestions() {
+      const container = document.getElementById('evalQuestionsContainer');
+      if (!container) return;
+      container.innerHTML = "";
+
+      evaluationQuestions.forEach((item, qIdx) => {
+        const card = document.createElement('div');
+        card.className = "eval-question-card";
+        card.id = `qCard_${qIdx}`;
+
+        let optsHtml = "";
+        item.options.forEach((opt, optIdx) => {
+          const isSelected = studentAnswers[qIdx] === optIdx;
+          optsHtml += `
+            <div class="eval-opt-label ${isSelected ? 'selected' : ''}" onclick="selectEvalAnswer(${qIdx}, ${optIdx})" id="opt_${qIdx}_${optIdx}">
+              <strong>${String.fromCharCode(65 + optIdx)}.</strong> ${opt}
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="eval-q-title">
+            <span>${item.q}</span>
+          </div>
+          <div class="eval-options">
+            ${optsHtml}
+          </div>
+          <div id="feedback_${qIdx}" style="margin-top: 8px; font-size: 11px; display: none;"></div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('btnCheckAllAnswers').onclick = checkEvaluationResult;
+    }
+
+    window.selectEvalAnswer = function(qIdx, optIdx) {
+      studentAnswers[qIdx] = optIdx;
+      // Update UI classes
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById(`opt_${qIdx}_${i}`);
+        if (el) {
+          if (i === optIdx) el.classList.add('selected');
+          else el.classList.remove('selected');
+        }
+      }
+    };
+
+    function checkEvaluationResult() {
+      let correctCount = 0;
+      evaluationQuestions.forEach((item, qIdx) => {
+        const chosen = studentAnswers[qIdx];
+        const fb = document.getElementById(`feedback_${qIdx}`);
+        if (fb) {
+          fb.style.display = "block";
+          if (chosen === item.answer) {
+            correctCount++;
+            fb.innerHTML = `<span style="color: #10b981; font-weight: bold;">&#10004; Benar!</span> ${item.exp}`;
+          } else {
+            fb.innerHTML = `<span style="color: #ef4444; font-weight: bold;">&#10008; Salah.</span> Jawaban tepat: <strong>${String.fromCharCode(65 + item.answer)}</strong>. ${item.exp}`;
+          }
+        }
+      });
+
+      const totalScore = correctCount * 5;
+      const scoreBadge = document.getElementById('evalScoreBadge');
+      scoreBadge.textContent = `Skor: ${totalScore} / 100`;
+      scoreBadge.style.color = totalScore >= 70 ? "#10b981" : "#f59e0b";
+
+      alert(`Hasil Evaluasi Mandiri:
+Nilai Anda: ${totalScore} / 100 (${correctCount} dari 20 soal benar).
+Silakan cek feedback penjelasan pada setiap butir soal.`);
+    }
+
+    // INITIAL RENDER ON LOAD
+    window.addEventListener("DOMContentLoaded", () => {
+      renderSlide(0);
+    });
+  </script>
+</body>
+</html>
